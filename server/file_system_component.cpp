@@ -46,7 +46,21 @@ using namespace std;
 
 void EnumerateForReal(string path, vector<string> allowable_extensions, string dbname)
 {
-	cout << "+" << endl;
+	int rc;
+	sqlite3 * db = nullptr;
+	
+	if ((rc = sqlite3_open_v2(dbname.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL)) != SQLITE_OK)
+	{
+		LOG(sqlite3_errmsg(db));
+		goto bottom;
+	}
+
+bottom:
+	if (db != nullptr)
+	{
+		sqlite3_close(db);
+	}
+	return;	
 }
 
 /* goto's ? relax - Dijkstra said alarm exits are ok. See the last two paragraphs
@@ -103,7 +117,10 @@ bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
 //	for (auto it = tl_subdirs.begin(); it < tl_subdirs.end(); it++)
 //		cout << *it << endl;
 
-	#pragma omp parallel for
+	// Limit the number of threads to a small number because sqlite can take
+	// only so many connections at once.
+	//omp_set_dynamic(0);
+	#pragma omp parallel for 
 	for (size_t i = 0; i < tl_subdirs.size(); i++)
 	{
 		EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath);
