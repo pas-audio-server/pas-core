@@ -49,6 +49,12 @@ void EnumerateForReal(string path, vector<string> allowable_extensions, string d
 	cout << "+" << endl;
 }
 
+/* goto's ? relax - Dijkstra said alarm exits are ok. See the last two paragraphs
+   of the foundational paper:
+   
+   http://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
+*/
+
 bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
 {
 	bool rv = true;
