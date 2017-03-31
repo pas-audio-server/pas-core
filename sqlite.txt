@@ -1,3 +1,4 @@
 CREATE TABLE tracks (id integer primary key, path text );
 DROP TABLE tracks;
+INSERT INTO tracks(path) values("Foo");
 
