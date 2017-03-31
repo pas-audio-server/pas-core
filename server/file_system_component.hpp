@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <omp.h>
+#include <sqlite3.h> 
 
-bool Enumerate(std::string path, std::vector<std::string> allowed_extensions);
+bool Enumerate(std::string path, std::vector<std::string> allowed_extensions, std::string dbpath);
 

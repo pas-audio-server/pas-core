@@ -66,7 +66,7 @@ int main()
 	valid_extensions.push_back("mp3");
 	valid_extensions.push_back("flac");
 
-	bool b = Enumerate(string("/home/perryk/perryk/music"), valid_extensions);
+	bool b = Enumerate(string("/home/perryk/perryk/music"), valid_extensions, string("../pas.db"));
 	cout << "Enumerate returns: " << b << endl;
 	// Connect to database.
 	// Initialize audio.

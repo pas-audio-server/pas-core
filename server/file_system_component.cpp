@@ -30,6 +30,7 @@ using namespace std;
 	level directory which will recursively drill down on its
 	own. This sounds tailor made for openmp.
 
+	I am not pleased there are database functions in here.
 */
 
 /*
@@ -43,12 +44,12 @@ using namespace std;
 
 #define	LOG(m)	{ cout << __FILE__ << " " << __LINE__ << " " << m << endl; }
 
-void EnumerateForReal(string path, vector<string> allowable_extensions)
+void EnumerateForReal(string path, vector<string> allowable_extensions, string dbname)
 {
 	cout << "+" << endl;
 }
 
-bool Enumerate(string path, vector<string> allowed_extensions)
+bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
 {
 	bool rv = true;
 	vector<string> tl_subdirs;
@@ -94,7 +95,7 @@ bool Enumerate(string path, vector<string> allowed_extensions)
 	#pragma omp parallel for
 	for (size_t i = 0; i < tl_subdirs.size(); i++)
 	{
-		EnumerateForReal(tl_subdirs.at(i), allowed_extensions);
+		EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath);
 	}
 
 bottom:
