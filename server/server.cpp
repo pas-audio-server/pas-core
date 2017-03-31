@@ -58,15 +58,20 @@ void ConnectionHandler(sockaddr_in client_info, int incoming_socket, int connect
     cout << "ConnectionHandler(" << connection_number << ") exiting." << endl;
 }
 
-int main()
+int main(int argc, char * argv[])
 {
+	string path("/home/perryk/perryk/music");
+
+	if (argc > 1)
+		path = string(argv[1]);
+
 	vector<string> valid_extensions;
 	NetworkComponent nw;
 
 	valid_extensions.push_back("mp3");
 	valid_extensions.push_back("flac");
 
-	bool b = Enumerate(string("/home/perryk/perryk/music"), valid_extensions, string("../pas.db"));
+	bool b = Enumerate(path, valid_extensions, string("../pas.db"));
 	cout << "Enumerate returns: " << b << endl;
 	// Connect to database.
 	// Initialize audio.
