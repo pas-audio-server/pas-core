@@ -31,32 +31,27 @@ using namespace std;
 	own. This sounds tailor made for openmp.
 */
 
-/*
-            listdir(path, level + 1);
-        }
-        else
-            printf("%*s- %s\n", level*2, "", entry->d_name);
-    } while (entry = readdir(dir));
-}
-*/
+// based upon http://stackoverflow.com/questions/874134/find-if-string-ends-with-another-string-in-c
 
-#if !defined(LOG)
-#define	LOG(m)	{ cerr << __FILE__ << " " << __LINE__ << " " << m << endl; }
-#endif
+inline bool HasEnding (std::string const &fullString, std::string const &ending)
+{
+	bool rv = false;
+
+    if (fullString.length() >= ending.length()) 
+	{
+        rv = (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+    }
+	return rv;
+}
 
 /*	Assumption: allowable_extensions has already been vetted by caller.
-
 */
-void EnumerateForReal(string path, vector<string> & allowable_extensions, string & dbname, DB * db)
+
+void EnumerateForReal(string path, vector<string> & allowable_extensions, string & dbname, DB * db, int tid)
 {
 	vector<string> subdirs;
 	DIR * d;
 	dirent * entry;
-
-	/* 	If db == nullptr, this is the top level of the recusion initiated by Enumerate. If
-		so, it is our job to allocate a new connection to the database. Setting top_level
-		to true causes the DB object to be deleted on exit of this function.
-	*/
 
 	assert(db != nullptr);
 
@@ -74,7 +69,25 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, string
 	
 	do
 	{
-		if (entry->d_type == DT_DIR)
+		if (entry->d_type == DT_REG)
+		{
+			// NOTE: Common case - leave as first.
+			bool ok_extension = false;
+			string s(entry->d_name);
+			for (auto it = allowable_extensions.begin(); it < allowable_extensions.end(); it++)
+			{
+				if (HasEnding(s, *it))
+				{
+					ok_extension = true;
+					break;
+				}
+			}
+			if (!ok_extension)
+				continue;
+
+			cout << tid << '\t' << path << "/" << s << endl;
+		}
+		else if (entry->d_type == DT_DIR)
 		{
 			// Ignore . and .. to prevent (simple) loops
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -84,7 +97,7 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, string
 
 			string next_path = path + string("/") + string(entry->d_name);
 			string s = "";
-			EnumerateForReal(next_path, allowable_extensions, s, db);
+			EnumerateForReal(next_path, allowable_extensions, s, db, tid);
 		}
 	} while ((entry = readdir(d)) != nullptr);
 
@@ -157,7 +170,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 //		cout << *it << endl;
 
 	//omp_set_dynamic(0);
-	#pragma omp parallel for 
+	#pragma omp parallel for num_threads(64)
 	for (size_t i = 0; i < tl_subdirs.size(); i++)
 	{
 		DB * db = new DB();
@@ -166,8 +179,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 		{ 
 			if (db->Initialize(dbpath))
 			{
-				EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath, db);
-				cout << "Foo: " << db->GetTrackCount() << endl;
+				EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath, db, i);
 			}
 			else
 				LOG("");

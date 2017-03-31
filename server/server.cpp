@@ -73,6 +73,7 @@ int main(int argc, char * argv[])
 
 	bool b = Enumerate(path, valid_extensions, string("../pas.db"));
 	cout << "Enumerate returns: " << b << endl;
+
 	// Connect to database.
 	// Initialize audio.
 	//nw.AcceptConnections(ConnectionHandler);

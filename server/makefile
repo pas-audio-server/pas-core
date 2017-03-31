@@ -1,5 +1,5 @@
 CC	= g++
-CFLAGS	= -g -Wall -std=c++11 -fopenmp
+CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
 LDFLAGS	= -lpthread -lsqlite3 -lavcodec -lavformat -lsqlite3 -fopenmp
 SRC		= $(wildcard *.cpp)
 OBJS	= $(SRC:.cpp=.o)

@@ -28,8 +28,15 @@
 #include <assert.h>
 
 #if !defined(LOG)
+#if defined(_DEBUG_)
 #define LOG(m)  { cerr << __FILE__ << " " << __LINE__ << " " << m << endl; }
 #endif
+#endif
+
+struct Track
+{
+	std::string name;
+};
 
 class DB
 {
@@ -39,6 +46,7 @@ public:
 	bool Initialize(std::string dbname);
 	bool Initialized();
 	int GetTrackCount();
+	bool AddTrack(const Track & t);
 
 private:
 	sqlite3 * db;

@@ -50,6 +50,15 @@ bottom:
 	return rv;
 }
 
+bool DB::AddTrack(const Track & t)
+{
+	bool rv = true;
+
+	assert(db != nullptr);
+
+	return rv;
+}
+
 int DB::GetTrackCount()
 {
 	int rv = -1;
