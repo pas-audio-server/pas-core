@@ -29,8 +29,6 @@ using namespace std;
 	to enumerate the top level and spin off one thread per top
 	level directory which will recursively drill down on its
 	own. This sounds tailor made for openmp.
-
-	I am not pleased there are database functions in here.
 */
 
 /*
@@ -42,24 +40,58 @@ using namespace std;
 }
 */
 
-#define	LOG(m)	{ cout << __FILE__ << " " << __LINE__ << " " << m << endl; }
+#if !defined(LOG)
+#define	LOG(m)	{ cerr << __FILE__ << " " << __LINE__ << " " << m << endl; }
+#endif
 
-void EnumerateForReal(string path, vector<string> allowable_extensions, string dbname)
+/*	Assumption: allowable_extensions has already been vetted by caller.
+
+*/
+void EnumerateForReal(string path, vector<string> & allowable_extensions, string & dbname, DB * db)
 {
-	int rc;
-	sqlite3 * db = nullptr;
-	
-	if ((rc = sqlite3_open_v2(dbname.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL)) != SQLITE_OK)
+	vector<string> subdirs;
+	DIR * d;
+	dirent * entry;
+
+	/* 	If db == nullptr, this is the top level of the recusion initiated by Enumerate. If
+		so, it is our job to allocate a new connection to the database. Setting top_level
+		to true causes the DB object to be deleted on exit of this function.
+	*/
+
+	assert(db != nullptr);
+
+	if (!(d = opendir(path.c_str())))
 	{
-		LOG(sqlite3_errmsg(db));
+		LOG(path);
 		goto bottom;
 	}
 
-bottom:
-	if (db != nullptr)
+	if (!(entry = readdir(d)))
 	{
-		sqlite3_close(db);
+		LOG(path);
+		goto bottom;
 	}
+	
+	do
+	{
+		if (entry->d_type == DT_DIR)
+		{
+			// Ignore . and .. to prevent (simple) loops
+			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+				continue;
+
+			// TODO: Handle conversion of full paths to partial paths
+
+			string next_path = path + string("/") + string(entry->d_name);
+			string s = "";
+			EnumerateForReal(next_path, allowable_extensions, s, db);
+		}
+	} while ((entry = readdir(d)) != nullptr);
+
+	closedir(d);
+
+bottom:
+
 	return;	
 }
 
@@ -74,7 +106,7 @@ bottom:
    being used as a higher speed throw().
 */
 
-bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
+bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 {
 	bool rv = true;
 	vector<string> tl_subdirs;
@@ -103,9 +135,16 @@ bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
 	
 	do
 	{
+		// NOTE: This may skip symbolic links entirely. Is that a good thing?
+
+		// The common case short circuit.
+		if (entry->d_type == DT_REG)
+			continue;
+
 		if (entry->d_type == DT_DIR)
 		{
 			// Ignore . and .. to prevent (simple) loops
+
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
 			tl_subdirs.push_back(path + string("/") + string(entry->d_name));
@@ -117,13 +156,31 @@ bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
 //	for (auto it = tl_subdirs.begin(); it < tl_subdirs.end(); it++)
 //		cout << *it << endl;
 
-	// Limit the number of threads to a small number because sqlite can take
-	// only so many connections at once.
 	//omp_set_dynamic(0);
 	#pragma omp parallel for 
 	for (size_t i = 0; i < tl_subdirs.size(); i++)
 	{
-		EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath);
+		DB * db = new DB();
+
+		if (db != nullptr)
+		{ 
+			if (db->Initialize(dbpath))
+			{
+				EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath, db);
+				cout << "Foo: " << db->GetTrackCount() << endl;
+			}
+			else
+				LOG("");
+		}
+
+		if (db != nullptr)
+		{
+			delete db;
+		}
+		else
+		{
+			LOG("Impossible");
+		}
 	}
 
 bottom:
