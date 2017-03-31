@@ -13,3 +13,5 @@ Some information about pas:
 - web interface is expected to be node.js with some salad framework on top.
 
 This code is in its earliest stages and very far from complete.
+
+Please see the wiki for style guide and other information.
