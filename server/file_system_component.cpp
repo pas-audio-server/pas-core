@@ -53,6 +53,11 @@ void EnumerateForReal(string path, vector<string> allowable_extensions, string d
    of the foundational paper:
    
    http://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
+   
+   The pas yet-to-be-written style guide will specify at most one label can be
+   defined for alarm exits so as to provide a clear and simple means of keeping
+   the number of return paths in a function to one. In this regard, goto is
+   being used as a higher speed throw().
 */
 
 bool Enumerate(string path, vector<string> allowed_extensions, string dbpath)
