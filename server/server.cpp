@@ -60,11 +60,17 @@ void ConnectionHandler(sockaddr_in client_info, int incoming_socket, int connect
 
 int main()
 {
+	vector<string> valid_extensions;
 	NetworkComponent nw;
 
+	valid_extensions.push_back("mp3");
+	valid_extensions.push_back("flac");
+
+	bool b = Enumerate(string("/home/perryk/perryk/music"), valid_extensions);
+	cout << "Enumerate returns: " << b << endl;
 	// Connect to database.
 	// Initialize audio.
-	nw.AcceptConnections(ConnectionHandler);
+	//nw.AcceptConnections(ConnectionHandler);
 	exit(0);
 }
 

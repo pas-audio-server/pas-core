@@ -18,12 +18,14 @@
 
 
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <omp.h>
 
-
+bool Enumerate(std::string path, std::vector<std::string> allowed_extensions);
 

@@ -1,6 +1,6 @@
 CC	= g++
-CFLAGS	= -g -Wall -std=c++11
-LDFLAGS	= -lpthread -lsqlite3 -lavcodec -lavformat
+CFLAGS	= -g -Wall -std=c++11 -fopenmp
+LDFLAGS	= -lpthread -lsqlite3 -lavcodec -lavformat -fopenmp
 SRC		= $(wildcard *.cpp)
 OBJS	= $(SRC:.cpp=.o)
 
