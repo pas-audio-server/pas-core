@@ -11,13 +11,13 @@ Some information about pas:
 - pas is Linux based.
 - pas is heavily multithreaded and likes multicore machines.
 - pas is written to be headless. UI will be provided via a web server.
-- audio is emitted using portaudio using USB audio devices.
+- audio is emitted using pulseaudio via USB audio devices.
 - audio is decoded using ffmpeg.
 - data is maintained using sqlite.
 - web interface is expected to be node.js with some salad framework on top.
 
 - pas is being developed on an odroid XU4.
-- pas is being developed using an audioengine D3 USB DAC.
+- pas is being developed using an audioengine D3 USB DAC, a 24 bits / sample device.
 
 This code is in its earliest stages and very far from complete.
 
