@@ -1,0 +1,142 @@
+#include <iostream>
+#include <string>
+#include <thread>
+#include <mutex>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pulse/simple.h>
+#include <pulse/error.h>
+#include <semaphore.h>
+
+using namespace std;
+
+
+void PreReader(unsigned char * buffers[], int buffer_size, sem_t * sem, mutex * m, int * next_buffer, FILE * p)
+{
+	size_t bytes_read;
+
+	bytes_read = fread(buffers[0], 1, buffer_size, p);
+	while (bytes_read > 0)
+	{
+		bytes_read = fread(buffers[0], 1, buffer_size, p);
+	}
+	m->lock();
+	*next_buffer = 0;
+	m->unlock();
+
+	sem_post(sem);
+}
+
+bool Play(string cmdline, unsigned char * buffers[], int buffer_size, const char * device)
+{
+
+	bool rv = true;
+	FILE * p = nullptr;
+	const int SAMPLE_RATE = 44100;
+
+	if ((p = popen(cmdline.c_str(), "r")) == nullptr)
+	{
+		cerr << "pipe failed to open" << endl;
+		rv = false;
+	}
+	else
+	{
+		size_t bytes_read;
+		int pulse_error;
+		pa_sample_spec ss;
+		pa_channel_map cm;
+		pa_simple * pas = nullptr;
+
+		pa_channel_map_init_stereo(&cm);
+
+		ss.format = PA_SAMPLE_S24LE;
+		ss.rate = SAMPLE_RATE;
+		ss.channels = 2;
+
+		if ((pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
+		{
+			cerr << "pa_simple_new failed." << endl;
+			cerr << pa_strerror(pulse_error) << endl;
+			rv = false;
+		}
+		else
+		{
+			mutex m;
+			sem_t sem;
+			sem_init(&sem, 0, 0);
+			int next_buffer;
+
+			thread t(PreReader, buffers, buffer_size, &sem, &m, &next_buffer, p);
+			while (bytes_read > 0)
+			{
+				pulse_error = 0;
+		
+				if (pa_simple_write(pas, (const void *) buffers[0], bytes_read, &pulse_error) < 0)
+				{
+					cerr << "lost my pulse: " << pa_strerror(pulse_error) << endl;
+					break;
+				}	
+				bytes_read = fread(buffers[0], 1, buffer_size, p);
+			}
+			sem_destroy(&sem);
+		}
+		if (pas != nullptr)
+		{
+			pa_simple_flush(pas, &pulse_error);
+			pa_simple_free(pas);
+		}
+	}
+
+	if (p != nullptr)
+		pclose(p);
+
+	return rv;
+}
+
+int main(int argc, char * argv[])
+{
+	int rv = 0;
+	int pulse_error;
+
+	unsigned char * buffer_1 = nullptr;
+	unsigned char * buffer_2 = nullptr;
+
+	// The div / mult by 6 is essential.
+	int BUFFER_SIZE = ((1 << 20) * (1 << 3)) / 6 * 6;
+	string cmdline;
+
+	if (argc < 2)
+	{
+		cerr << "usage: <audiofile>" << endl;
+		exit(1);
+	}
+
+	cmdline = string("ffmpeg -loglevel quiet -i ") + string(argv[1]) + string(" -f s24le -ac 2 -");
+
+	buffer_1 = (unsigned char *) malloc(BUFFER_SIZE);
+	buffer_2 = (unsigned char *) malloc(BUFFER_SIZE);
+
+	if (buffer_1 == nullptr || buffer_2 == nullptr)
+	{
+		cerr << "buffer allocation failed" << endl;
+		exit(1);
+	}
+
+	unsigned char * buffers[] { buffer_1, buffer_2 };
+	Play(cmdline, buffers, BUFFER_SIZE, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
+
+
+bottom:
+
+
+	if (buffer_1 != nullptr)
+		free(buffer_1);
+
+	if (buffer_2 != nullptr)
+		free(buffer_2);
+
+	return rv;
+}
