@@ -31,9 +31,12 @@ using namespace std;
 	own. This sounds tailor made for openmp.
 */
 
-// based upon http://stackoverflow.com/questions/874134/find-if-string-ends-with-another-string-in-c
+/* 	When discovering media, file extensions are compared to a list of
+	blessed values. This function is called to do the comparison.
 
-inline bool HasEnding (std::string const &fullString, std::string const &ending)
+	based upon http://stackoverflow.com/questions/874134/find-if-string-ends-with-another-string-in-c
+*/
+inline bool HasEnding (string const & fullString, string const & ending)
 {
 	bool rv = false;
 
@@ -44,10 +47,56 @@ inline bool HasEnding (std::string const &fullString, std::string const &ending)
 	return rv;
 }
 
+bool HasAllowedExtension(const char * file_name, const vector<string> & allowable_extensions)
+{
+	bool ok_extension = false;
+
+	string s(file_name);
+	for (auto it = allowable_extensions.begin(); it < allowable_extensions.end(); it++)
+	{
+		if (HasEnding(s, *it))
+		{
+			ok_extension = true;
+			break;
+		}
+	}
+	return ok_extension;
+}
+
+// NOTE:
+// NOTE: It is likely additional file system loop prevention code will be needed.
+// NOTE:
+bool CausesLoop(const char * path)
+{
+	// Ignore . and .. to prevent (simple) loops
+	return (strcmp(path, ".") == 0 || strcmp(path, "..") == 0);
+}
+
 /*	Assumption: allowable_extensions has already been vetted by caller.
+	Assumption: db connection is not null.
+
+	EnumerateForReal is the code that actually drills down into a directory
+	hierarchy. It is called within its own thread. It is given its own connection
+	to the database - in the case of sqlite this is required as database connections
+	are not themselves threadsafe.
+
+	As acceptable files are found (based upon their file extension) they are added
+	to the database. My intent is to have this perform minimal sniffing of the media
+	to glean things from the media's tags. I intend this to be done lazily later.
+
+	Parameters:
+	path					recursively grown path to the directory being evaluated.
+	allowable_extensions	vector of file endings considered to be media.
+	db						a pointer to a database connection
+	tid						thread id
+
+	Returns:
+	none
+
+	Note: tid is passed along for debugging purposes only.
 */
 
-void EnumerateForReal(string path, vector<string> & allowable_extensions, string & dbname, DB * db, int tid)
+void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * db, int tid)
 {
 	vector<string> subdirs;
 	DIR * d;
@@ -55,69 +104,43 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, string
 
 	assert(db != nullptr);
 
-	if (!(d = opendir(path.c_str())))
+	try
 	{
-		LOG(path);
-		goto bottom;
-	}
+		if (!(d = opendir(path.c_str())))
+			throw(LOG(path));
 
-	if (!(entry = readdir(d)))
-	{
-		LOG(path);
-		goto bottom;
-	}
-	
-	do
-	{
-		if (entry->d_type == DT_REG)
+		if (!(entry = readdir(d)))
+			throw(LOG(path));
+		
+		do
 		{
 			// NOTE: Common case - leave as first.
-			bool ok_extension = false;
-			string s(entry->d_name);
-			for (auto it = allowable_extensions.begin(); it < allowable_extensions.end(); it++)
+			if (entry->d_type == DT_REG)
 			{
-				if (HasEnding(s, *it))
-				{
-					ok_extension = true;
-					break;
-				}
+				if (!HasAllowedExtension(entry->d_name, allowable_extensions))
+					continue;
+	
+				cout << tid << '\t' << path << "/" << entry->d_name << endl;
 			}
-			if (!ok_extension)
-				continue;
-
-			cout << tid << '\t' << path << "/" << s << endl;
-		}
-		else if (entry->d_type == DT_DIR)
-		{
-			// Ignore . and .. to prevent (simple) loops
-			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-				continue;
-
-			// TODO: Handle conversion of full paths to partial paths
-
-			string next_path = path + string("/") + string(entry->d_name);
-			string s = "";
-			EnumerateForReal(next_path, allowable_extensions, s, db, tid);
-		}
-	} while ((entry = readdir(d)) != nullptr);
-
+			else if (entry->d_type == DT_DIR)
+			{
+				if (CausesLoop(entry->d_name))
+					continue;
+	
+				// Possible TODO: Handle conversion of full paths to partial paths
+	
+				string next_path = path + string("/") + string(entry->d_name);
+				EnumerateForReal(next_path, allowable_extensions, db, tid);
+			}
+		} while ((entry = readdir(d)) != nullptr);
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+			cerr << s << endl;
+	}
 	closedir(d);
-
-bottom:
-
-	return;	
 }
-
-/* goto's ? relax - Dijkstra said alarm exits are ok. See the last two paragraphs
-   of the foundational paper:
-   
-   http://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
-   
-   The pas yet-to-be-written style guide will specify at most one label can be
-   defined for alarm exits so as to provide a clear and simple means of keeping
-   the number of return paths in a function to one. In this regard, goto is
-   being used as a higher speed throw().
-*/
 
 bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 {
@@ -126,76 +149,71 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 	DIR * tld;
 	dirent * entry;
 
-	if (allowed_extensions.size() == 0)
+	try
 	{
-		LOG("");
-		goto bottom;
-	}
+		if (allowed_extensions.size() == 0)
+			throw(LOG("extension vector has size zero"));
 
-	if (!(tld = opendir(path.c_str())))
-	{
-		LOG(path);
-		rv = false;
-		goto bottom;
-	}
-
-	if (!(entry = readdir(tld)))
-	{
-		LOG("");
-		rv = false;
-		goto bottom;
-	}
-	
-	do
-	{
-		// NOTE: This may skip symbolic links entirely. Is that a good thing?
-
-		// The common case short circuit.
-		if (entry->d_type == DT_REG)
-			continue;
-
-		if (entry->d_type == DT_DIR)
+		if (!(tld = opendir(path.c_str())))
 		{
-			// Ignore . and .. to prevent (simple) loops
-
-			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-				continue;
-			tl_subdirs.push_back(path + string("/") + string(entry->d_name));
+			rv = false;
+			throw(LOG(path));
 		}
-	} while ((entry = readdir(tld)) != nullptr);
 
-	closedir(tld);
-
-//	for (auto it = tl_subdirs.begin(); it < tl_subdirs.end(); it++)
-//		cout << *it << endl;
-
-	//omp_set_dynamic(0);
-	#pragma omp parallel for num_threads(64)
-	for (size_t i = 0; i < tl_subdirs.size(); i++)
-	{
-		DB * db = new DB();
-
-		if (db != nullptr)
-		{ 
-			if (db->Initialize(dbpath))
+		if (!(entry = readdir(tld)))
+		{
+			rv = false;
+			throw(LOG(""));
+		}
+	
+		do
+		{
+			// NOTE: This may skip symbolic links entirely. Is that a good thing?
+	
+			if (entry->d_type == DT_REG)
+				continue;
+	
+			if (entry->d_type == DT_DIR)
 			{
-				EnumerateForReal(tl_subdirs.at(i), allowed_extensions, dbpath, db, i);
+				if (CausesLoop(entry->d_name))
+					continue;
+				tl_subdirs.push_back(path + string("/") + string(entry->d_name));
+			}
+		} while ((entry = readdir(tld)) != nullptr);
+
+		closedir(tld);
+
+		//omp_set_dynamic(0);
+		#pragma omp parallel for num_threads(64)
+		for (size_t i = 0; i < tl_subdirs.size(); i++)
+		{
+			DB * db = new DB();
+	
+			if (db != nullptr)
+			{ 
+				if (db->Initialize(dbpath))
+				{
+					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i);
+				}
+				else
+					cerr << LOG("") << endl;
+			}
+	
+			if (db != nullptr)
+			{
+				delete db;
 			}
 			else
-				LOG("");
-		}
-
-		if (db != nullptr)
-		{
-			delete db;
-		}
-		else
-		{
-			LOG("Impossible");
+			{
+				LOG("Impossible");
+			}
 		}
 	}
+	catch (string m)
+	{
+		if (m.size() > 0)
+			cerr << m << endl;
+	}	
 
-bottom:
 	return rv;	
 }
-

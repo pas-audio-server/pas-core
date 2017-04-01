@@ -1,4 +1,7 @@
- /*  This file is part of pas.
+#pragma once
+#include <string>
+
+/*  This file is part of pas.
 
     pas is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,39 +17,5 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <omp.h>
-#include <sqlite3.h>
-#include <assert.h>
-
-#include "utility.hpp"
-
-struct Track
-{
-	std::string name;
-};
-
-class DB
-{
-public:
-	DB();
-	~DB();
-	bool Initialize(std::string dbname);
-	bool Initialized();
-	int GetTrackCount();
-	bool AddTrack(const Track & t);
-
-private:
-	sqlite3 * db;
-	
-	static int _cb_GetTrackCount(void * rv, int argc, char * argv[], char * cols[]);
-};
+#define LOG(m)  (std::string(__FILE__) + std::string(" ") + std::to_string(__LINE__) + std::string(" ") + std::string(m))
 

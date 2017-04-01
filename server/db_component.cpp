@@ -32,20 +32,17 @@ DB::~DB()
 bool DB::Initialize(string dbname)
 {
 	bool rv = true;
-	int rc = 1;
+	int rc;
 
 	assert(db == nullptr);
 
 	if ((rc = sqlite3_open_v2(dbname.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL)) != SQLITE_OK)
     {
-        LOG(sqlite3_errmsg(db));
+        cerr << LOG(sqlite3_errmsg(db)) << endl;
 		sqlite3_close(db);
 		db = nullptr;
 		rv = false;
-        goto bottom;
     }
-
-bottom:
 
 	return rv;
 }
