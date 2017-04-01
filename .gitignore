@@ -31,5 +31,10 @@
 # VI
 *.swp
 
+# Music formats
+*.wav
+*.mp3
+*.flac
+
 # SQLite
 *.db
