@@ -216,8 +216,6 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
-	cmdline = string("ffmpeg -loglevel quiet -i ") + string(argv[1]) + string(" -f s24le -ac 2 -");
-
 	buffer_1 = (unsigned char *) malloc(BUFFER_SIZE);
 	buffer_2 = (unsigned char *) malloc(BUFFER_SIZE);
 
@@ -228,7 +226,12 @@ int main(int argc, char * argv[])
 	}
 
 	unsigned char * buffers[] { buffer_1, buffer_2 };
-	Play(cmdline, buffers, BUFFER_SIZE, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
+
+	for (int i = 1; i < argc; i++)
+	{
+		cmdline = string("ffmpeg -loglevel quiet -i ") + string(argv[i]) + string(" -f s24le -ac 2 -");
+		Play(cmdline, buffers, BUFFER_SIZE, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
+	}
 
 	if (buffer_1 != nullptr)
 		free(buffer_1);
