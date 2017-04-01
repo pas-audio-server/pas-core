@@ -68,6 +68,9 @@ int DB::GetTrackCount()
 
 	string sql("select count(*) from tracks;");
 	rc = sqlite3_exec(db, sql.c_str(), _cb_GetTrackCount, &rv, nullptr);
+
+	if (rc < 0)
+		rv = rc;
  
 	return rv;
 }

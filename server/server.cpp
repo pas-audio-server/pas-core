@@ -70,6 +70,7 @@ int main(int argc, char * argv[])
 
 	valid_extensions.push_back("mp3");
 	valid_extensions.push_back("flac");
+	valid_extensions.push_back("wav");
 
 	bool b = Enumerate(path, valid_extensions, string("../pas.db"));
 	cout << "Enumerate returns: " << b << endl;
