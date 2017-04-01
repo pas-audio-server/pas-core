@@ -36,6 +36,7 @@ using namespace std;
 
 	based upon http://stackoverflow.com/questions/874134/find-if-string-ends-with-another-string-in-c
 */
+
 inline bool HasEnding (string const & fullString, string const & ending)
 {
 	bool rv = false;
@@ -168,7 +169,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 	
 		do
 		{
-			// NOTE: This may skip symbolic links entirely. Is that a good thing?
+			// NOTE: This may skip links entirely. Is that a good thing?
 	
 			if (entry->d_type == DT_REG)
 				continue;
@@ -177,6 +178,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 			{
 				if (CausesLoop(entry->d_name))
 					continue;
+
 				tl_subdirs.push_back(path + string("/") + string(entry->d_name));
 			}
 		} while ((entry = readdir(tld)) != nullptr);
@@ -187,6 +189,8 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 		#pragma omp parallel for num_threads(64)
 		for (size_t i = 0; i < tl_subdirs.size(); i++)
 		{
+			// Avoiding throw's inside the parallel for.
+
 			DB * db = new DB();
 	
 			if (db != nullptr)
@@ -197,15 +201,11 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 				}
 				else
 					cerr << LOG("") << endl;
-			}
-	
-			if (db != nullptr)
-			{
 				delete db;
 			}
 			else
 			{
-				LOG("Impossible");
+				cerr << LOG("DB failed to allocate") << endl;
 			}
 		}
 	}
