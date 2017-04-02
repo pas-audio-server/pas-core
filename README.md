@@ -43,8 +43,21 @@ I strive not to write shitty code. I take pride in my work. I welcome constructi
 
 ## Does pas contain cool code?
 
-I am a gray-beard. I don't beleive in cool code. I beleive in working and maintainable code. Cool code is for young people smarter than I.
+When I wrote the first documented key-logger back in the day I beleived in cool code.
+
+Alas, I am now a gray-beard. 
+
+I don't beleive in cool code. 
+
+I beleive in working code.
+
+I beleive in maintainable code. 
+
+Cool code is for younger people smarter than me.
+
+Seriously, one might expect me to say something like "I've forgotten more than you'll ever know." The truth is, I've forgetten what I've forgotten so there *is a good chance* you're smarter than me.
 
 ## When will pas be done?
+
 I am a busy person and lose interest in non-paying projects easily. So ¯\_(ツ)_/¯.
 
