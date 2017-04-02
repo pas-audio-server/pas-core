@@ -43,7 +43,7 @@ I strive not to write shitty code. I take pride in my work. I welcome constructi
 
 ## Does pas contain cool code?
 
-No. When I wrote the first documented key-logger back in the day I beleived in cool code.
+No. When I wrote the first documented key-logger back in the day I believed in cool code.
 
 Alas, I am now a gray-beard. 
 
