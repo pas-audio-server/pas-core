@@ -43,15 +43,15 @@ I strive not to write shitty code. I take pride in my work. I welcome constructi
 
 ## Does pas contain cool code?
 
-When I wrote the first documented key-logger back in the day I beleived in cool code.
+No. When I wrote the first documented key-logger back in the day I beleived in cool code.
 
 Alas, I am now a gray-beard. 
 
-I don't beleive in cool code. 
+I don't believe in cool code. 
 
-I beleive in working code.
+I believe in working code.
 
-I beleive in maintainable code. 
+I believe in maintainable code. 
 
 Cool code is for younger people smarter than me.
 
