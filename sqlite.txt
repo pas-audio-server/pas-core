@@ -19,7 +19,7 @@ create index index_album on tracks(album);
 
 
 
-DROP TABLE tracks;
+#CAREFUL DROP TABLE t racks;
 
 
 
