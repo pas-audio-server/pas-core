@@ -35,7 +35,7 @@ Yes
 
 ## Are other contributors welcome?
 
-Not yet but I am very hopeful pas becomes worthy of other developer's interest.
+Not yet but I am very hopeful pas becomes worthy of other developer's interest. It would be so cool if my kid or one of my former students were among those future contributors.
 
 ## Is pas shitty code?
 
@@ -59,5 +59,10 @@ Seriously, one might expect me to say something like "I've forgotten more than y
 
 ## When will pas be done?
 
-I am a busy person and lose interest in non-paying projects easily. So ¯\_(ツ)_/¯.
+I am a busy person and easily lose interest in non-paying projects. So ¯\_(ツ)_/¯.
 
+## What's the best computer ever made?
+
+The Amiga.
+
+\<mic drop>
