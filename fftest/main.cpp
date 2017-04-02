@@ -1,3 +1,14 @@
+// pacmd list-sinks will find full alsa names.
+// it is given directly under the * index: n line with heading "name:"
+// alsa force-reload
+// good resource https://wiki.archlinux.org/index.php/PulseAudio/Examples
+// 
+
+// ffprobe loglevel quiet -show_entries stream_tags:format_tags ../../b.flac
+/*
+Bus 003 Device 004: ID 2972:0006		this is the FIIO
+Bus 003 Device 003: ID 2912:120b		this is the D3
+*/
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -141,7 +152,7 @@ bool Play(string cmdline, unsigned char * buffers[], int buffer_size, const char
 				// Launch blocking write to pulse
 				pulse_error = 0;
 				bytes_read = bytes_read / 6 * 6;
-				//cout << "rendr: " << BufferPrev(buffer_index) << " " << bytes_read << endl;
+				cout << "rendr: " << BufferPrev(buffer_index) << " " << bytes_read << endl;
 				if (pa_simple_write(pas, (const void *) buffers[BufferPrev(buffer_index)], bytes_read, &pulse_error) < 0)
 				{
 					cerr << "lost my pulse: " << pa_strerror(pulse_error) << endl;
@@ -194,6 +205,7 @@ int main(int argc, char * argv[])
 	for (int i = 1; i < argc; i++)
 	{
 		cmdline = string("ffmpeg -loglevel quiet -i ") + string(argv[i]) + string(" -f s24le -ac 2 -");
+		cout << argv[i] << endl;
 		Play(cmdline, buffers, BUFFER_SIZE, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
 	}
 
