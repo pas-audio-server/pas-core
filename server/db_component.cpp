@@ -14,13 +14,43 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*	Copyright 2017 by Perr Kivolowitz
+*/
+
 #include "db_component.hpp"
 
 using namespace std;
 
+string track_column_names[] =
+{
+	// Order must match select / insert code
+	"path",
+	"artist",
+	"title",
+	"album",
+	"genre",
+	"source"
+};
+
 DB::DB()
 {
 	db = nullptr;
+	// I did not want to make this a static on purpose to avoid race conditions on init.
+	query_columns = "(";
+	parameter_columns = " values (";
+	for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
+	{
+		if (i > 0)
+		{
+			query_columns += ", ";
+			parameter_columns += ", ";
+		}
+		supported_track_column_names.push_back(track_column_names[i]);
+		query_columns += track_column_names[i];
+		parameter_columns += "?";
+	}
+	query_columns += ") ";
+	parameter_columns += ") ";
 }
 
 DB::~DB()
@@ -47,11 +77,88 @@ bool DB::Initialize(string dbname)
 	return rv;
 }
 
-bool DB::AddTrack(const Track & t)
+bool DB::AddMedia(std::string path)
 {
 	bool rv = true;
+	FILE * p = nullptr;
+	int rc;
 
-	assert(db != nullptr);
+	try
+	{
+		if (access(path.c_str(), R_OK) < 0)
+			throw string("cannot access: ") + path;
+
+		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags \"") + path + string("\"");
+		//cout << "Attempting: " << cmdline << endl;
+
+		if ((p = popen(cmdline.c_str(), "r")) == nullptr)
+			throw LOG(path);
+
+		const int bsize = 1024;
+		char buffer[bsize];
+
+		Track track;
+		track.SetPath(path);
+
+		while (fgets(buffer, bsize, p) != nullptr)
+		{
+			string b(buffer);
+			track.SetTag(b);
+		}
+		//track.PrintTags(18, 50);
+
+		// NOTE:
+		// NOTE: It is a map of tags to values. This function must be modified as more tags are supported.
+		// NOTE:
+
+		string sql = "insert or replace into tracks " + query_columns + parameter_columns;
+		sqlite3_stmt * stmt;
+
+		while ((rc = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &stmt, nullptr)) != SQLITE_OK)
+		{
+			if (rc == SQLITE_BUSY)
+				usleep(100);
+			else
+				throw LOG("prepare failed " + ::to_string(rc));
+		}
+
+		int i = 1;
+		for (auto it = supported_track_column_names.begin(); it < supported_track_column_names.end(); it++, i++)
+		{
+			string v = track.GetTag(*it);
+			//cout << *it << "	" << v << endl;
+
+			if (v.size() > 0)
+				rc = sqlite3_bind_text(stmt, i, v.c_str(), -1, SQLITE_TRANSIENT);
+			else
+				rc = sqlite3_bind_null(stmt, i);
+
+			if (rc != SQLITE_OK)
+				throw LOG("bind failed");
+		}
+
+		while ((rc = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			if (rc == SQLITE_BUSY)
+				usleep(100);
+			else
+				throw LOG("step failed " + ::to_string(rc));
+		}
+
+		if (sqlite3_finalize(stmt) != SQLITE_OK)
+			throw LOG("finalize failed");
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+		{
+			cerr << s << endl;
+			rv = false;
+		}
+	}
+
+	if (p != nullptr)
+		pclose(p);
 
 	return rv;
 }
@@ -64,11 +171,11 @@ int DB::GetTrackCount()
 	assert(db != nullptr);
 
 	string sql("select count(*) from tracks;");
-	rc = sqlite3_exec(db, sql.c_str(), _cb_GetTrackCount, &rv, nullptr);
+	rc = sqlite3_exec(db, sql.c_str(), _db_GetTrackCount, &rv, nullptr);
 
 	if (rc < 0)
 		rv = rc;
- 
+
 	return rv;
 }
 
@@ -77,7 +184,7 @@ bool DB::Initialized()
 	return db != nullptr;
 }
 
-int DB::_cb_GetTrackCount(void * rv, int argc, char * argv[], char * cols[])
+int DB::_db_GetTrackCount(void * rv, int argc, char * argv[], char * cols[])
 {
 	assert(rv != nullptr);
 	*((int *) rv) = 0;

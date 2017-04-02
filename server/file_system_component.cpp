@@ -20,7 +20,7 @@ using namespace std;
 
 /*	This component manages access to the file system providing
 	services such as enumerating all music files in a subtree.
-	
+
 	Enumeration, for example, is a critical piece of the server
 	as it is how media is discovered. I have been annoyed at how
 	long it takes other systems to do this over thousands of
@@ -41,7 +41,7 @@ inline bool HasEnding (string const & fullString, string const & ending)
 {
 	bool rv = false;
 
-    if (fullString.length() >= ending.length()) 
+    if (fullString.length() >= ending.length())
 	{
         rv = (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
     }
@@ -99,8 +99,9 @@ bool CausesLoop(const char * path)
 
 void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * db, int tid)
 {
+	const string slash("/");
 	vector<string> subdirs;
-	DIR * d;
+	DIR * d = nullptr;
 	dirent * entry;
 
 	assert(db != nullptr);
@@ -112,7 +113,7 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 
 		if (!(entry = readdir(d)))
 			throw(LOG(path));
-		
+
 		do
 		{
 			// NOTE: Common case - leave as first.
@@ -120,17 +121,18 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 			{
 				if (!HasAllowedExtension(entry->d_name, allowable_extensions))
 					continue;
-	
-				cout << tid << '\t' << path << "/" << entry->d_name << endl;
+
+				// Do something with this file.
+				db->AddMedia(path + slash + string(entry->d_name));
 			}
 			else if (entry->d_type == DT_DIR)
 			{
 				if (CausesLoop(entry->d_name))
 					continue;
-	
+
 				// Possible TODO: Handle conversion of full paths to partial paths
-	
-				string next_path = path + string("/") + string(entry->d_name);
+
+				string next_path = path + slash + string(entry->d_name);
 				EnumerateForReal(next_path, allowable_extensions, db, tid);
 			}
 		} while ((entry = readdir(d)) != nullptr);
@@ -140,7 +142,8 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 		if (s.size() > 0)
 			cerr << s << endl;
 	}
-	closedir(d);
+	if (d != nullptr)
+		closedir(d);
 }
 
 bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
@@ -166,14 +169,14 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 			rv = false;
 			throw(LOG(""));
 		}
-	
+
 		do
 		{
 			// NOTE: This may skip links entirely. Is that a good thing?
-	
+
 			if (entry->d_type == DT_REG)
 				continue;
-	
+
 			if (entry->d_type == DT_DIR)
 			{
 				if (CausesLoop(entry->d_name))
@@ -185,16 +188,16 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 
 		closedir(tld);
 
-		//omp_set_dynamic(0);
-		#pragma omp parallel for num_threads(64)
+		omp_set_dynamic(1);
+		#pragma omp parallel for num_threads(4)
 		for (size_t i = 0; i < tl_subdirs.size(); i++)
 		{
 			// Avoiding throw's inside the parallel for.
 
 			DB * db = new DB();
-	
+
 			if (db != nullptr)
-			{ 
+			{
 				if (db->Initialize(dbpath))
 				{
 					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i);
@@ -213,7 +216,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 	{
 		if (m.size() > 0)
 			cerr << m << endl;
-	}	
+	}
 
-	return rv;	
+	return rv;
 }

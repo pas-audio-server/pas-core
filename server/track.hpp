@@ -1,3 +1,5 @@
+#pragma once
+
  /*  This file is part of pas.
 
     pas is free software: you can redistribute it and/or modify
@@ -17,38 +19,29 @@
 /*	Copyright 2017 by Perr Kivolowitz
 */
 
-
-#pragma once
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
 #include <iostream>
+#include <map>
+#include <algorithm>
+#include <iomanip>
+#include <regex>
 #include <string>
-#include <vector>
-#include <omp.h>
-#include <sqlite3.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cstring>
 #include <assert.h>
 
-#include "track.hpp"
-#include "utility.hpp"
-
-class DB
+class Track
 {
 public:
-	DB();
-	~DB();
-	bool Initialize(std::string dbname);
-	bool Initialized();
-	int  GetTrackCount();
-	bool AddMedia(std::string path);
+	std::map<std::string, std::string> tags;
 
-private:
-	sqlite3 * db;
-	std::vector<std::string> supported_track_column_names;
-	std::string query_columns;
-	std::string parameter_columns;
-	static int _db_GetTrackCount(void * rv, int argc, char * argv[], char * cols[]);
+	std::string GetTag(std::string &);
+	void SetTag(std::string & tag, std::string & value);
+	void SetTag(std::string & raw);
+	void SetPath(std::string & path);
+	void PrintTags(int, int);
 };
 
