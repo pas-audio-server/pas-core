@@ -19,7 +19,15 @@ Some information about pas:
 - pas is being developed on an odroid XU4.
 - pas is being developed using an audioengine D3 USB DAC, a 24 bits / sample device.
 
-## Why did I start pas when * is available?
+## Who is Perry?
+
+This is <a href="https://en.wikipedia.org/wiki/Perry_Kivolowitz">me</a>.
+
+I contribute to <a href="https://en.wikipedia.org/wiki/SilhouetteFX">this</a>.
+
+I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach <a href="https://www.carthage.edu/">CS</a> here.
+
+## Why did I start pas when \*.\* is available?
 
 Because
 
@@ -45,27 +53,27 @@ Read <a href="https://www.amazon.com/Get-Off-My-Zombie-Novel-ebook/dp/B00DQ26J8G
 
 ## Is pas shitty code?
 
-I take pride in my work. I strive not to write shitty code. I welcome constructive criticism.
+I take pride in my work. I strive not to write shitty code. If you believe I have written shitty code, please let me know in a non-shitty way.
 
 ## Does pas contain much *cool* code?
 
-No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented key-logger</a> back in the day I believed in cool code.
+No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented keylogger</a> back in the day I believed in cool code.
 
 Alas, I am now a gray-beard. 
 
-I don't believe in cool code. 
+I no longer believe in cool code. 
 
 I believe in *working* code.
 
 I believe in *maintainable* code. 
 
-Cool code is for younger people smarter than me.
+I believe cool code is for much younger people who are much smarter than me.
 
-Seriously, one might expect me to say something like "I've forgotten more than you'll ever know." The truth is, I've forgetten what I've forgotten so there *is a good chance* you're smarter than me.
+Seriously, one might expect me to say something like "I've forgotten more than you'll ever know." The truth is, I've forgetten what I've forgotten so there is a *reasonable chance* you are smarter than me. Maybe you are better looking too. You bastard. I hate you.
 
 ## When will pas be done?
 
-I am a busy person and easily lose interest. So ¯\_(ツ)_/¯.
+I am a busy person and easily lose interest in things. So ¯\_(ツ)_/¯.
 
 ## What's the best computer ever made?
 
