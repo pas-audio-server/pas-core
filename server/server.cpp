@@ -14,6 +14,9 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*	pas is Copyright 2017 by Perry Kivolowitz
+*/
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -35,31 +38,9 @@ using namespace std;
 bool keep_going = true;
 int  port = 5077;
 
-/*  ConnectionHandler is temporary.
-*/
-void ConnectionHandler(sockaddr_in client_info, int incoming_socket, int connection_number)
-{
-    size_t bytes_read;
-    const int BS = 32;
-    char buffer[BS];
-
-    memset(buffer, 0, BS);
-    cout << "ConnectionHandler(" << connection_number << ") servicing client at " << inet_ntoa(client_info.sin_addr) << endl;
-    while ((bytes_read = recv(incoming_socket, (void *) buffer, BS, 0)) > 0)
-    {
-	if (bytes_read >= 2 && bytes_read < BS)
-	{
-	    if (buffer[0] == 's' && buffer[1] == 'q')
-		break;
-	}
-	write(1, buffer, bytes_read);
-	memset(buffer, 0, BS);
-    }
-    cout << "ConnectionHandler(" << connection_number << ") exiting." << endl;
-}
-
 int main(int argc, char * argv[])
 {
+	string db_path("/home/perryk/pas/pas.db");
 	string path("/home/perryk/perryk/music");
 
 	if (argc > 1)
@@ -71,13 +52,15 @@ int main(int argc, char * argv[])
 	valid_extensions.push_back("mp3");
 	valid_extensions.push_back("flac");
 	valid_extensions.push_back("wav");
+	valid_extensions.push_back("m4a");
+	valid_extensions.push_back("ogg");
 
-	bool b = Enumerate(path, valid_extensions, string("../pas.db"));
-	cout << "Enumerate returns: " << b << endl;
+	//bool b = Enumerate(path, valid_extensions, db_path);
+	//cout << "Enumerate returns: " << b << endl;
 
 	// Connect to database.
 	// Initialize audio.
-	//nw.AcceptConnections(ConnectionHandler);
+	nw.AcceptConnections(db_path);
 	exit(0);
 }
 

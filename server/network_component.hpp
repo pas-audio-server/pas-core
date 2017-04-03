@@ -16,14 +16,17 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*  pas is Copyright 2017 by Perry Kivolowitz.
+*/
+ 
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <thread>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -33,7 +36,7 @@ class NetworkComponent
 {
 public:
 	NetworkComponent();
-	void AcceptConnections(void (*f)(sockaddr_in, int, int));
+	void AcceptConnections(const std::string & db_path);
 
 private:
 	static bool keep_going;
