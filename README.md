@@ -39,6 +39,10 @@ Yes. It is in the wiki.
 
 Not yet but I am very hopeful pas becomes worthy of other developer's interest. It would be so cool if my kid or one of my former students were among those future contributors.
 
+## How do computer programmers kill zombies?
+
+Read <a href="https://www.amazon.com/Get-Off-My-Zombie-Novel-ebook/dp/B00DQ26J8G/">Get off my L@wn</a> and find out. And don't steal it like everybody else, please? It's just $2.99 for crap's sake.
+
 ## Is pas shitty code?
 
 I take pride in my work. I strive not to write shitty code. I welcome constructive criticism.
