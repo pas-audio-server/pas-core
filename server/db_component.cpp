@@ -21,6 +21,8 @@
 
 using namespace std;
 
+//const int DB::_db_sleep_time = 1000;
+
 string track_column_names[] =
 {
 	// Order must match select / insert code
@@ -77,7 +79,7 @@ bool DB::Initialize(string dbname)
 	return rv;
 }
 
-bool DB::AddMedia(std::string path)
+bool DB::AddMedia(std::string & path, bool force)
 {
 	bool rv = true;
 	FILE * p = nullptr;
@@ -108,16 +110,16 @@ bool DB::AddMedia(std::string path)
 		//track.PrintTags(18, 50);
 
 		// NOTE:
-		// NOTE: It is a map of tags to values. This function must be modified as more tags are supported.
+		// NOTE: It is a map of tags to values. As more cpulmns are added, change track_column_names.
 		// NOTE:
 
-		string sql = "insert or replace into tracks " + query_columns + parameter_columns;
+		string sql = string("insert") + (force ? string(" or replace") : string("")) + " into tracks " + query_columns + parameter_columns;
 		sqlite3_stmt * stmt;
 
 		while ((rc = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &stmt, nullptr)) != SQLITE_OK)
 		{
 			if (rc == SQLITE_BUSY)
-				usleep(100);
+				usleep(_db_sleep_time);
 			else
 				throw LOG("prepare failed " + ::to_string(rc));
 		}
@@ -139,10 +141,19 @@ bool DB::AddMedia(std::string path)
 
 		while ((rc = sqlite3_step(stmt)) != SQLITE_DONE)
 		{
+			// The step may not have completed due to contention for sqlite. If so,
+			// the return will be BUSY. If it isn't BUSY and we're
 			if (rc == SQLITE_BUSY)
-				usleep(100);
-			else
-				throw LOG("step failed " + ::to_string(rc));
+			{
+				usleep(_db_sleep_time);
+				continue;
+			}
+			if (!force && rc == SQLITE_CONSTRAINT)
+			{
+				// I wonder if this is too slow.
+				throw(string(""));
+			}
+			throw LOG("step failed " + ::to_string(rc));
 		}
 
 		if (sqlite3_finalize(stmt) != SQLITE_OK)

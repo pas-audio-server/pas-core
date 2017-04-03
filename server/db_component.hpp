@@ -42,7 +42,7 @@ public:
 	bool Initialize(std::string dbname);
 	bool Initialized();
 	int  GetTrackCount();
-	bool AddMedia(std::string path);
+	bool AddMedia(std::string & path, bool force);
 
 private:
 	sqlite3 * db;
@@ -50,5 +50,6 @@ private:
 	std::string query_columns;
 	std::string parameter_columns;
 	static int _db_GetTrackCount(void * rv, int argc, char * argv[], char * cols[]);
+	static const int _db_sleep_time = 100;
 };
 

@@ -97,7 +97,7 @@ bool CausesLoop(const char * path)
 	Note: tid is passed along for debugging purposes only.
 */
 
-void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * db, int tid)
+void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * db, int tid, bool force)
 {
 	const string slash("/");
 	vector<string> subdirs;
@@ -123,7 +123,8 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 					continue;
 
 				// Do something with this file.
-				db->AddMedia(path + slash + string(entry->d_name));
+				string s = path + slash + string(entry->d_name);
+				db->AddMedia(s, force);
 			}
 			else if (entry->d_type == DT_DIR)
 			{
@@ -133,7 +134,7 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 				// Possible TODO: Handle conversion of full paths to partial paths
 
 				string next_path = path + slash + string(entry->d_name);
-				EnumerateForReal(next_path, allowable_extensions, db, tid);
+				EnumerateForReal(next_path, allowable_extensions, db, tid, force);
 			}
 		} while ((entry = readdir(d)) != nullptr);
 	}
@@ -146,7 +147,7 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 		closedir(d);
 }
 
-bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
+bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, bool force)
 {
 	bool rv = true;
 	vector<string> tl_subdirs;
@@ -188,8 +189,8 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 
 		closedir(tld);
 
-		omp_set_dynamic(1);
-		#pragma omp parallel for num_threads(4)
+		//omp_set_dynamic(1);
+		#pragma omp parallel for
 		for (size_t i = 0; i < tl_subdirs.size(); i++)
 		{
 			// Avoiding throw's inside the parallel for.
@@ -200,7 +201,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath)
 			{
 				if (db->Initialize(dbpath))
 				{
-					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i);
+					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i, force);
 				}
 				else
 					cerr << LOG("") << endl;
