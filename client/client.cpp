@@ -53,17 +53,29 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
+	const int BS = 2048;
+	char buffer[BS];
 	ssize_t bytes_sent;
+	ssize_t bytes_read;
 	string l;			
 	getline(cin, l);
 	while (l != "quit")
 	{
+		memset(buffer, 0, BS);
 		bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
 		if (bytes_sent != (int) l.size())
 			break;
+		if (l == "tc")
+		{
+			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+			if (bytes_read > 0)
+			{
+				string s(buffer);
+				cout << "Track count: " << s << endl;
+			}
+		}
 		getline(cin, l);
 	}
-
 	close(server_socket);
 	return 0;
 }
