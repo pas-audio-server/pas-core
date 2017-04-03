@@ -36,7 +36,6 @@ using namespace std;
 
 	based upon http://stackoverflow.com/questions/874134/find-if-string-ends-with-another-string-in-c
 */
-
 inline bool HasEnding (string const & fullString, string const & ending)
 {
 	bool rv = false;
@@ -48,6 +47,9 @@ inline bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
+/*	HasAllowedExtension() returns true if the given path ends in
+	one of the blessed extensions such as mp3, flac, etc.
+*/
 bool HasAllowedExtension(const char * file_name, const vector<string> & allowable_extensions)
 {
 	bool ok_extension = false;
@@ -90,6 +92,8 @@ bool CausesLoop(const char * path)
 	allowable_extensions	vector of file endings considered to be media.
 	db						a pointer to a database connection
 	tid						thread id
+	force					of true, "insert or replace" is used on the database
+							rather than "insert".
 
 	Returns:
 	none
@@ -162,13 +166,13 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, 
 		if (!(tld = opendir(path.c_str())))
 		{
 			rv = false;
-			throw(LOG(path));
+			throw(LOG(string("opendir failed on ") + path));
 		}
 
 		if (!(entry = readdir(tld)))
 		{
 			rv = false;
-			throw(LOG(""));
+			throw(LOG("initial readdir failed"));
 		}
 
 		do
@@ -188,6 +192,10 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, 
 		} while ((entry = readdir(tld)) != nullptr);
 
 		closedir(tld);
+
+		// THIS WAS A BAD IDEA - REWRITE THIS TO ONE THREAD ENUMERATES AND
+		// MANY THREADS PROCESS. THE REASON THIS WAS A BAD IDEA IS THAT AN
+		// "UNBALANCED TREE" IS PROCESSED SLOWLY.
 
 		//omp_set_dynamic(1);
 		#pragma omp parallel for

@@ -8,6 +8,17 @@ void Track::SetPath(string & path)
 	SetTag(s, path);
 }
 
+/*	SetTag() parses a metadata tag produced by ffprobe. Metadata
+	looks like:
+
+	TAG:tagname=tagvalue\n.
+
+	Did you know regex was invented by the second Chair of the
+	UW - Madisonn CS department?
+
+	After parsing the tag, the key-value pair is added to the
+	track's tag map.
+*/
 void Track::SetTag(string & raw)
 {
 	regex c("TAG:.*=.*\n");
@@ -32,6 +43,7 @@ void Track::SetTag(string & raw)
 
 void Track::SetTag(string & tag, string & value)
 {
+	// All keys are squashed to lower case.
 	transform(tag.begin(), tag.end(), tag.begin(), ::tolower);
 	tags[tag] = value;
 }
@@ -44,6 +56,8 @@ string Track::GetTag(string & tag)
 	return (it != tags.end()) ? it->second : "";
 }
 
+/*	PrintTags() may be of some use during debugging.
+*/
 void Track::PrintTags(int width_1, int width_2)
 {
 	for (auto it = tags.begin(); it != tags.end(); it++)
