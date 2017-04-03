@@ -25,7 +25,7 @@ This is <a href="https://en.wikipedia.org/wiki/Perry_Kivolowitz">me</a>.
 
 I contribute to <a href="https://en.wikipedia.org/wiki/SilhouetteFX">this</a>.
 
-I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS<a href="https://www.carthage.edu/">here</a>.
+I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS <a href="https://www.carthage.edu/">here</a>.
 
 ## Why did I start pas when \*.\* is available?
 
