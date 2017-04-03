@@ -3,16 +3,18 @@ Perry's audio server
 
 ## What is pas?
 
-pas is an audio server capable of sending multiple stereo feeds to some (undetermined maximum) number of outboard DACs. Each DAC will drive a seperate audio zone. pas does **not** stream digital data. It (via DACs) emits analog audio.
+pas is an audio server capable of sending multiple **analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC will drive a seperate audio zone in a multi-zone or multi-room installation. 
+
+pas does **not** stream digital data. It (via DACs) emits analog audio.
 
 Some information about pas:
 - pas is Linux based.
 - pas is heavily multithreaded and likes multicore machines.
-- pas is written to be headless. UI will be provided via a web server.
+- pas is written to be headless. A UI will be provided via a web server.
 - audio is emitted using pulseaudio via USB audio devices.
-- audio is decoded using ffmpeg.
+- audio is decoded using ffmpeg so pas supports those formats supported by ffmpeg.
 - data is maintained using sqlite.
-- web interface is expected to be node.js with some salad framework on top.
+- pas *may* expose a MPD-compatible interface.
 
 - pas is being developed on an odroid XU4.
 - pas is being developed using an audioengine D3 USB DAC, a 24 bits / sample device.
@@ -31,27 +33,27 @@ The wiki is maintained.
 
 ## Is there a style guide?
 
-Yes
+Yes. It is in the wiki.
 
-## Are other contributors welcome?
+## Are other contributors welcomed?
 
 Not yet but I am very hopeful pas becomes worthy of other developer's interest. It would be so cool if my kid or one of my former students were among those future contributors.
 
 ## Is pas shitty code?
 
-I strive not to write shitty code. I take pride in my work. I welcome constructive criticism.
+I take pride in my work. I strive not to write shitty code. I welcome constructive criticism.
 
-## Does pas contain cool code?
+## Does pas contain much *cool* code?
 
-No. When I wrote the first documented key-logger back in the day I believed in cool code.
+No. When I wrote the *first documented key-logger* back in the day I believed in cool code.
 
 Alas, I am now a gray-beard. 
 
 I don't believe in cool code. 
 
-I believe in working code.
+I believe in *working* code.
 
-I believe in maintainable code. 
+I believe in *maintainable* code. 
 
 Cool code is for younger people smarter than me.
 
@@ -59,7 +61,7 @@ Seriously, one might expect me to say something like "I've forgotten more than y
 
 ## When will pas be done?
 
-I am a busy person and easily lose interest in non-paying projects. So ¯\_(ツ)_/¯.
+I am a busy person and easily lose interest. So ¯\_(ツ)_/¯.
 
 ## What's the best computer ever made?
 
