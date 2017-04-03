@@ -29,7 +29,7 @@ I hope this is added someday. As of this writing, pas is not yet ready for any U
 
 ## What additional information is available about pas?
 
-The wiki is maintained.
+The <a href="https://github.com/pkivolowitz/pas/wiki">wiki</a> is maintained.
 
 ## Is there a style guide?
 
@@ -45,7 +45,7 @@ I take pride in my work. I strive not to write shitty code. I welcome constructi
 
 ## Does pas contain much *cool* code?
 
-No. When I wrote the *first documented key-logger* back in the day I believed in cool code.
+No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented key-logger</a> back in the day I believed in cool code.
 
 Alas, I am now a gray-beard. 
 
