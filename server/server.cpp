@@ -55,8 +55,7 @@ int main(int argc, char * argv[])
 	valid_extensions.push_back("m4a");
 	valid_extensions.push_back("ogg");
 
-	//bool b = Enumerate(path, valid_extensions, db_path);
-	//cout << "Enumerate returns: " << b << endl;
+	//Enumerate2(path, valid_extensions, false);
 
 	// Connect to database.
 	// Initialize audio.

@@ -59,7 +59,10 @@ DB::DB()
 DB::~DB()
 {
 	if (connection != nullptr)
+	{
+		connection->close();
 		delete connection;
+	}
 }
 
 bool DB::Initialize()
@@ -86,6 +89,16 @@ bool DB::Initialize()
 		}
 	}
 	return rv;
+}
+
+void DB::DeInitialize()
+{
+	if (connection != nullptr)
+	{
+		connection->close();
+		delete connection;
+		connection = nullptr;
+	}
 }
 
 bool DB::AddMedia(std::string & path, bool force)

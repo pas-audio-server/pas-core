@@ -30,5 +30,6 @@
 #include "utility.hpp"
 #include "db_component.hpp"
 
-bool Enumerate(std::string path, std::vector<std::string> & allowed_extensions, const std::string dbpath, bool force = false);
+bool Enumerate2(std::string path, std::vector<std::string> & allowed_extensions, bool force = false);
+bool Enumerate(std::string path, std::vector<std::string> & allowed_extensions, bool force = false);
 

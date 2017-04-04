@@ -101,14 +101,11 @@ bool CausesLoop(const char * path)
 	Note: tid is passed along for debugging purposes only.
 */
 
-void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * db, int tid, bool force)
+static void AddFolders(string path, vector<string> & v)
 {
 	const string slash("/");
-	vector<string> subdirs;
 	DIR * d = nullptr;
 	dirent * entry;
-
-	assert(db != nullptr);
 
 	try
 	{
@@ -120,25 +117,58 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 
 		do
 		{
-			// NOTE: Common case - leave as first.
+			if (entry->d_type == DT_DIR)
+			{
+				if (CausesLoop(entry->d_name))
+					continue;
+				string next_path = path + slash + string(entry->d_name);
+				v.push_back(next_path);
+				AddFolders(next_path, v);
+			}
+		} while ((entry = readdir(d)) != nullptr);
+
+		if (d != nullptr)
+			closedir(d);
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+			cerr << s << endl;
+	}
+}
+
+static void EnumerateFolder(string folder, const vector<string> & allowable_extensions)
+{
+	const string slash("/");
+	DIR * d = nullptr;
+	dirent * entry;
+
+	DB * db = new DB();
+	db->Initialize();
+	try
+	{
+		if (db == nullptr)
+			throw LOG("Allocating a DB failed");
+
+		if (!db->Initialized())
+			throw LOG("DB failed to initialize");
+
+		if (!(d = opendir(folder.c_str())))
+			throw(LOG(folder));
+
+		if (!(entry = readdir(d)))
+			throw(LOG(folder));
+
+		do
+		{
 			if (entry->d_type == DT_REG)
 			{
 				if (!HasAllowedExtension(entry->d_name, allowable_extensions))
 					continue;
 
 				// Do something with this file.
-				string s = path + slash + string(entry->d_name);
-				db->AddMedia(s, force);
-			}
-			else if (entry->d_type == DT_DIR)
-			{
-				if (CausesLoop(entry->d_name))
-					continue;
-
-				// Possible TODO: Handle conversion of full paths to partial paths
-
-				string next_path = path + slash + string(entry->d_name);
-				EnumerateForReal(next_path, allowable_extensions, db, tid, force);
+				string s = folder + slash + string(entry->d_name);
+				db->AddMedia(s, false);
 			}
 		} while ((entry = readdir(d)) != nullptr);
 	}
@@ -147,79 +177,38 @@ void EnumerateForReal(string path, vector<string> & allowable_extensions, DB * d
 		if (s.size() > 0)
 			cerr << s << endl;
 	}
-	if (d != nullptr)
+
+	if (db)
+	{
+		db->DeInitialize();
+		delete db;
+	}
+
+	if (d)
 		closedir(d);
 }
 
-bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, bool force)
+bool Enumerate2(string path, vector<string> & allowed_extensions, bool force)
 {
 	bool rv = true;
-	vector<string> tl_subdirs;
-	DIR * tld;
-	dirent * entry;
+	vector<string> dirs;
 
+	cout << "Starting to enumerate folders" << endl;
 	try
 	{
 		if (allowed_extensions.size() == 0)
 			throw(LOG("extension vector has size zero"));
 
-		if (!(tld = opendir(path.c_str())))
-		{
-			rv = false;
-			throw(LOG(string("opendir failed on ") + path));
-		}
+		dirs.push_back(path);
+		AddFolders(path, dirs);
+		cout << "Folders: " << dirs.size() << endl;
 
-		if (!(entry = readdir(tld)))
-		{
-			rv = false;
-			throw(LOG("initial readdir failed"));
-		}
-
-		do
-		{
-			// NOTE: This may skip links entirely. Is that a good thing?
-
-			if (entry->d_type == DT_REG)
-				continue;
-
-			if (entry->d_type == DT_DIR)
-			{
-				if (CausesLoop(entry->d_name))
-					continue;
-
-				tl_subdirs.push_back(path + string("/") + string(entry->d_name));
-			}
-		} while ((entry = readdir(tld)) != nullptr);
-
-		closedir(tld);
-
-		// THIS WAS A BAD IDEA - REWRITE THIS TO ONE THREAD ENUMERATES AND
-		// MANY THREADS PROCESS. THE REASON THIS WAS A BAD IDEA IS THAT AN
-		// "UNBALANCED TREE" IS PROCESSED SLOWLY.
-
-		//omp_set_dynamic(1);
 		#pragma omp parallel for
-		for (size_t i = 0; i < tl_subdirs.size(); i++)
+		for (int i = 0; i < (int) dirs.size(); i++)
 		{
-			// Avoiding throw's inside the parallel for.
-
-			DB * db = new DB();
-
-			if (db != nullptr)
-			{
-				if (db->Initialize())
-				{
-					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i, force);
-				}
-				else
-					cerr << LOG("") << endl;
-				delete db;
-			}
-			else
-			{
-				cerr << LOG("DB failed to allocate") << endl;
-			}
+			EnumerateFolder(dirs.at(i), (const vector<string>) allowed_extensions);
 		}
+		cout << "Done" << endl;
 	}
 	catch (string m)
 	{
@@ -229,3 +218,4 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, 
 
 	return rv;
 }
+

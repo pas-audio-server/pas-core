@@ -86,7 +86,7 @@ int main(int argc, char * argv[])
 	{
 		memset(buffer, 0, BS);
 
-		if (BeginsWith(l, "se"))
+		if (l == "se")
 		{
 			string column, pattern;
 			cout << "Column: ";
@@ -106,6 +106,8 @@ int main(int argc, char * argv[])
 				s = string(buffer);
 				cout << s;
 			}
+			cout << endl;
+			cin.ignore(9999, '\n');
 		}
 		if (l == "ac")
 		{

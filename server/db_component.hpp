@@ -43,6 +43,7 @@ public:
 	DB();
 	~DB();
 	bool Initialize();
+	void DeInitialize();
 	bool Initialized();
 	int  GetTrackCount();
 	int  GetArtistCount();
