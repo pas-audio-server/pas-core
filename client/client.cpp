@@ -28,6 +28,17 @@ inline bool BeginsWith(string const & fullString, string const & prefix)
 	return rv;
 }
 
+bool HasEnding (string const & fullString, string const & ending)
+{
+	bool rv = false;
+
+    if (fullString.length() >= ending.length())
+	{
+        rv = (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+    }
+	return rv;
+}
+
 int main(int argc, char * argv[])
 {
 	int port = 5077;
@@ -75,20 +86,25 @@ int main(int argc, char * argv[])
 	{
 		memset(buffer, 0, BS);
 
-		if (BeginsWith(l, "aq"))
+		if (BeginsWith(l, "se"))
 		{
+			string column, pattern;
+			cout << "Column: ";
+			cin >> column;
 			cout << "Pattern (no spaces): ";
-			cin >> l;
-			l = "aq " + l;
+			cin >> pattern;
+			l = "se " + column + " " + pattern;
 			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
 			if (bytes_sent != (int) l.size())
 				break;
 
-			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-			if (bytes_read > 0)
+			string s;
+			while (s.find("****") == string::npos)
 			{
-				string s(buffer);
-				cout << "temp: " << s;
+				memset(buffer, 0, BS);
+				bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+				s = string(buffer);
+				cout << s;
 			}
 		}
 		if (l == "ac")

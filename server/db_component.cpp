@@ -146,11 +146,7 @@ bool DB::AddMedia(std::string & path, bool force)
 	}
 	catch (sql::SQLException &e)
 	{
-		cerr << "# ERR: SQLException in " << __FILE__;
-		cerr << " on line " << __LINE__ << endl;
-		cerr << "# ERR: " << e.what();
-		cerr << " (MySQL error code: " << e.getErrorCode();
-		cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
+		PrintMySQLException(e);
 	}
 
 	if (stmt != nullptr)
@@ -188,11 +184,7 @@ int DB::IntegerQuery(string & sql)
 		}
 		catch (sql::SQLException &e)
 		{
-			cerr << "# ERR: SQLException in " << __FILE__;
-			cerr << " on line " << __LINE__ << endl;
-			cerr << "# ERR: " << e.what();
-			cerr << " (MySQL error code: " << e.getErrorCode();
-			cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
+			PrintMySQLException(e);
 		}
 	}
 	if (stmt != nullptr)
@@ -210,9 +202,75 @@ int DB::GetTrackCount()
 	return IntegerQuery(sql);
 }
 
+void DB::PrintMySQLException(sql::SQLException & e)
+{
+	cerr << "# ERR: SQLException in " << __FILE__;
+	cerr << " on line " << __LINE__ << endl;
+	cerr << "# ERR: " << e.what();
+	cerr << " (MySQL error code: " << e.getErrorCode();
+	cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
+}
+
 void DB::MultiValuedQuery(string column, string pattern, vector<string> & results)
 {
-// select id,artist,title,album,genre from tracks where artist like "%ruce%" order by artist, title;
+	sql::Statement * stmt = nullptr;
+	sql::ResultSet * res = nullptr;
+
+	assert(connection != nullptr);
+	if (IsAColumn(column))
+	{
+		try
+		{
+			// NOTE:
+			// NOTE: SQL Injection vulnerability here.
+			// NOTE:
+			if ((stmt = connection->createStatement()) == nullptr)
+				throw LOG("createStatement() failed");
+
+			string sql("select id,artist,title,album,genre from tracks where ");
+			sql += column + " like \"" + pattern + "\" order by " + column + ";";
+			res = stmt->executeQuery(sql.c_str());
+			while (res->next())
+			{
+				stringstream ss;
+				ss << res->getString(1) << "\t";
+				ss << res->getString(2) << "\t";
+				ss << res->getString(3) << "\t";
+				ss << res->getString(4) << "\t";
+				ss << res->getString(5) << endl;
+				results.push_back(ss.str());
+			}
+		}
+		catch (string s)
+		{
+			if (s.size() > 0)
+				cerr << s << endl;
+		}
+		catch (sql::SQLException &e)
+		{
+			PrintMySQLException(e);
+		}
+	}
+
+	if (stmt != nullptr)
+		delete stmt;
+
+	if (res != nullptr)
+		delete res;
+}
+
+bool DB::IsAColumn(std::string c)
+{
+	bool rv = false;
+	for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
+	{
+		if (c == track_column_names[i])
+		{
+			rv = true;
+			break;
+		}
+	}
+	return rv;
 }
 
 int DB::GetArtistCount()

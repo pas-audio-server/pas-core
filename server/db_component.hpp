@@ -47,11 +47,13 @@ public:
 	int  GetTrackCount();
 	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
+	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
 private:
 	sql::Driver * driver;
 	sql::Connection * connection;
 
-	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
+	bool IsAColumn(std::string c);
+	void PrintMySQLException(sql::SQLException & e);
 	int IntegerQuery(std::string & sql);
 	std::vector<std::string> supported_track_column_names;
 	std::string query_columns;

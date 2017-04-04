@@ -52,28 +52,21 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 			throw string("");
 		}
 
-		if (token == string("aq"))
+		if (token == string("se"))
 		{	
-			tss >> token;
-			string answer("-1\n");
+			string col, pat;
+			tss >> col >> pat;
+			string answer;
 			vector<string> aq_results;
-			if (token.size() > 0)
+			db->MultiValuedQuery(col, pat, aq_results);
+			aq_results.push_back("*************");
+
+			for (size_t i = 0; i < aq_results.size(); i++)
 			{
-				db->MultiValuedQuery(string("artist"), token, aq_results);
-				stringstream ss;
-				ss << aq_results.size() << endl;
-				answer = ss.str();
-			}
-			int counter = -1;
-			do
-			{
-				if (send(socket, answer.c_str(), answer.size(), 0) != (ssize_t) answer.size())
+				cout << "sending: " << aq_results.at(i) << endl;
+				if (send(socket, aq_results.at(i).c_str(), aq_results.at(i).size(), 0) != (ssize_t) aq_results.at(i).size())
 					throw LOG("send did not return the correct number of bytes written");
-				cout << "sent: " << answer << endl;
-				counter++;
-				if (counter < (int) aq_results.size())
-					answer = aq_results.at(counter);
-			} while (counter < (int) aq_results.size());
+			}
 		}
 		
 		if (token == string("ac"))
