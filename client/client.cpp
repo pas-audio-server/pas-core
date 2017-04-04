@@ -17,6 +17,17 @@
 
 using namespace std;
 
+inline bool BeginsWith(string const & fullString, string const & prefix)
+{
+	bool rv = false;
+
+    if (fullString.length() >= prefix.length())
+	{
+        rv = (0 == fullString.compare(0, prefix.length(), prefix));
+    }
+	return rv;
+}
+
 int main(int argc, char * argv[])
 {
 	int port = 5077;
@@ -57,23 +68,54 @@ int main(int argc, char * argv[])
 	char buffer[BS];
 	ssize_t bytes_sent;
 	ssize_t bytes_read;
-	string l;			
+	string l;
+	cout << "Command: ";
 	getline(cin, l);
 	while (l != "quit")
 	{
 		memset(buffer, 0, BS);
-		bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
-		if (bytes_sent != (int) l.size())
-			break;
-		if (l == "tc")
+
+		if (BeginsWith(l, "aq"))
 		{
+			cout << "Pattern (no spaces): ";
+			cin >> l;
+			l = "aq " + l;
+			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
+			if (bytes_sent != (int) l.size())
+				break;
+
 			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
 			if (bytes_read > 0)
 			{
 				string s(buffer);
-				cout << "Track count: " << s << endl;
+				cout << "temp: " << s;
 			}
 		}
+		if (l == "ac")
+		{
+			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
+			if (bytes_sent != (int) l.size())
+				break;
+			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+			if (bytes_read > 0)
+			{
+				string s(buffer);
+				cout << "Artist count: " << s;
+			}
+		}
+		if (l == "tc")
+		{
+			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
+			if (bytes_sent != (int) l.size())
+				break;
+			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+			if (bytes_read > 0)
+			{
+				string s(buffer);
+				cout << "Track count: " << s;
+			}
+		}
+		cout << "Command: ";
 		getline(cin, l);
 	}
 	close(server_socket);

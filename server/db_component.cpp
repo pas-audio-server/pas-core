@@ -36,7 +36,8 @@ string track_column_names[] =
 
 DB::DB()
 {
-	db = nullptr;
+	driver = nullptr;
+	connection = nullptr;
 	// I did not want to make this a static on purpose to avoid race conditions on init.
 	query_columns = "(";
 	parameter_columns = " values (";
@@ -57,25 +58,33 @@ DB::DB()
 
 DB::~DB()
 {
-	if (db != nullptr)
-		sqlite3_close(db);
+	if (connection != nullptr)
+		delete connection;
 }
 
-bool DB::Initialize(string dbname)
+bool DB::Initialize()
 {
 	bool rv = true;
-	int rc;
 
-	assert(db == nullptr);
-
-	if ((rc = sqlite3_open_v2(dbname.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL)) != SQLITE_OK)
-    {
-        cerr << LOG(sqlite3_errmsg(db)) << endl;
-		sqlite3_close(db);
-		db = nullptr;
+	driver = get_driver_instance();
+	if (driver == nullptr)
+	{
+		cerr << LOG("get_driver_instance() failed") << endl;
 		rv = false;
-    }
-
+	}
+	else
+	{
+		connection = driver->connect("tcp://127.0.0.1:3306", "pas", "pas");
+		if (connection == nullptr)
+		{
+			cerr << LOG("connect() failed") << endl;
+			rv = false;
+		}
+		else
+		{
+			connection->setSchema("pas");
+		}
+	}
 	return rv;
 }
 
@@ -83,15 +92,15 @@ bool DB::AddMedia(std::string & path, bool force)
 {
 	bool rv = true;
 	FILE * p = nullptr;
-	int rc;
+	sql::PreparedStatement * stmt = nullptr;
 
+	assert(connection != nullptr);
 	try
 	{
 		if (access(path.c_str(), R_OK) < 0)
 			throw string("cannot access: ") + path;
 
 		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags \"") + path + string("\"");
-		//cout << "Attempting: " << cmdline << endl;
 
 		if ((p = popen(cmdline.c_str(), "r")) == nullptr)
 			throw LOG(path);
@@ -112,51 +121,20 @@ bool DB::AddMedia(std::string & path, bool force)
 		// NOTE: It is a map of tags to values. As more columns are added, change track_column_names.
 		// NOTE:
 
-		string sql = string("insert") + (force ? string(" or replace") : string("")) + " into tracks " + query_columns + parameter_columns;
-		sqlite3_stmt * stmt;
-
-		while ((rc = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &stmt, nullptr)) != SQLITE_OK)
-		{
-			if (rc == SQLITE_BUSY)
-				usleep(_db_sleep_time);
-			else
-				throw LOG("prepare failed " + ::to_string(rc));
-		}
+		string sql = string("insert into tracks ") + query_columns + parameter_columns;
+		stmt = connection->prepareStatement(sql.c_str());
+		if (stmt == nullptr)
+			throw LOG("prepareStatement() failed");
 
 		int i = 1;
 		for (auto it = supported_track_column_names.begin(); it < supported_track_column_names.end(); it++, i++)
 		{
 			string v = track.GetTag(*it);
 			//cout << *it << "	" << v << endl;
-
-			if (v.size() > 0)
-				rc = sqlite3_bind_text(stmt, i, v.c_str(), -1, SQLITE_TRANSIENT);
-			else
-				rc = sqlite3_bind_null(stmt, i);
-
-			if (rc != SQLITE_OK)
-				throw LOG("bind failed");
+			stmt->setString(i, v.c_str());
 		}
 
-		while ((rc = sqlite3_step(stmt)) != SQLITE_DONE)
-		{
-			// The step may not have completed due to contention for sqlite. If so,
-			// the return will be BUSY. If it isn't BUSY and we're
-			if (rc == SQLITE_BUSY)
-			{
-				usleep(_db_sleep_time);
-				continue;
-			}
-			if (!force && rc == SQLITE_CONSTRAINT)
-			{
-				// I wonder if this is too slow.
-				throw(string(""));
-			}
-			throw LOG("step failed " + ::to_string(rc));
-		}
-
-		if (sqlite3_finalize(stmt) != SQLITE_OK)
-			throw LOG("finalize failed");
+		stmt->execute();
 	}
 	catch (string s)
 	{
@@ -166,6 +144,17 @@ bool DB::AddMedia(std::string & path, bool force)
 			rv = false;
 		}
 	}
+	catch (sql::SQLException &e)
+	{
+		cerr << "# ERR: SQLException in " << __FILE__;
+		cerr << " on line " << __LINE__ << endl;
+		cerr << "# ERR: " << e.what();
+		cerr << " (MySQL error code: " << e.getErrorCode();
+		cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
+	}
+
+	if (stmt != nullptr)
+		delete stmt;
 
 	if (p != nullptr)
 		pclose(p);
@@ -173,56 +162,67 @@ bool DB::AddMedia(std::string & path, bool force)
 	return rv;
 }
 
-int DB::GetTrackCount()
+int DB::IntegerQuery(string & sql)
 {
-	int rv = -1;
-	int rc;
+	int rv = 0;
 
-	assert(db != nullptr);
+	sql::Statement * stmt = nullptr;
+	sql::ResultSet *res = nullptr;
 
-	string sql("select count(*) from tracks;");
-	rc = sqlite3_exec(db, sql.c_str(), _db_GetTrackCount, &rv, nullptr);
+	assert(connection != nullptr);
 
-	if (rc < 0)
-		rv = rc;
+	stmt = connection->createStatement();
+	if (stmt == nullptr)
+	{
+		cerr << LOG("createStatement() failed") << endl;
+	}
+	else
+	{
+		try
+		{
+			res = stmt->executeQuery(sql.c_str());
+			if (res->next())
+			{
+				rv = res->getInt(1);
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			cerr << "# ERR: SQLException in " << __FILE__;
+			cerr << " on line " << __LINE__ << endl;
+			cerr << "# ERR: " << e.what();
+			cerr << " (MySQL error code: " << e.getErrorCode();
+			cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
+		}
+	}
+	if (stmt != nullptr)
+		delete stmt;
+
+	if (res != nullptr)
+		delete res;
 
 	return rv;
+}
+
+int DB::GetTrackCount()
+{
+	string sql("select count(*) from tracks");
+	return IntegerQuery(sql);
 }
 
 void DB::MultiValuedQuery(string column, string pattern, vector<string> & results)
 {
 // select id,artist,title,album,genre from tracks where artist like "%ruce%" order by artist, title;
-
 }
 
 int DB::GetArtistCount()
 {
-	int rv = -1;
-	int rc;
-
-	assert(db != nullptr);
-
-	string sql("select count(*) from (select distinct artist from tracks);");
-	rc = sqlite3_exec(db, sql.c_str(), _db_GetTrackCount, &rv, nullptr);
-
-	if (rc < 0)
-		rv = rc;
-
-	return rv;
+	string sql("select count(*) from (select distinct artist from tracks) as foo;");
+	return IntegerQuery(sql);
 }
 
 bool DB::Initialized()
 {
-	return db != nullptr;
+	return connection != nullptr;
 }
 
-int DB::_db_GetTrackCount(void * rv, int argc, char * argv[], char * cols[])
-{
-	assert(rv != nullptr);
-	*((int *) rv) = 0;
-
-	if (argc > 0)
-		*((int *) rv) = atoi(argv[0]);
-
-	return 0;
-}

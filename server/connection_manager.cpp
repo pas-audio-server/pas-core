@@ -35,7 +35,7 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 		db = new DB();
 		if (db == nullptr)
 			throw LOG("new of DB failed???");
-		if (!db->Initialize(db_path))
+		if (!db->Initialize())
 			throw LOG(string("DB failed to initialize: ") + db_path);
 		stringstream tss(buffer);
 		string token;

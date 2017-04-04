@@ -207,7 +207,7 @@ bool Enumerate(string path, vector<string> & allowed_extensions, string dbpath, 
 
 			if (db != nullptr)
 			{
-				if (db->Initialize(dbpath))
+				if (db->Initialize())
 				{
 					EnumerateForReal(tl_subdirs.at(i), allowed_extensions, db, i, force);
 				}

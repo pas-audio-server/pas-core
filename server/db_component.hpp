@@ -28,9 +28,12 @@
 #include <string>
 #include <vector>
 #include <omp.h>
-#include <sqlite3.h>
 #include <assert.h>
-
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
 #include "track.hpp"
 #include "utility.hpp"
 
@@ -39,18 +42,19 @@ class DB
 public:
 	DB();
 	~DB();
-	bool Initialize(std::string dbname);
+	bool Initialize();
 	bool Initialized();
 	int  GetTrackCount();
 	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
-	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
 private:
-	sqlite3 * db;
+	sql::Driver * driver;
+	sql::Connection * connection;
+
+	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
+	int IntegerQuery(std::string & sql);
 	std::vector<std::string> supported_track_column_names;
 	std::string query_columns;
 	std::string parameter_columns;
-	static int _db_GetTrackCount(void * rv, int argc, char * argv[], char * cols[]);
-	static const int _db_sleep_time = 100;
 };
 

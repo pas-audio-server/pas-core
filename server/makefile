@@ -1,7 +1,8 @@
 CC	= g++
-CFLAGS	= -O3 -Wall -std=c++11 -fopenmp
+#CFLAGS	= -O3 -Wall -std=c++11 -fopenmp
+CFLAGS	= -g -Wall -std=c++11 -fopenmp
 #CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
-LDFLAGS	= -lpthread -lsqlite3 -lavcodec -lavformat -lsqlite3 -fopenmp
+LDFLAGS	= -lpthread -lavcodec -lavformat -lmysqlcppconn -fopenmp
 SRC		= $(wildcard *.cpp)
 OBJS	= $(SRC:.cpp=.o)
 
