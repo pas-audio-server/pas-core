@@ -25,16 +25,10 @@
 
 using namespace std;
 
-void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number, const string & db_path)
+static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 {
-	assert(connection_number >= 0);
-	assert(socket >= 0);
-	assert(sockaddr != nullptr);
-
-	sockaddr_in sa;
+	bool rv = true;
 	DB * db = nullptr;
-
-	memcpy(&sa, sockaddr, sizeof(sockaddr_in));
 
 	try
 	{
@@ -43,6 +37,87 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number
 			throw LOG("new of DB failed???");
 		if (!db->Initialize(db_path))
 			throw LOG(string("DB failed to initialize: ") + db_path);
+		stringstream tss(buffer);
+		string token;
+
+		// Identify the command...
+		tss >> token;
+
+		if (token.size() == 0)
+			throw LOG("recv returned 0 bytes. This shouldn't happen.");
+
+		if (token == string("sq"))
+		{
+			rv = false;
+			throw string("");
+		}
+
+		if (token == string("aq"))
+		{	
+			tss >> token;
+			string answer("-1\n");
+			vector<string> aq_results;
+			if (token.size() > 0)
+			{
+				db->MultiValuedQuery(string("artist"), token, aq_results);
+				stringstream ss;
+				ss << aq_results.size() << endl;
+				answer = ss.str();
+			}
+			int counter = -1;
+			do
+			{
+				if (send(socket, answer.c_str(), answer.size(), 0) != (ssize_t) answer.size())
+					throw LOG("send did not return the correct number of bytes written");
+				cout << "sent: " << answer << endl;
+				counter++;
+				if (counter < (int) aq_results.size())
+					answer = aq_results.at(counter);
+			} while (counter < (int) aq_results.size());
+		}
+		
+		if (token == string("ac"))
+		{
+			int artist_count = db->GetArtistCount();
+			stringstream ss;
+			ss << artist_count << endl;
+			string s = ss.str();
+			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
+				throw LOG("send did not return the correct number of bytes written");
+		}
+		
+		if (token == string("tc"))
+		{
+			int track_count = db->GetTrackCount();
+			stringstream ss;
+			ss << track_count << endl;
+			string s = ss.str();
+			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
+				throw LOG("send did not return the correct number of bytes written");
+		}
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+			cerr << s << endl;
+	}
+	
+	if (db != nullptr)
+		delete db;
+	return rv;
+}
+
+void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number, const string & db_path)
+{
+	assert(connection_number >= 0);
+	assert(socket >= 0);
+	assert(sockaddr != nullptr);
+
+	sockaddr_in sa;
+	memcpy(&sa, sockaddr, sizeof(sockaddr_in));
+
+	try
+	{
 
 		size_t bytes_read;
 		const int BS = 2048;
@@ -52,40 +127,15 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number
 		cout << "ConnectionHandler(" << connection_number << ") servicing client at " << inet_ntoa(sa.sin_addr) << endl;
 		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
 		{
-			stringstream ss(buffer);
-			string token;
-
-			// Identify the command...
-			ss >> token;
-			if (token.size() == 0)
-				throw LOG("recv returned 0 bytes. This shouldn't happen.");
-
-			if (token == string("tc"))
-			{
-				int track_count = db->GetTrackCount();
-				stringstream ss;
-				ss << track_count;
-				string s = ss.str();
-				if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-					throw LOG("send did not return the correct number of bytes written");
-			}
-
-			if (token == string("sq"))
+			if (!CommandProcessor(db_path, socket, buffer))
 				break;
-
-			if (write(1, buffer, bytes_read) != (int) bytes_read)
-				throw LOG("write to std out returned wrong number of bytes");
-
 			memset(buffer, 0, BS);
 		}
-		cout << "ConnectionHandler(" << connection_number << ") exiting." << endl;
 	}
 	catch (string s)
 	{
 		if (s.size() > 0)
 			cerr << s << endl;
 	}
-	if (db != nullptr)
-		delete db;
-	cerr << "ConnectionHandler exiting!" << endl;
+	//cerr << "ConnectionHandler exiting!" << endl;
 }

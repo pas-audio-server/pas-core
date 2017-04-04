@@ -42,8 +42,9 @@ public:
 	bool Initialize(std::string dbname);
 	bool Initialized();
 	int  GetTrackCount();
+	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
-
+	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
 private:
 	sqlite3 * db;
 	std::vector<std::string> supported_track_column_names;

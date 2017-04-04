@@ -107,10 +107,9 @@ bool DB::AddMedia(std::string & path, bool force)
 			string b(buffer);
 			track.SetTag(b);
 		}
-		//track.PrintTags(18, 50);
 
 		// NOTE:
-		// NOTE: It is a map of tags to values. As more cpulmns are added, change track_column_names.
+		// NOTE: It is a map of tags to values. As more columns are added, change track_column_names.
 		// NOTE:
 
 		string sql = string("insert") + (force ? string(" or replace") : string("")) + " into tracks " + query_columns + parameter_columns;
@@ -182,6 +181,28 @@ int DB::GetTrackCount()
 	assert(db != nullptr);
 
 	string sql("select count(*) from tracks;");
+	rc = sqlite3_exec(db, sql.c_str(), _db_GetTrackCount, &rv, nullptr);
+
+	if (rc < 0)
+		rv = rc;
+
+	return rv;
+}
+
+void DB::MultiValuedQuery(string column, string pattern, vector<string> & results)
+{
+// select id,artist,title,album,genre from tracks where artist like "%ruce%" order by artist, title;
+
+}
+
+int DB::GetArtistCount()
+{
+	int rv = -1;
+	int rc;
+
+	assert(db != nullptr);
+
+	string sql("select count(*) from (select distinct artist from tracks);");
 	rc = sqlite3_exec(db, sql.c_str(), _db_GetTrackCount, &rv, nullptr);
 
 	if (rc < 0)
