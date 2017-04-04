@@ -5,7 +5,9 @@ Perry's audio server
 
 pas is an audio server capable of sending multiple **analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC will drive a seperate audio zone in a multi-zone or multi-room installation. 
 
-pas does **not** stream digital data. It (via DACs) emits analog audio.
+A key feature of pas is that it is quite light weight, capable of running multiple concurrent streams from an ARM-based development board. See directly below for information about the sbc pas being being developed on.
+
+**To repeat: pas does not stream digital data. It (via DACs) emits analog audio for injection into a means of analog audio distribution.**
 
 Some information about pas:
 - pas is Linux based.
