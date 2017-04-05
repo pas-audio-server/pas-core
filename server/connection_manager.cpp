@@ -39,33 +39,68 @@ static DB * InitDB()
 	return db;
 }
 
-static bool CommandProcessor(int socket, char * buffer)
+static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 {
+	AudioComponent ** acs = (AudioComponent **) dacs;
+
 	bool rv = true;
 	// db will become initialized only when receiving commands that require use of the
 	// databse. Commands not requiring DB accress will not initialize the DB, leaving
 	// the following pointer uninitalized (preventing the DB from being deleted at the
 	// end of processing this command.
 	DB * db = nullptr;
+	
+	int device_index = 0;
+	int buffer_offset = 0;
+	// We only get here if the buffer has something in it (based on bytes_read).
+	if (buffer[0] >= '0' && buffer[0] <= '9')
+	{
+		device_index = buffer[0] - '0';
+		buffer_offset = 2;
+	}
 
 	try
 	{
-		stringstream tss(buffer);
+		if (device_index < 0 || device_index >= ndacs)
+			throw LOG("bad device index");
+
+		// We are depending upon the memset of buffer to ensure we have a null terminator.
+		stringstream tss(buffer + buffer_offset);
 		string token;
 
 		tss >> token;
 
+		// This can happen now. Suppose the string is "0 ". The zero and
+		// space would be skipped by buffer_offset being 2. Then tss would
+		// have nothing in it. 
 		if (token.size() == 0)
-			throw LOG("recv returned 0 bytes. This shouldn't happen when all is well.");
+			throw LOG("");
 
-		if (token == string("sq"))
+		if (token == "Q" || token == "c" || token == "r" || token == "z")
 		{
-			// requested that we quit
-			rv = false;
-			throw string("");
+			AudioCommand cmd;
+			cmd.cmd = (unsigned char) token[0];
+			acs[device_index]->AddCommand(cmd);
+			if (cmd.cmd == 'Q')
+				throw LOG("quitting");
 		}
-
-		if (token == string("se"))
+		else if (token == "p")
+		{
+			// The remaining token should be an index number for a track to play
+			unsigned int id;
+			tss >> id;
+			db = InitDB();
+			string path = db->PathFromID(id);
+			if (path.size() > 0)
+			{
+				AudioCommand cmd;
+				cmd.cmd = PLAY;
+				cmd.argument = path;
+				acs[device_index]->AddCommand(cmd);
+				// and a miracle happens here?
+			}
+		} 
+		else if (token == string("se"))
 		{	
 			// search on column col using pattern pat
 			db = InitDB();
@@ -83,8 +118,13 @@ static bool CommandProcessor(int socket, char * buffer)
 					throw LOG("send did not return the correct number of bytes written");
 			}
 		}
-		
-		if (token == string("ac"))
+		else if (token == string("sq"))
+		{
+			// requested that we quit
+			rv = false;
+			throw string("");
+		}
+		else if (token == string("ac"))
 		{
 			db = InitDB();
 			// Get count of artists
@@ -95,8 +135,7 @@ static bool CommandProcessor(int socket, char * buffer)
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG("send did not return the correct number of bytes written");
 		}
-		
-		if (token == string("tc"))
+		else if (token == string("tc"))
 		{
 			db = InitDB();
 			// Get count of tracks
@@ -127,11 +166,6 @@ static bool CommandProcessor(int socket, char * buffer)
 */
 void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndacs, int connection_number)
 {
-	AudioComponent ** acs = (AudioComponent **) dacs;
-
-// test - make sure we got that dacs OK
-	for (int i = 0; i < ndacs; i++)
-		cout << acs[i]->HumanName() << endl;
 
 	assert(connection_number >= 0);
 	assert(socket >= 0);
@@ -151,7 +185,8 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 		cout << "ConnectionHandler(" << connection_number << ") servicing client at " << inet_ntoa(sa.sin_addr) << endl;
 		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
 		{
-			if (!CommandProcessor(socket, buffer))
+			//cerr << "Raw: " << buffer << endl;
+			if (!CommandProcessor(socket, buffer, dacs, ndacs))
 				break;
 			memset(buffer, 0, BS);
 		}

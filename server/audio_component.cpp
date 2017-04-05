@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <signal.h>
 #include "audio_component.hpp"
 #include "utility.hpp"
 
@@ -28,6 +29,7 @@ using namespace std;
 AudioComponent::AudioComponent()
 {
 	pas = nullptr;
+	t = nullptr;
 	// There are no commands waiting for the player.
 	sem_init(&sem, 0, 0);
 }
@@ -59,9 +61,52 @@ AudioComponent::~AudioComponent()
 	if (buffer_2 != nullptr)
 		free(buffer_2);
 
+	if (t != nullptr)
+	{
+		pthread_kill((pthread_t) t->native_handle(), SIGKILL);
+		delete t;
+	}
+
 	sem_destroy(&sem);
 }
                                                         
+inline bool GoodCommand(unsigned char c)
+{
+	return (c == PLAY || c == STOP || c == PAUSE || c == RESUME || c == QUIT);
+}
+
+void AudioComponent::PlayerThread(AudioComponent * me)
+{
+	AudioCommand ac;
+
+	while (true)
+	{
+		// IDLE STATE
+		sem_wait(&me->sem);
+		// If we get here, there is a command waiting.
+		cout << "Awake" << endl;
+		if (!me->GetCommand(ac, true))
+		{
+			cout << "No command!" << endl;
+			continue;
+		}
+		if (!GoodCommand(ac.cmd))
+		{
+			cout << "Bad command" << endl;
+			continue;
+		}
+
+		cout << "Got " << ac.cmd << endl;
+
+		if (ac.cmd == QUIT)
+			break;
+
+		cout << "Going back to IDLE" << endl;
+	}
+	cout << "Player thread exiting" << endl;
+	me->t = nullptr;
+}
+
 /*	Initialize is happening at the time pas starts. This means all the DACS are ready to
 	go and can be used by all clients. Here ONE SPECIFIC DAC is being readied. Initialize()
 	is being called from the main thread. This class wraps all communication with the 
@@ -71,9 +116,12 @@ AudioComponent::~AudioComponent()
 */
 bool AudioComponent::Initialize(AudioDevice & ad)
 {
+	cout << LOG(ad.device_name) << endl;
+
 	bool rv = true;
 	assert(this->ad.device_spec.size() == 0);
-	
+	assert(t == nullptr);
+
 	this->ad = ad;
 
 	pa_sample_spec ss;
@@ -105,6 +153,8 @@ bool AudioComponent::Initialize(AudioDevice & ad)
     buffers[0] = buffer_1;
 	buffers[1] = buffer_2;
 
+	// Launch the thread associated with this DAC.
+	t = new thread(PlayerThread, this);
 	return rv;
 }
 
@@ -113,30 +163,37 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
+	cerr << LOG("") << endl;
 	if (m.try_lock())
 	{
+		//cerr << LOG("") << endl;
 		if (commands.size() > 0)
 		{
-			// If we were idle, then we have alread done the sem_wait.
-			// If we were not idle, then the sem_wait should return immediately but
-			// must be called for balance. Note, because the sem_wait should return
-			// immediately, deadlock ought not to happen (even if we are holding the
-			// m lock).
+			// If the commands queue is non-empty, someone must have done an
+			// AddCommand. This means they did a sem_post. We must do a sem_wait
+			// here to balance the forces in the universe. The universe should
+			// respond immediately.
 			// The audio player main loop won't exit when idle, instead t will sem_wait
 			// for something to do.
-			if (!was_idle)
-				sem_wait(&sem);
 			ac = commands.front();
 			commands.pop();
+			//cerr << LOG("") << endl;
+			if (!was_idle)
+				sem_wait(&sem);
+			//cerr << LOG("") << endl;
 			rv = true;
 		}
 		m.unlock();
+		//cerr << LOG("") << endl;
 	}
+	//cerr << LOG("") << endl;
 	return rv;
 }
 
-/*	Called by the connection manager only.
+/*	Called by the connection manager only. The sem_post will at most wake
+	an idle player. At least it will cause no harm.
 */
+
 void AudioComponent::AddCommand(const AudioCommand & cmd)
 {
 	m.lock();

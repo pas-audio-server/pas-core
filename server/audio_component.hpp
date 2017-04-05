@@ -52,6 +52,8 @@ enum AUDIO_COMMANDS
 	STOP = 's',
 	PAUSE = 'z',
 	RESUME = 'r',
+
+	QUIT = 'Q',
 	NONE = 0
 };
 
@@ -96,7 +98,7 @@ private:
 	std::queue<AudioCommand> commands;
 	sem_t sem;
 	std::mutex m;
-	std::thread t;
+	std::thread * t;
 	
 	float seconds;
 	pa_simple * pas;
@@ -111,6 +113,8 @@ private:
     int BUFFER_SIZE = (1 << 12) * 6; 
 
 	const int SAMPLE_RATE = 44100;
+
+	static void PlayerThread(AudioComponent * me);
 
 	inline int BufferNext(int & bi)
 	{

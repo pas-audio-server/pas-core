@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
 			throw string("DAC 0 failed to Initialize()");
 	
 		if (!dacs[1]->Initialize(devices[1]))
-			throw string("DAC 0 failed to Initialize()");
+			throw string("DAC 1 failed to Initialize()");
 	
 		cout << "DACs 0 and 1 are allocated and initialized" << endl;
 		cout << "Entering network monitoring" << endl;
