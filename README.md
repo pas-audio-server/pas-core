@@ -27,7 +27,7 @@ Some information about pas:
 - pas *may* expose a MPD-compatible interface.
 
 - pas is being developed on an odroid XU4.
-- pas is being developed using an audioengine D3 USB DAC, a 24 bits / sample device.
+- pas is being developed using an audioengine D3 USB DAC and a DragonFly Black from AudioQuest.
 
 ## Who is Perry?
 
