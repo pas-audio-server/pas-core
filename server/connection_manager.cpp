@@ -26,21 +26,30 @@
 
 using namespace std;
 
+static DB * InitDB()
+{
+	DB * db = new DB();
+
+	if (db == nullptr)
+		throw LOG("new of DB failed???");
+
+	if (!db->Initialize())
+		throw LOG("DB failed to initialize: ");
+
+	return db;
+}
+
 static bool CommandProcessor(int socket, char * buffer)
 {
 	bool rv = true;
+	// db will become initialized only when receiving commands that require use of the
+	// databse. Commands not requiring DB accress will not initialize the DB, leaving
+	// the following pointer uninitalized (preventing the DB from being deleted at the
+	// end of processing this command.
 	DB * db = nullptr;
 
 	try
 	{
-		db = new DB();
-
-		if (db == nullptr)
-			throw LOG("new of DB failed???");
-
-		if (!db->Initialize())
-			throw LOG("DB failed to initialize: ");
-
 		stringstream tss(buffer);
 		string token;
 
@@ -59,6 +68,7 @@ static bool CommandProcessor(int socket, char * buffer)
 		if (token == string("se"))
 		{	
 			// search on column col using pattern pat
+			db = InitDB();
 			string col, pat;
 			tss >> col >> pat;
 			string answer;
@@ -76,6 +86,7 @@ static bool CommandProcessor(int socket, char * buffer)
 		
 		if (token == string("ac"))
 		{
+			db = InitDB();
 			// Get count of artists
 			int artist_count = db->GetArtistCount();
 			stringstream ss;
@@ -87,6 +98,7 @@ static bool CommandProcessor(int socket, char * buffer)
 		
 		if (token == string("tc"))
 		{
+			db = InitDB();
 			// Get count of tracks
 			int track_count = db->GetTrackCount();
 			stringstream ss;
@@ -104,6 +116,7 @@ static bool CommandProcessor(int socket, char * buffer)
 	
 	if (db != nullptr)
 		delete db;
+
 	return rv;
 }
 

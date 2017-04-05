@@ -107,7 +107,7 @@ bool DB::AddMedia(std::string & path, bool force)
 	FILE * p = nullptr;
 	sql::PreparedStatement * stmt = nullptr;
 
-	assert(connection != nullptr);
+	assert(Initialized());
 	try
 	{
 		if (access(path.c_str(), R_OK) < 0)
@@ -295,5 +295,38 @@ int DB::GetArtistCount()
 bool DB::Initialized()
 {
 	return connection != nullptr;
+}
+
+string DB::PathFromID(unsigned int id)
+{
+	string rv;
+	assert(Initialized());
+	string sql("select path from tracks where id = " + to_string(id) + ";");
+	sql::Statement * stmt = connection->createStatement();
+	sql::ResultSet *res = nullptr;
+
+	try
+	{
+		if (stmt == nullptr)
+			throw LOG("createStatement() failed");
+
+		res = stmt->executeQuery(sql.c_str());
+		if (res->next())
+		{
+			rv = res->getString(1);
+		}
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+		{
+			cerr << s << endl;
+		}
+	}
+	catch (sql::SQLException &e)
+	{
+		PrintMySQLException(e);
+	}
+	return rv;
 }
 

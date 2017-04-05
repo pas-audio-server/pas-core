@@ -21,16 +21,30 @@
 #include <string>
 #include <vector>
 #include "audio_component.hpp"
+#include "utility.hpp"
 
 using namespace std;
 
 AudioComponent::AudioComponent()
 {
 	pas = nullptr;
+	// There are no commands waiting for the player.
+	sem_init(&sem, 0, 0);
 }
 
 AudioComponent::~AudioComponent()
 {
+//
+// QUESTION: This is ripping the pas out from under the player thread. What are
+// the implicationsof this. Do I need:
+//
+// http://stackoverflow.com/questions/9094422/how-to-check-if-a-stdthread-is-still-running
+//
+// I could SIGNAL the thread or send it a command 
+// in either case then join it.
+//
+// This would fail if the thread were hung.
+
 	int pulse_error = 0;
 	if (pas != nullptr)
 	{
@@ -44,9 +58,17 @@ AudioComponent::~AudioComponent()
 
 	if (buffer_2 != nullptr)
 		free(buffer_2);
+
+	sem_destroy(&sem);
 }
                                                         
+/*	Initialize is happening at the time pas starts. This means all the DACS are ready to
+	go and can be used by all clients. Here ONE SPECIFIC DAC is being readied. Initialize()
+	is being called from the main thread. This class wraps all communication with the 
+	thread that is actually managing the hardware.
 
+	ONLY Initialize and the destructor can mess with the pas (PulseAudioSimple)!!!!
+*/
 bool AudioComponent::Initialize(AudioDevice & ad)
 {
 	bool rv = true;
@@ -88,13 +110,22 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 
 /*	Called by the audio thread only.
 */
-bool AudioComponent::GetCommand(AudioCommand & ac)
+bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
 	if (m.try_lock())
 	{
 		if (commands.size() > 0)
 		{
+			// If we were idle, then we have alread done the sem_wait.
+			// If we were not idle, then the sem_wait should return immediately but
+			// must be called for balance. Note, because the sem_wait should return
+			// immediately, deadlock ought not to happen (even if we are holding the
+			// m lock).
+			// The audio player main loop won't exit when idle, instead t will sem_wait
+			// for something to do.
+			if (!was_idle)
+				sem_wait(&sem);
 			ac = commands.front();
 			commands.pop();
 			rv = true;
@@ -110,6 +141,7 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 {
 	m.lock();
 	commands.push(cmd);
+	sem_post(&sem);
 	m.unlock();
 }
 
@@ -122,3 +154,46 @@ void AudioComponent::Play(const string & path)
 	ac.cmd = 'p';
 	AddCommand(ac);
 }
+
+void AudioComponent::Play(unsigned int id)
+{
+	DB * db = new DB();
+	
+	try
+	{
+		if (db == nullptr)
+			throw LOG("allocating db failed");
+
+		if (!db->Initialize())
+			throw LOG("db->Initialize() failed");
+
+		string path = db->PathFromID(id);
+		if (path.size() > 0)
+			Play(path);
+	}
+
+	catch (string s)
+	{
+		if (s.size() > 0)
+			cerr << s << endl;
+	}
+
+	if (db != nullptr)
+		delete db;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Make it easier to code in bed`

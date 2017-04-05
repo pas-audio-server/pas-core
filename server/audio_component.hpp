@@ -29,16 +29,37 @@
 #include <aio.h>
 #include <cstring>
 #include <assert.h>
+#include <thread>
 #include <mutex>
 #include <string>
 #include <queue>
 #include "audio_device.hpp"
+#include "db_component.hpp"
+#include <semaphore.h>
+
+/*	An audio component sits in someone elses thread. It manages the hardware
+	for a specific DAC and the player thread that corresponds to it. Audio
+	commands can be set to the player thread such as play, pause and stop.
+	If the audio player thread was idle, it is sem_waiting. If the player is
+	not idle, it will poll the command queue without blocking. Of course
+	if it finds a command waiting, it must sem_wait to decrement the
+	semaphore to balance the post made when the command was added.
+*/
+
+enum AUDIO_COMMANDS
+{
+	PLAY = 'c',
+	STOP = 's',
+	PAUSE = 'p',
+	RESUME = 'r',
+	NONE = 0
+};
 
 struct AudioCommand
 {
 	AudioCommand()
 	{
-		cmd = 0;
+		cmd = AUDIO_COMMANDS::NONE;
 		filler = 0;
 	}
 
@@ -64,17 +85,20 @@ public:
 	inline float GetSeconds() { return seconds; }
 	void AddCommand(const AudioCommand & c);
 	void Play(const std::string & path);
+	void Play(unsigned int id);
 	std::string HumanName() { return ad.device_name; }
 
 private:
 
-	bool GetCommand(AudioCommand & ac);
+	bool GetCommand(AudioCommand & ac, bool was_idle);
 	AudioDevice ad;
-	std::mutex m;
+	// used when the audio thread is idle.
 	std::queue<AudioCommand> commands;
+	sem_t sem;
+	std::mutex m;
+	std::thread t;
 	
 	float seconds;
-	
 	pa_simple * pas;
 
     unsigned char * buffer_1 = nullptr;

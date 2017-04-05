@@ -45,6 +45,14 @@ int main(int argc, char * argv[])
 	string path("/home/perryk/perryk/music");
 	AudioComponent * dacs[2];
 
+/*	DB * db = new DB();
+	db->Initialize();
+	cout << "\"" << db->PathFromID(19) << "\"" << endl;
+	cout << "\"" << db->PathFromID(99999) << "\"" << endl;
+	delete db;
+	return 0;
+*/
+
 	dacs[0] = dacs[1] = nullptr;
 
 	try

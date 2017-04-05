@@ -49,6 +49,8 @@ public:
 	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
 	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
+	std::string PathFromID(unsigned int id);
+
 private:
 	sql::Driver * driver;
 	sql::Connection * connection;
