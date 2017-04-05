@@ -22,6 +22,7 @@ Bus 003 Device 003: ID 2912:120b		this is the D3
 #include <aio.h>
 #include <cstring>
 #include <assert.h>
+#include <vector>
 
 using namespace std;
 
@@ -40,7 +41,9 @@ inline void BufferToggle(int & bi)
 	bi = 1 - bi;
 }
 
-bool Play(string cmdline, unsigned char * buffers[], int buffer_size, const char * device)
+vector<string> devices;
+
+bool Play(string cmdline, unsigned char * buffers[], int buffer_size, string device)
 {
 
 	bool rv = true;
@@ -67,7 +70,7 @@ bool Play(string cmdline, unsigned char * buffers[], int buffer_size, const char
 		ss.rate = SAMPLE_RATE;
 		ss.channels = 2;
 
-		if ((pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
+		if ((pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, device.c_str(), "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
 		{
 			cerr << "pa_simple_new failed." << endl;
 			cerr << pa_strerror(pulse_error) << endl;
@@ -178,6 +181,17 @@ bool Play(string cmdline, unsigned char * buffers[], int buffer_size, const char
 int main(int argc, char * argv[])
 {
 	int rv = 0;
+	int device_index = 0;
+
+	devices.push_back("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
+	devices.push_back("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo");
+
+	if (argc > 1)
+	{
+		device_index = atoi(argv[1]);
+		if (device_index < 0 && device_index >= (int) devices.size())
+			device_index = 0;
+	}
 
 	unsigned char * buffer_1 = nullptr;
 	unsigned char * buffer_2 = nullptr;
@@ -203,11 +217,11 @@ int main(int argc, char * argv[])
 
 	unsigned char * buffers[] { buffer_1, buffer_2 };
 
-	for (int i = 1; i < argc; i++)
+	for (int i = 2; i < argc; i++)
 	{
 		cmdline = string("ffmpeg -loglevel quiet -i ") + string(argv[i]) + string(" -f s24le -ac 2 -");
 		cout << argv[i] << endl;
-		Play(cmdline, buffers, BUFFER_SIZE, "alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo");
+		Play(cmdline, buffers, BUFFER_SIZE, devices[device_index]);
 	}
 
 	if (buffer_1 != nullptr)
