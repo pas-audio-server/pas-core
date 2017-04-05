@@ -1,6 +1,10 @@
 # pas
 Perry's audio server
 
+## Sponsors
+
+AUDIO DAC MAKERS - I NEED MORE DACS TO FIND OUT HOW MANY CONCURRENT STREAMS A TYPE OF MAIN BOARD CAN SUPPORT. I AM SEEKING SPONSORS TO PROVIDE ONE OR MORE OF THEIR USB DAC PRODUCTS. PLEASE CONTACT ME IF INTERESTED, USING MY LINKEDIN ACCOUNT (SEE "This is me" BELOW).
+
 ## What is pas?
 
 pas is an audio server capable of sending multiple **concurrent analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC will drive a separate audio zone in a multi-zone or multi-room installation. 
