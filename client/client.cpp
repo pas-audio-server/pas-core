@@ -39,6 +39,23 @@ bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
+bool SetUpConnection(int server_socket, sockaddr_in * server_sockaddr, hostent * server_hostent, int port)
+{
+	bool rv = true;
+
+	memset(server_sockaddr, 0, sizeof(sockaddr_in));
+	server_sockaddr->sin_family = AF_INET;
+	memmove(&server_sockaddr->sin_addr.s_addr, server_hostent->h_addr, server_hostent->h_length);
+	server_sockaddr->sin_port = htons(port);
+
+	if (connect(server_socket, (struct sockaddr*) server_sockaddr, sizeof(sockaddr_in)) == -1)
+	{
+		perror("Client connection failure:");
+		rv = false;
+	}
+	return rv;
+}
+
 int main(int argc, char * argv[])
 {
 	int port = 5077;
@@ -63,18 +80,13 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
-	memset(&server_sockaddr, 0, sizeof(server_sockaddr));
-	server_sockaddr.sin_family = AF_INET;
-	memmove(&server_sockaddr.sin_addr.s_addr, server_hostent->h_addr, server_hostent->h_length);
-	server_sockaddr.sin_port = htons(port);
-
-	if (connect(server_socket, (struct sockaddr*)&server_sockaddr, sizeof(server_sockaddr)) == -1)
+	if (!SetUpConnection(server_socket, &server_sockaddr, server_hostent, port))
 	{
-		perror("Client connection failure:");
 		close(server_socket);
 		exit(1);
 	}
 
+	bool connected = true;
 	const int BS = 2048;
 	char buffer[BS];
 	ssize_t bytes_sent;
@@ -133,9 +145,42 @@ int main(int argc, char * argv[])
 				cout << "Track count: " << s;
 			}
 		}
+	
+		if (l == "rc")
+		{
+			if (connected)
+				cout << "Already connected" << endl;
+			else
+			{
+				server_socket = socket(AF_INET, SOCK_STREAM, 0);
+				if (server_socket < 0)
+				{
+					perror("Client failed to open socket for reconnection.");
+					break;
+				}
+				if (!SetUpConnection(server_socket, &server_sockaddr, server_hostent, port))
+				{
+					close(server_socket);
+					server_socket = -1;
+					break;
+				}
+				cout << "Reconnected" << endl;
+			}
+		}
+		if (l == "sq")
+		{
+			cout << "Disconnecting" << endl;
+			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
+			if (bytes_sent != (int) l.size())
+				break;
+			close(server_socket);
+			server_socket = -1;
+			connected = false;
+		}
 		cout << "Command: ";
 		getline(cin, l);
 	}
-	close(server_socket);
+	if (server_socket >= 0)
+		close(server_socket);
 	return 0;
 }
