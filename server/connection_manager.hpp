@@ -32,4 +32,4 @@
 /*  pas is Copyright 2017 by Perry Kivolowitz.
 */
 
-void ConnectionHandler(sockaddr_in  * sockaddr, int incoming_socket, int connection_number, const std::string & db_path);
+void ConnectionHandler(sockaddr_in  * sockaddr, int incoming_socket, void * dacs, int ndacs, int connection_number);

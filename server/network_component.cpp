@@ -45,7 +45,7 @@ void NetworkComponent::SIGINTHandler(int)
    This function should not return. Doing so signifies an error.
 */
 
-void NetworkComponent::AcceptConnections(const string & db_path)
+void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 {
 	// By default, Linux apparently retries  interrupted system calls.  This defeats the
 	// purpose of interrupting them, doesn't it? The call to siginterrupt disables this.
@@ -88,8 +88,7 @@ void NetworkComponent::AcceptConnections(const string & db_path)
 
 		while ((incoming_socket = accept(listening_socket, (sockaddr *) &client_info, (socklen_t *) &c)) > 0)
 		{
-			// ConnectionHandler is TEMPORARY
-			thread * t = new thread(ConnectionHandler, &client_info, incoming_socket, connection_counter++, db_path);
+			thread * t = new thread(ConnectionHandler, &client_info, incoming_socket, dacs, ndacs, connection_counter++);
 			threads.push_back(t);
 			if (!keep_going)
 				break;

@@ -32,6 +32,8 @@
 
 #include "network_component.hpp"
 #include "file_system_component.hpp"
+#include "audio_component.hpp"
+#include "audio_device.hpp"
 
 using namespace std;
 
@@ -40,26 +42,59 @@ int  port = 5077;
 
 int main(int argc, char * argv[])
 {
-	string db_path("/home/perryk/pas/pas.db");
 	string path("/home/perryk/perryk/music");
+	AudioComponent * dacs[2];
 
-	if (argc > 1)
-		path = string(argv[1]);
+	dacs[0] = dacs[1] = nullptr;
 
-	vector<string> valid_extensions;
-	NetworkComponent nw;
+	try
+	{
+		if ((dacs[0] = new AudioComponent()) == nullptr)
+			throw string("DAC 0 failed to allocate");
+ 
+		if ((dacs[1] = new AudioComponent()) == nullptr)
+			throw string("DAC 1 failed to allocate");
+		
+		if (argc > 1)
+			path = string(argv[1]);
 
-	valid_extensions.push_back("mp3");
-	valid_extensions.push_back("flac");
-	valid_extensions.push_back("wav");
-	valid_extensions.push_back("m4a");
-	valid_extensions.push_back("ogg");
+		vector<string> valid_extensions;
+		vector<AudioDevice> devices;
+	
+		NetworkComponent nw;
+	
+		valid_extensions.push_back("mp3");
+		valid_extensions.push_back("flac");
+		valid_extensions.push_back("wav");
+		valid_extensions.push_back("m4a");
+		valid_extensions.push_back("ogg");
+	
+		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black"));
+		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3"));
+	
+		if (!dacs[0]->Initialize(devices[0]))
+			throw string("DAC 0 failed to Initialize()");
+	
+		if (!dacs[1]->Initialize(devices[1]))
+			throw string("DAC 0 failed to Initialize()");
+	
+		cout << "DACs 0 and 1 are allocated and initialized" << endl;
+		cout << "Entering network monitoring" << endl;
 
-	//Enumerate2(path, valid_extensions, false);
+		nw.AcceptConnections((void *) dacs, 2);
+	}
+	catch (string s)
+	{
+		if (s.size() > 0)
+			cerr << s << endl;
+	}
 
-	// Connect to database.
-	// Initialize audio.
-	nw.AcceptConnections(db_path);
+	if (dacs[0] != nullptr)
+		delete dacs[0];
+
+	if (dacs[1] != nullptr)
+		delete dacs[1];
+
 	exit(0);
 }
 

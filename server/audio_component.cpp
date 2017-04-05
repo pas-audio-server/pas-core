@@ -38,12 +38,87 @@ AudioComponent::~AudioComponent()
 		pa_simple_free(pas);
 		pas = nullptr;
 	}
-}
 
-bool AudioComponent::Initialize(string d)
+	if (buffer_1 != nullptr)
+		free(buffer_1);
+
+	if (buffer_2 != nullptr)
+		free(buffer_2);
+}
+                                                        
+
+bool AudioComponent::Initialize(AudioDevice & ad)
 {
 	bool rv = true;
-	assert(device.size() == 0);
-	device = d;
+	assert(this->ad.device_spec.size() == 0);
+	
+	this->ad = ad;
+
+	pa_sample_spec ss;
+	pa_channel_map cm;
+	int pulse_error;
+
+	pa_channel_map_init_stereo(&cm);
+
+	ss.format = PA_SAMPLE_S24LE;
+	ss.rate = SAMPLE_RATE;
+	ss.channels = 2;
+
+	if ((pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, this->ad.device_spec.c_str(), "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
+	{
+		cerr << "pa_simple_new failed." << endl;
+		cerr << pa_strerror(pulse_error) << endl;
+		rv = false;
+	}
+
+	buffer_1 = (unsigned char *) malloc(BUFFER_SIZE);
+    buffer_2 = (unsigned char *) malloc(BUFFER_SIZE);   
+                                                        
+    if (buffer_1 == nullptr || buffer_2 == nullptr)     
+    {                                                   
+        cerr << "buffer allocation failed" << endl;     
+        exit(1);                                        
+    }                                                   
+                                                        
+    buffers[0] = buffer_1;
+	buffers[1] = buffer_2;
+
 	return rv;
+}
+
+/*	Called by the audio thread only.
+*/
+bool AudioComponent::GetCommand(AudioCommand & ac)
+{
+	bool rv = false;
+	if (m.try_lock())
+	{
+		if (commands.size() > 0)
+		{
+			ac = commands.front();
+			commands.pop();
+			rv = true;
+		}
+		m.unlock();
+	}
+	return rv;
+}
+
+/*	Called by the connection manager only.
+*/
+void AudioComponent::AddCommand(const AudioCommand & cmd)
+{
+	m.lock();
+	commands.push(cmd);
+	m.unlock();
+}
+
+/*	Called by the connection manager only.
+*/
+void AudioComponent::Play(const string & path)
+{
+	AudioCommand ac;
+	ac.argument = path;
+	ac.cmd = 'p';
+	AddCommand(ac);
 }

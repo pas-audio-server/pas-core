@@ -36,7 +36,7 @@ class NetworkComponent
 {
 public:
 	NetworkComponent();
-	void AcceptConnections(const std::string & db_path);
+	void AcceptConnections(void * dacs, int ndacs);
 
 private:
 	static bool keep_going;

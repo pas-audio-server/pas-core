@@ -21,11 +21,12 @@
 #include <string>
 #include <sstream>
 #include "connection_manager.hpp"
+#include "audio_component.hpp"
 #include "db_component.hpp"
 
 using namespace std;
 
-static bool CommandProcessor(const string & db_path, int socket, char * buffer)
+static bool CommandProcessor(int socket, char * buffer)
 {
 	bool rv = true;
 	DB * db = nullptr;
@@ -33,27 +34,31 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 	try
 	{
 		db = new DB();
+
 		if (db == nullptr)
 			throw LOG("new of DB failed???");
+
 		if (!db->Initialize())
-			throw LOG(string("DB failed to initialize: ") + db_path);
+			throw LOG("DB failed to initialize: ");
+
 		stringstream tss(buffer);
 		string token;
 
-		// Identify the command...
 		tss >> token;
 
 		if (token.size() == 0)
-			throw LOG("recv returned 0 bytes. This shouldn't happen.");
+			throw LOG("recv returned 0 bytes. This shouldn't happen when all is well.");
 
 		if (token == string("sq"))
 		{
+			// requested that we quit
 			rv = false;
 			throw string("");
 		}
 
 		if (token == string("se"))
 		{	
+			// search on column col using pattern pat
 			string col, pat;
 			tss >> col >> pat;
 			string answer;
@@ -71,6 +76,7 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 		
 		if (token == string("ac"))
 		{
+			// Get count of artists
 			int artist_count = db->GetArtistCount();
 			stringstream ss;
 			ss << artist_count << endl;
@@ -81,6 +87,7 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 		
 		if (token == string("tc"))
 		{
+			// Get count of tracks
 			int track_count = db->GetTrackCount();
 			stringstream ss;
 			ss << track_count << endl;
@@ -100,8 +107,19 @@ static bool CommandProcessor(const string & db_path, int socket, char * buffer)
 	return rv;
 }
 
-void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number, const string & db_path)
+/*	So a connection happened and will be handled by this thread. I am having a
+	conceptual problem about who owns what (with respect to the DACs). I need to
+	have some device state - isn;t that what I made AudioComponent for? Oh. Right.
+	Thats what the dacs parameter gives us.
+*/
+void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndacs, int connection_number)
 {
+	AudioComponent ** acs = (AudioComponent **) dacs;
+
+// test - make sure we got that dacs OK
+	for (int i = 0; i < ndacs; i++)
+		cout << acs[i]->HumanName() << endl;
+
 	assert(connection_number >= 0);
 	assert(socket >= 0);
 	assert(sockaddr != nullptr);
@@ -120,7 +138,7 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number
 		cout << "ConnectionHandler(" << connection_number << ") servicing client at " << inet_ntoa(sa.sin_addr) << endl;
 		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
 		{
-			if (!CommandProcessor(db_path, socket, buffer))
+			if (!CommandProcessor(socket, buffer))
 				break;
 			memset(buffer, 0, BS);
 		}
@@ -130,5 +148,5 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, int connection_number
 		if (s.size() > 0)
 			cerr << s << endl;
 	}
-	//cerr << "ConnectionHandler exiting!" << endl;
+	cerr << "ConnectionHandler(" << connection_number << ") exiting!" << endl;
 }

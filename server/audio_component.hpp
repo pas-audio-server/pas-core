@@ -29,19 +29,64 @@
 #include <aio.h>
 #include <cstring>
 #include <assert.h>
+#include <mutex>
+#include <string>
+#include <queue>
+#include "audio_device.hpp"
+
+struct AudioCommand
+{
+	AudioCommand()
+	{
+		cmd = 0;
+		filler = 0;
+	}
+
+	AudioCommand(const AudioCommand & other)
+	{
+		argument = other.argument;
+		cmd = other.cmd;
+		filler = other.filler;
+	}
+
+	std::string argument;
+	unsigned char cmd;
+	unsigned char filler;
+};
 
 class AudioComponent
 {
 public:
+
 	AudioComponent();
 	~AudioComponent();
-	bool Initialize(std::string d);
-
+	bool Initialize(AudioDevice & ad);
+	inline float GetSeconds() { return seconds; }
+	void AddCommand(const AudioCommand & c);
+	void Play(const std::string & path);
+	std::string HumanName() { return ad.device_name; }
 
 private:
 
-	std::string device;
+	bool GetCommand(AudioCommand & ac);
+	AudioDevice ad;
+	std::mutex m;
+	std::queue<AudioCommand> commands;
+	
+	float seconds;
+	
 	pa_simple * pas;
+
+    unsigned char * buffer_1 = nullptr;
+    unsigned char * buffer_2 = nullptr; 
+	unsigned char * buffers[2];
+
+    // The div / mult by 6 is essential. Furthermore, a very large size will
+	// actually cause problems with ffmpeg keeping up. This value of 24K
+	// works pretty well.
+    int BUFFER_SIZE = (1 << 12) * 6; 
+
+	const int SAMPLE_RATE = 44100;
 
 	inline int BufferNext(int & bi)
 	{
@@ -59,3 +104,5 @@ private:
 	}
 
 };
+
+void AudioThread(AudioComponent * ac);

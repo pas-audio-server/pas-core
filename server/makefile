@@ -18,7 +18,7 @@ server.out				: server.o network_component.o file_system_component.o db_componen
 clear_screen			:
 						clear
 
-server.o				: server.cpp network_component.hpp file_system_component.hpp utility.hpp
+server.o				: server.cpp network_component.hpp file_system_component.hpp utility.hpp audio_component.hpp audio_device.hpp
 
 connection_manager.o	: connection_manager.cpp connection_manager.hpp
 
