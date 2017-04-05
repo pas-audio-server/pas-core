@@ -48,9 +48,9 @@
 
 enum AUDIO_COMMANDS
 {
-	PLAY = 'c',
+	PLAY = 'p',
 	STOP = 's',
-	PAUSE = 'p',
+	PAUSE = 'z',
 	RESUME = 'r',
 	NONE = 0
 };
