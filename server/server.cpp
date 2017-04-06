@@ -76,6 +76,9 @@ int main(int argc, char * argv[])
 		valid_extensions.push_back("wav");
 		valid_extensions.push_back("m4a");
 		valid_extensions.push_back("ogg");
+
+		//Enumerate2(path, valid_extensions, false);
+		//return 0;
 	
 		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black"));
 		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3"));
