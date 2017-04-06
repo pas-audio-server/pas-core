@@ -80,7 +80,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		if (token.size() == 0)
 			throw LOG("");
 
-		if (token == "Q" || token == "c" || token == "r" || token == "z")
+		if (token == "Q" || token == "c" || token == "r" || token == "z" || token == "s")
 		{
 			AudioCommand cmd;
 			cmd.cmd = (unsigned char) token[0];

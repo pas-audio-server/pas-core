@@ -1,13 +1,11 @@
-#include <thread>
+#include <string>
 
 using namespace std;
 
-int foo()
-{
-}
-
 int main()
 {
-	thread t(foo);
+	char c = 'p';
+
+	string s = string(c);
 	return 0;
 }

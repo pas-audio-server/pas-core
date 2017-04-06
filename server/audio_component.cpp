@@ -70,6 +70,27 @@ inline bool GoodCommand(unsigned char c)
 	return (c == PLAY || c == STOP || c == PAUSE || c == RESUME || c == QUIT);
 }
 
+// This is used twice, formerly as copy / pasted code. Copy / pasted code
+// is evil. Code in one place, test in one place, fix in one place.
+void AudioComponent::LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned char * b)
+{
+	assert(b != nullptr);
+
+	int error;
+	cb.aio_fildes = fd;
+	cb.aio_offset = me->read_offset;
+	cb.aio_buf = (void *) b;
+	cb.aio_nbytes = me->BUFFER_SIZE;
+	cb.aio_reqprio = 0;
+	cb.aio_sigevent.sigev_notify = SIGEV_NONE;
+	cb.aio_lio_opcode = LIO_NOP;
+	//cout << "async: 1 " << read_offset << " * " << endl;
+	error = aio_read(&cb);
+	if (error != 0)
+		throw LOG("aio_read() failed: " + to_string(error));
+
+}
+
 void AudioComponent::PlayerThread(AudioComponent * me)
 {
 	AudioCommand ac;
@@ -113,7 +134,8 @@ void AudioComponent::PlayerThread(AudioComponent * me)
     buffers[0] = buffer_1;
 	buffers[1] = buffer_2;
 
-	while (true)
+	bool terminate_flag = false;
+	while (!terminate_flag)
 	{
 		// IDLE STATE
 		me->read_offset = 0;
@@ -132,7 +154,10 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			continue;
 		}
 		if (ac.cmd == QUIT)
+		{
+			terminate_flag = true;
 			break;
+		}
 		if (ac.cmd != PLAY)
 			continue;
 		//cerr << LOG(ac.argument) << endl;
@@ -142,13 +167,17 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 		size_t bytes_read;
 		try
 		{
+			// If a stop command is received, this flag will be set to true
+			// then the main while loop is broken. terminate_flag on the other
+			// hand means the thread should terminate.
+			bool stop_flag = false;
+
 			// assemble the command line
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ac.argument + string("\" -f s24le -ac 2 -");
 			// Launch the decoder
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG("pipe failed to open");
-			//cerr << LOG(player_command) << endl;
-			bool stop_flag = false;
+			cerr << LOG(player_command) << endl;
 			int buffer_index = 0;
 			int fd = fileno(p);
 			int error, pulse_error;
@@ -164,22 +193,15 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// the first time through the loop.
 
 			memset(&cb, 0, sizeof(aiocb));
-			cb.aio_fildes = fd;
-			cb.aio_offset = me->read_offset;
-			cb.aio_buf = (void *) buffers[1];
-			cb.aio_nbytes = me->BUFFER_SIZE;
-			cb.aio_reqprio = 0;
-			cb.aio_sigevent.sigev_notify = SIGEV_NONE;
-			cb.aio_lio_opcode = LIO_NOP;
-			//cout << "async: 1 " << read_offset << " * " << endl;
-			error = aio_read(&cb);
-			if (error != 0)
-				throw LOG("aio_read() failed: " + to_string(error));
-
+			me->LaunchAIO(cb, fd, me, buffers[1]);
 			//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
 			bool first_loop = true;
 
-			while (bytes_read > 0 && stop_flag == false)
+			// The preceding has been foreplay, priming the pump for this
+			// main loop of audio play. We'll always launch the NEXT buffer's
+			// asynchonous I/O before writing the PREVIOUS buffer to pulse
+			// in a blocking manner.
+			while (bytes_read > 0 && !terminate_flag && !stop_flag)
 			{
 				//cerr << LOG("") << endl;
 				if (!first_loop)
@@ -190,15 +212,14 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					}
 
 					if (error > 0)
-					{
 						throw LOG("async i/o returned error");
-						break;
-					}
+
 					assert(error == 0);
 					int t = aio_return(&cb);
 					assert(t >= 0);
 					if (t == 0)
-						stop_flag = true;
+						break;
+
 					me->read_offset += t;
 					bytes_read = t;
 					//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
@@ -213,20 +234,35 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				if (!first_loop)
 				{
 					memset(&cb, 0, sizeof(aiocb));
-					cb.aio_fildes = fd;
-					cb.aio_offset = me->read_offset;
-					cb.aio_buf = (void *) buffers[me->BufferNext(buffer_index)];
-					cb.aio_nbytes = me->BUFFER_SIZE;
-					cb.aio_reqprio = 0;
-					cb.aio_sigevent.sigev_notify = SIGEV_NONE;
-					cb.aio_lio_opcode = LIO_NOP;
-					//cout << "async: " << BufferNext(buffer_index) << " " << read_offset << endl;
-					error = aio_read(&cb);
-					if (error != 0)
-						throw LOG("aio_read() failed: " + to_string(error));
+					me->LaunchAIO(cb, fd, me, buffers[me->BufferNext(buffer_index)]);
 				}
 
 				first_loop = false;
+
+//////////////////////////////////////////////
+// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
+//////////////////////////////////////////////
+				//cerr << LOG("") << endl;
+				if (me->GetCommand(ac, false) && GoodCommand(ac.cmd))
+				{
+					cerr << "		" << LOG("") << endl;
+					if (ac.cmd == QUIT)
+					{
+						terminate_flag = true;
+						break;
+					}
+					if (ac.cmd == STOP)
+					{
+						cout << "STOP" << endl;
+						usleep(10000);
+						stop_flag = true;
+						break;
+					}
+				}
+				//cerr << LOG("") << endl;
+//////////////////////////////////////////////
+// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
+//////////////////////////////////////////////
 
 				// Launch blocking write to pulse
 				pulse_error = 0;

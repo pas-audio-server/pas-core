@@ -125,9 +125,9 @@ int main(int argc, char * argv[])
 		if (l == "cm")
 		{
 			char cmd;
-			cout << "Which command (p, z, r or c): ";
+			cout << "Which command (p, z, r or s): ";
 			cin >> cmd;
-			if (cmd == 'p' || cmd == 'c' || cmd == 'z' || cmd== 'r')
+			if (cmd == 'p' || cmd == 's' || cmd == 'z' || cmd == 'r' || cmd == 'Q')
 			{
 				char unit;
 				cout << "Which device (0 - 9): ";
@@ -142,6 +142,7 @@ int main(int argc, char * argv[])
 						// No need to vet this. It will be done later.
 					}
 					l = unit + string(" ") + cmd + string(" ") + id_number; 
+					cout << "Sending: " << l << endl;
 					bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
 					if (bytes_sent != (int) l.size())
 						break;

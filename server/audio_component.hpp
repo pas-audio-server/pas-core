@@ -106,12 +106,17 @@ private:
 
     // The div / mult by 6 is essential. Furthermore, a very large size will
 	// actually cause problems with ffmpeg keeping up. This value of 24K
-	// works pretty well.
-    int BUFFER_SIZE = (1 << 12) * 6; 
+	// works pretty well. Let's try doubling it. This is 49152 bytes. Linux
+	// pipes hold 64K. If we exceed this, we will sometimes wait for the pipe
+	// to become non-empty. 49152 bytes is 0.1858 seconds of 24 bit stereo
+	// at 44.1 Khz.
+
+    int BUFFER_SIZE = (1 << 13) * 6; 
 
 	const int SAMPLE_RATE = 44100;
 
 	static void PlayerThread(AudioComponent * me);
+	static void LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned char * b);
 
 	inline int BufferNext(int & bi)
 	{
