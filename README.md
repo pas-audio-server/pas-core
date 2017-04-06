@@ -3,7 +3,9 @@ Perry's audio server
 
 *Breaking news:*
 
-pas is now playing multiple streams of audio simultaneously that were requested from a remote client - it's alive! it's ALIVE. IT'S ALIVE
+**pas is now playing multiple streams of audio simultaneously that were requested from a remote client.**
+
+**As Gene Wilder said: it's alive! it's ALIVE. IT'S ALIVE**
 
 ## Sponsors
 
