@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <signal.h>
@@ -99,7 +100,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
     buffer_2 = (unsigned char *) malloc(me->BUFFER_SIZE);   
 	unsigned char * buffers[2];
 
-	cerr << LOG(to_string(me->BUFFER_SIZE)) << endl;
+	//cerr << LOG(to_string(me->BUFFER_SIZE)) << endl;
                                                         
     if (buffer_1 == nullptr || buffer_2 == nullptr)     
     {                                                   
@@ -114,11 +115,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 	while (true)
 	{
-		cout << LOG("") << endl;
 		// IDLE STATE
+		me->read_offset = 0;
+		cout << LOG("") << endl;
 		sem_wait(&me->sem);
 		// If we get here, there is a command waiting.
-		cout << "Awake" << endl;
+		cout << LOG("") << endl;
 		if (!me->GetCommand(ac, true))
 		{
 			cout << "No command!" << endl;
@@ -133,12 +135,11 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			break;
 		if (ac.cmd != PLAY)
 			continue;
-		cerr << LOG(ac.argument) << endl;
+		//cerr << LOG(ac.argument) << endl;
 
 		// OK - It's playtime!
 		FILE * p = nullptr;
 		size_t bytes_read;
-		me->seconds = 0.0f;
 		try
 		{
 			// assemble the command line
@@ -146,18 +147,17 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// Launch the decoder
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG("pipe failed to open");
-			cerr << LOG(player_command) << endl;
+			//cerr << LOG(player_command) << endl;
 			bool stop_flag = false;
 			int buffer_index = 0;
-			off_t read_offset = 0;
 			int fd = fileno(p);
 			int error, pulse_error;
 			aiocb cb;
 			
 			//cout << "block: 0 0" << endl;
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
-			read_offset += bytes_read;
-			cerr << LOG("") << endl;
+			me->read_offset += bytes_read;
+			//cerr << LOG("") << endl;
 
 			// There needs to be one I/O already in flight by 
 			// the time the loop starts. I found a gap happening
@@ -165,7 +165,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 			memset(&cb, 0, sizeof(aiocb));
 			cb.aio_fildes = fd;
-			cb.aio_offset = read_offset;
+			cb.aio_offset = me->read_offset;
 			cb.aio_buf = (void *) buffers[1];
 			cb.aio_nbytes = me->BUFFER_SIZE;
 			cb.aio_reqprio = 0;
@@ -199,7 +199,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					assert(t >= 0);
 					if (t == 0)
 						stop_flag = true;
-					read_offset += t;
+					me->read_offset += t;
 					bytes_read = t;
 					//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
 				}
@@ -214,7 +214,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				{
 					memset(&cb, 0, sizeof(aiocb));
 					cb.aio_fildes = fd;
-					cb.aio_offset = read_offset;
+					cb.aio_offset = me->read_offset;
 					cb.aio_buf = (void *) buffers[me->BufferNext(buffer_index)];
 					cb.aio_nbytes = me->BUFFER_SIZE;
 					cb.aio_reqprio = 0;
@@ -331,6 +331,19 @@ void AudioComponent::Play(const string & path)
 	ac.argument = path;
 	ac.cmd = 'p';
 	AddCommand(ac);
+}
+
+string AudioComponent::TimeCode()
+{
+	stringstream ss;
+	//cout << read_offset << endl;
+	int ro = read_offset / (6 * SAMPLE_RATE);
+	int hours, minutes, seconds;
+	seconds = (int) ro % 60;
+	minutes = ((int) ro / 60) % 60;
+	hours = ((int) ro / 3600) % 100;
+	ss << setw(2) << setfill('0') << hours << ":" << setw(2) << minutes << ":" << setw(2) << seconds;
+	return ss.str();
 }
 
 void AudioComponent::Play(unsigned int id)

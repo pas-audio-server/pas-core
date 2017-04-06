@@ -17,6 +17,8 @@
 
 using namespace std;
 
+const int BS = 2048;
+
 inline bool BeginsWith(string const & fullString, string const & prefix)
 {
 	bool rv = false;
@@ -56,6 +58,29 @@ bool SetUpConnection(int server_socket, sockaddr_in * server_sockaddr, hostent *
 	return rv;
 }
 
+bool SimpleCase(int server_socket, string command, string legend)
+{
+	bool rv = true;
+	char buffer[BS];
+	assert(server_socket >= 0);
+	memset(buffer, 0, BS);
+	size_t bytes_sent = send(server_socket, (const void *) command.c_str(), command.size(), 0);
+	if (bytes_sent != command.size())
+	{
+		rv = false;
+	}
+	else
+	{
+		size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+		if (bytes_read > 0)
+		{
+			string s(buffer);
+			cout << legend << ": "  << s;
+		}
+	}
+	return rv;
+}
+
 int main(int argc, char * argv[])
 {
 	int port = 5077;
@@ -87,7 +112,6 @@ int main(int argc, char * argv[])
 	}
 
 	bool connected = true;
-	const int BS = 2048;
 	char buffer[BS];
 	ssize_t bytes_sent;
 	ssize_t bytes_read;
@@ -123,7 +147,6 @@ int main(int argc, char * argv[])
 						break;
 				}
 			} 
-			cin.ignore(9999, '\n');
 		}
 		else if (l == "se")
 		{
@@ -142,38 +165,33 @@ int main(int argc, char * argv[])
 			{
 				memset(buffer, 0, BS);
 				bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+				if (bytes_read > 0) ;
 				s = string(buffer);
 				cout << s;
 			}
 			cout << endl;
-			cin.ignore(9999, '\n');
 		}
-		if (l == "ac")
+		else if (l == "ac")
 		{
-			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
-			if (bytes_sent != (int) l.size())
-				break;
-			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-			if (bytes_read > 0)
+			SimpleCase(server_socket, l, "Artist count");
+		}
+		else if (l == "tc")
+		{
+			SimpleCase(server_socket, l, "Track count");
+		}
+		else if (l == "ti")
+		{
+			char unit;
+			cout << "Which device (0 - 9): ";
+			cin >> unit;
+			if (unit >= '0' && unit <= '9')
 			{
-				string s(buffer);
-				cout << "Artist count: " << s;
+				l = unit + string(" ") + l; 
+				SimpleCase(server_socket, l, "Time code");
+				cout << endl;
 			}
 		}
-		if (l == "tc")
-		{
-			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
-			if (bytes_sent != (int) l.size())
-				break;
-			bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-			if (bytes_read > 0)
-			{
-				string s(buffer);
-				cout << "Track count: " << s;
-			}
-		}
-	
-		if (l == "rc")
+		else if (l == "rc")
 		{
 			if (connected)
 				cout << "Already connected" << endl;
@@ -194,7 +212,7 @@ int main(int argc, char * argv[])
 				cout << "Reconnected" << endl;
 			}
 		}
-		if (l == "sq")
+		else if (l == "sq")
 		{
 			cout << "Disconnecting" << endl;
 			bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
@@ -204,6 +222,7 @@ int main(int argc, char * argv[])
 			server_socket = -1;
 			connected = false;
 		}
+		cin.ignore(99, '\n');
 		cout << "Command: ";
 		getline(cin, l);
 	}

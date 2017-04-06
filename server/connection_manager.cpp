@@ -62,7 +62,11 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 	try
 	{
 		if (device_index < 0 || device_index >= ndacs)
-			throw LOG("bad device index");
+		{
+			string s("bad device index");
+			send(socket, s.c_str(), s.size(), 0);
+			throw LOG(s);
+		}
 
 		// We are depending upon the memset of buffer to ensure we have a null terminator.
 		stringstream tss(buffer + buffer_offset);
@@ -83,6 +87,13 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			acs[device_index]->AddCommand(cmd);
 			if (cmd.cmd == 'Q')
 				throw LOG("quitting");
+		}
+		else if (token == "ti")
+		{
+			string s;
+			s = acs[device_index]->TimeCode();
+			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
+				throw LOG("send did not return the correct number of bytes written");
 		}
 		else if (token == "p")
 		{

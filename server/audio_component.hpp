@@ -84,11 +84,11 @@ public:
 	AudioComponent();
 	~AudioComponent();
 	bool Initialize(AudioDevice & ad);
-	inline float GetSeconds() { return seconds; }
 	void AddCommand(const AudioCommand & c);
 	void Play(const std::string & path);
 	void Play(unsigned int id);
 	std::string HumanName() { return ad.device_name; }
+	std::string TimeCode();
 
 private:
 
@@ -99,8 +99,8 @@ private:
 	sem_t sem;
 	std::mutex m;
 	std::thread * t;
-	
-	float seconds;
+	off_t read_offset;
+
 	pa_simple * pas;
 
 
