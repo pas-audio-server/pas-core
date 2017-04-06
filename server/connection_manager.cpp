@@ -113,7 +113,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 
 			for (size_t i = 0; i < aq_results.size(); i++)
 			{
-				cout << "sending: " << aq_results.at(i) << endl;
+				//cout << "sending: " << aq_results.at(i) << endl;
 				if (send(socket, aq_results.at(i).c_str(), aq_results.at(i).size(), 0) != (ssize_t) aq_results.at(i).size())
 					throw LOG("send did not return the correct number of bytes written");
 			}
