@@ -1,7 +1,9 @@
 # pas
 Perry's audio server
 
-*breaking news: pas is now playing multiple streams of audio simultaneously that were requested from a remote client - it's alive! it's ALIVE. IT'S ALIVE*
+*Breaking news:*
+
+pas is now playing multiple streams of audio simultaneously that were requested from a remote client - it's alive! it's ALIVE. IT'S ALIVE
 
 ## Sponsors
 
