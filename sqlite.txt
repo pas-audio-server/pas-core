@@ -1,3 +1,5 @@
+Don't look at this. sqlite sucks from C / C++. I have switched mysql.
+
 useful commands
 .tables
 .schema table
