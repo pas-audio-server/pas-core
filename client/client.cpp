@@ -98,7 +98,34 @@ int main(int argc, char * argv[])
 	{
 		memset(buffer, 0, BS);
 
-		if (l == "se")
+		if (l == "cm")
+		{
+			char cmd;
+			cout << "Which command (p, z, r or c): ";
+			cin >> cmd;
+			if (cmd == 'p' || cmd == 'c' || cmd == 'z' || cmd== 'r')
+			{
+				char unit;
+				cout << "Which device (0 - 9): ";
+				cin >> unit;
+				if (unit >= '0' && unit <= '9')
+				{
+					string id_number;
+					if (cmd == 'p')
+					{
+						cout << "ID number: ";
+						cin >> id_number;
+						// No need to vet this. It will be done later.
+					}
+					l = unit + string(" ") + cmd + string(" ") + id_number; 
+					bytes_sent = send(server_socket, (const void *) l.c_str(), l.size(), 0);
+					if (bytes_sent != (int) l.size())
+						break;
+				}
+			} 
+			cin.ignore(9999, '\n');
+		}
+		else if (l == "se")
 		{
 			string column, pattern;
 			cout << "Column: ";

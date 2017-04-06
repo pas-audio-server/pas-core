@@ -103,9 +103,6 @@ private:
 	float seconds;
 	pa_simple * pas;
 
-    unsigned char * buffer_1 = nullptr;
-    unsigned char * buffer_2 = nullptr; 
-	unsigned char * buffers[2];
 
     // The div / mult by 6 is essential. Furthermore, a very large size will
 	// actually cause problems with ffmpeg keeping up. This value of 24K
