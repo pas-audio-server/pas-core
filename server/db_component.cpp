@@ -31,7 +31,13 @@ string track_column_names[] =
 	"title",
 	"album",
 	"genre",
-	"source"
+	"source",
+	"duration",
+	"publisher",
+	"composer",
+	"track",
+	"copyright",
+	"disc"
 };
 
 DB::DB()
@@ -113,7 +119,11 @@ bool DB::AddMedia(std::string & path, bool force)
 		if (access(path.c_str(), R_OK) < 0)
 			throw string("cannot access: ") + path;
 
-		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags \"") + path + string("\"");
+		// adding -show_entries format=duration -sexagesimal
+		// will get the duration but it isn't in the same format.
+		// instead it looks like this:
+		// duration=0:04:19.213061
+		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags -show_entries format=duration -sexagesimal \"") + path + string("\"");
 
 		if ((p = popen(cmdline.c_str(), "r")) == nullptr)
 			throw LOG(path);
