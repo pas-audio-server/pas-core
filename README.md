@@ -1,6 +1,8 @@
 # pas
 Perry's audio server
 
+*breaking news: pas is now playing multiple streams of audio simultaneously that were requested from a remote client - it's alive! it's ALIVE. IT'S ALIVE*
+
 ## Sponsors
 
 AUDIO DAC MAKERS - I NEED MORE DACS TO FIND OUT HOW MANY CONCURRENT STREAMS A TYPE OF MAIN BOARD CAN SUPPORT. I AM SEEKING SPONSORS TO PROVIDE ONE OR MORE OF THEIR USB DAC PRODUCTS. SPONSORS GET:
