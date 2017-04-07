@@ -179,15 +179,28 @@ void OrganizeCommands()
 	simple_commands.insert(make_pair("ti 1", "ti 1"));
 	simple_commands.insert(make_pair("ti 2", "ti 2"));
 	simple_commands.insert(make_pair("ti 3", "ti 3"));
+
 	simple_commands.insert(make_pair("s 0", "0 s"));
 	simple_commands.insert(make_pair("s 1", "1 s"));
 	simple_commands.insert(make_pair("s 2", "2 s"));
 	simple_commands.insert(make_pair("s 3", "3 s"));
 
+	simple_commands.insert(make_pair("z 0", "0 z"));
+	simple_commands.insert(make_pair("z 1", "1 z"));
+	simple_commands.insert(make_pair("z 2", "2 z"));
+	simple_commands.insert(make_pair("z 3", "3 z"));
+	
+	simple_commands.insert(make_pair("r 0", "0 r"));
+	simple_commands.insert(make_pair("r 1", "1 r"));
+	simple_commands.insert(make_pair("r 2", "2 r"));
+	simple_commands.insert(make_pair("r 3", "3 r"));
+
 	one_arg_commands.insert(make_pair("p 0", "0 p "));
 	one_arg_commands.insert(make_pair("p 1", "1 p "));
 	one_arg_commands.insert(make_pair("p 2", "2 p "));
 	one_arg_commands.insert(make_pair("p 3", "3 p "));
+
+
 }
 
 int main(int argc, char * argv[])

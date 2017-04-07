@@ -1,21 +1,21 @@
 /*  This file is part of pas.
 
-    pas is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	pas is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    pas is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	pas is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with pas.  If not, see <http://www.gnu.org/licenses/>.
-*/
+	You should have received a copy of the GNU General Public License
+	along with pas.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /*  pas is Copyright 2017 by Perry Kivolowitz
-*/
+ */
 
 #include <iostream>
 #include <iomanip>
@@ -37,16 +37,16 @@ AudioComponent::AudioComponent()
 
 AudioComponent::~AudioComponent()
 {
-//
-// QUESTION: This is ripping the pas out from under the player thread. What are
-// the implicationsof this. Do I need:
-//
-// http://stackoverflow.com/questions/9094422/how-to-check-if-a-stdthread-is-still-running
-//
-// I could SIGNAL the thread or send it a command 
-// in either case then join it.
-//
-// This would fail if the thread were hung.
+	//
+	// QUESTION: This is ripping the pas out from under the player thread. What are
+	// the implicationsof this. Do I need:
+	//
+	// http://stackoverflow.com/questions/9094422/how-to-check-if-a-stdthread-is-still-running
+	//
+	// I could SIGNAL the thread or send it a command 
+	// in either case then join it.
+	//
+	// This would fail if the thread were hung.
 
 	int pulse_error = 0;
 	if (pas != nullptr)
@@ -64,7 +64,7 @@ AudioComponent::~AudioComponent()
 
 	sem_destroy(&sem);
 }
-                                                        
+
 inline bool GoodCommand(unsigned char c)
 {
 	return (c == PLAY || c == STOP || c == PAUSE || c == RESUME || c == QUIT);
@@ -118,50 +118,55 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	unsigned char * buffer_1 = nullptr;
 	unsigned char * buffer_2 = nullptr;
 	buffer_1 = (unsigned char *) malloc(me->BUFFER_SIZE);
-    buffer_2 = (unsigned char *) malloc(me->BUFFER_SIZE);   
+	buffer_2 = (unsigned char *) malloc(me->BUFFER_SIZE);   
 	unsigned char * buffers[2];
 
 	//cerr << LOG(to_string(me->BUFFER_SIZE)) << endl;
-                                                        
-    if (buffer_1 == nullptr || buffer_2 == nullptr)     
-    {                                                   
-        cerr << "buffer allocation failed" << endl;     
-        // MUST CHANGE THIS
+
+	if (buffer_1 == nullptr || buffer_2 == nullptr)     
+	{                                                   
+		cerr << "buffer allocation failed" << endl;     
+		// MUST CHANGE THIS
 		me->t = nullptr;
 		return;                                        
-    }                                                   
-                                                        
-    buffers[0] = buffer_1;
+	}                                                   
+
+	buffers[0] = buffer_1;
 	buffers[1] = buffer_2;
 
 	bool terminate_flag = false;
+	bool restarting = false;
+
 	while (!terminate_flag)
 	{
-		// IDLE STATE
-		me->read_offset = 0;
-		cout << LOG("") << endl;
-		sem_wait(&me->sem);
-		// If we get here, there is a command waiting.
-		cout << LOG("") << endl;
-		if (!me->GetCommand(ac, true))
+		if (!restarting)
 		{
-			cout << "No command!" << endl;
-			continue;
+			// IDLE STATE
+			me->read_offset = 0;
+			cout << LOG("") << endl;
+			sem_wait(&me->sem);
+			// If we get here, there is a command waiting.
+			cout << LOG("") << endl;
+			if (!me->GetCommand(ac, true))
+			{
+				cout << "No command!" << endl;
+				continue;
+			}
+			if (!GoodCommand(ac.cmd))
+			{
+				cout << "Bad command" << endl;
+				continue;
+			}
+			if (ac.cmd == QUIT)
+			{
+				terminate_flag = true;
+				break;
+			}
+			if (ac.cmd != PLAY)
+				continue;
+			//cerr << LOG(ac.argument) << endl;
 		}
-		if (!GoodCommand(ac.cmd))
-		{
-			cout << "Bad command" << endl;
-			continue;
-		}
-		if (ac.cmd == QUIT)
-		{
-			terminate_flag = true;
-			break;
-		}
-		if (ac.cmd != PLAY)
-			continue;
-		//cerr << LOG(ac.argument) << endl;
-
+		restarting = false;
 		// OK - It's playtime!
 		FILE * p = nullptr;
 		size_t bytes_read;
@@ -182,7 +187,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			int fd = fileno(p);
 			int error, pulse_error;
 			aiocb cb;
-			
+
 			//cout << "block: 0 0" << endl;
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
 			me->read_offset += bytes_read;
@@ -239,29 +244,60 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 				first_loop = false;
 
-//////////////////////////////////////////////
-// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
-//////////////////////////////////////////////
+				//////////////////////////////////////////////
+				// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
+				//////////////////////////////////////////////
 				//cerr << LOG("") << endl;
-				if (me->GetCommand(ac, false) && GoodCommand(ac.cmd))
+				if (me->GetCommand(ac, false))
 				{
-					cerr << "		" << LOG("") << endl;
-					if (ac.cmd == QUIT)
+retry_command:		if (GoodCommand(ac.cmd))
 					{
-						terminate_flag = true;
-						break;
-					}
-					if (ac.cmd == STOP)
-					{
-						//cout << "STOP" << endl;
-						stop_flag = true;
-						break;
+						cerr << LOG("") << endl;
+						if (ac.cmd == QUIT)
+						{
+							// This will break the outermost loop causing the thread to terminate.
+							terminate_flag = true;
+							break;
+						}
+						if (ac.cmd == STOP)
+						{
+							// This will break the playing loop. The thread will go to sleep again.
+							stop_flag = true;
+							break;
+						}
+						if (ac.cmd == PLAY)
+						{
+							// This will break the playing loop but the thread will not go to sleep.
+							// Instead, it starts playing a new track. Recall, when the play loop
+							// is broken, the pipe to ffmpeg is closed. This will cause ffmpeg
+							// to exit (writing on closed pipe is fatal).
+							restarting = true;
+							break;
+						}
+						/*	PAUSE:
+							If you get a pause here, this thread should go to sleep. Here. It will be woken by
+							another command. This new command should be retried here. But how to do this? A
+							new local loop? THE BEST way of handling this is a goto. Plain and simple. Not
+							using one makes the code much more complex.
+						 */
+						if (ac.cmd == PAUSE)
+						{
+							cout << LOG("") << endl;
+							sem_wait(&me->sem);
+							me->GetCommand(ac, true);
+							cout << LOG("") << endl;
+							goto retry_command;
+						}
+						if (ac.cmd == RESUME)
+						{
+							cout << LOG("") << endl;
+						}
 					}
 				}
 				//cerr << LOG("") << endl;
-//////////////////////////////////////////////
-// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
-//////////////////////////////////////////////
+				//////////////////////////////////////////////
+				// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
+				//////////////////////////////////////////////
 
 				// Launch blocking write to pulse
 				pulse_error = 0;
@@ -278,6 +314,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			if (s.size() > 0)
 				cerr << s << endl;
 		}
+		cout << LOG("") << endl;
 		if (p != nullptr)
 			pclose(p);
 	}
@@ -298,7 +335,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	thread that is actually managing the hardware.
 
 	ONLY Initialize and the destructor can mess with the pas (PulseAudioSimple)!!!!
-*/
+ */
 bool AudioComponent::Initialize(AudioDevice & ad)
 {
 	cout << LOG(ad.device_name) << endl;
@@ -315,7 +352,7 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 }
 
 /*	Called by the audio thread only.
-*/
+ */
 bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
@@ -348,7 +385,7 @@ bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 
 /*	Called by the connection manager only. The sem_post will at most wake
 	an idle player. At least it will cause no harm.
-*/
+ */
 
 void AudioComponent::AddCommand(const AudioCommand & cmd)
 {
@@ -359,7 +396,7 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 }
 
 /*	Called by the connection manager only.
-*/
+ */
 void AudioComponent::Play(const string & path)
 {
 	AudioCommand ac;
@@ -384,7 +421,7 @@ string AudioComponent::TimeCode()
 void AudioComponent::Play(unsigned int id)
 {
 	DB * db = new DB();
-	
+
 	try
 	{
 		if (db == nullptr)

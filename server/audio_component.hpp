@@ -111,7 +111,8 @@ private:
 	// to become non-empty. 49152 bytes is 0.1858 seconds of 24 bit stereo
 	// at 44.1 Khz.
 
-    int BUFFER_SIZE = (1 << 13) * 6; 
+	// Heading back down to 24K. Hearing hiccup at beginning of song.
+    int BUFFER_SIZE = (1 << 12) * 6; 
 
 	const int SAMPLE_RATE = 44100;
 
