@@ -253,8 +253,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					}
 					if (ac.cmd == STOP)
 					{
-						cout << "STOP" << endl;
-						usleep(10000);
+						//cout << "STOP" << endl;
 						stop_flag = true;
 						break;
 					}
@@ -320,7 +319,7 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
-	cerr << LOG("") << endl;
+	//cerr << LOG("") << endl;
 	if (m.try_lock())
 	{
 		//cerr << LOG("") << endl;
@@ -343,7 +342,7 @@ bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 		m.unlock();
 		//cerr << LOG("") << endl;
 	}
-	cerr << LOG("") << endl;
+	//cerr << LOG("") << endl;
 	return rv;
 }
 
