@@ -146,12 +146,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			cout << LOG("") << endl;
 			sem_wait(&me->sem);
 			// If we get here, there is a command waiting.
-			cout << LOG("") << endl;
 			if (!me->GetCommand(ac, true))
 			{
 				cout << "No command!" << endl;
 				continue;
 			}
+			cout << LOG("") << "	" << ac.cmd << endl;
 			if (!GoodCommand(ac.cmd))
 			{
 				cout << "Bad command" << endl;
@@ -159,6 +159,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			}
 			if (ac.cmd == QUIT)
 			{
+				cout << LOG("") << endl;
 				terminate_flag = true;
 				break;
 			}
@@ -178,7 +179,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			bool stop_flag = false;
 
 			// assemble the command line
-			string player_command = string("ffmpeg -loglevel quiet -i \"") + ac.argument + string("\" -f s24le -ac 2 -");
+			string player_command = string("ffmpeg -loglevel quiet -i \"") + ac.argument + string("\" -f s24le -ar 44100 -ac 2 -");
 			// Launch the decoder
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG("pipe failed to open");
@@ -188,7 +189,13 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			int error, pulse_error;
 			aiocb cb;
 
-			//cout << "block: 0 0" << endl;
+			// This unfortunate hack is needed to avoid a nasty glitch in ffmpeg output
+			// if it has to resample audio. This will happen on the Moody Blues "On the
+			// Threshold of a Dream" tracks which are sampled at 22500!!!
+			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
+			me->read_offset += bytes_read;
+			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
+			me->read_offset += bytes_read;
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
 			me->read_offset += bytes_read;
 			//cerr << LOG("") << endl;
@@ -201,6 +208,8 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->LaunchAIO(cb, fd, me, buffers[1]);
 			//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
 			bool first_loop = true;
+
+			usleep(10000);
 
 			// The preceding has been foreplay, priming the pump for this
 			// main loop of audio play. We'll always launch the NEXT buffer's
@@ -252,7 +261,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				{
 retry_command:		if (GoodCommand(ac.cmd))
 					{
-						cerr << LOG("") << endl;
+						//cerr << LOG("") << endl;
 						if (ac.cmd == QUIT)
 						{
 							// This will break the outermost loop causing the thread to terminate.
@@ -314,12 +323,16 @@ retry_command:		if (GoodCommand(ac.cmd))
 			if (s.size() > 0)
 				cerr << s << endl;
 		}
-		cout << LOG("") << endl;
+		//cout << LOG("") << endl;
 		if (p != nullptr)
 			pclose(p);
 	}
 	cout << "Player thread exiting" << endl;
 	me->t = nullptr;
+
+	pa_simple_flush(me->pas, &pulse_error);
+	pa_simple_free(me->pas);
+	me->pas = nullptr;
 
 	if (buffer_1 != nullptr)
 		free(buffer_1);

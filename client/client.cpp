@@ -108,6 +108,33 @@ bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
+void HandleSearch(int server_socket)
+{
+	assert(server_socket >= 0);
+	string l1;
+
+	cout << "Column: ";
+	getline(cin, l1);
+
+	string l2;
+	cout << "Pattern (no spaces): ";
+	getline(cin, l2);
+
+	string command = "se " + l1 + " " + l2;
+	size_t bytes_written = send(server_socket, (const void *) command.c_str(), command.size(), 0);
+	if (bytes_written != command.size())
+		throw LOG("send() of search");
+
+	cout << "Sent: " << command << endl;
+//	char buffer[BS];
+//	size_t bytes_read;
+//	while (bytes_read > 0
+//		memset(buffer, 0, BS);
+
+//		command = one_arg_commands[command] + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
+
+
+}
 bool HandleArgCommand(int server_socket, string command, int argc = 1)
 {
 	assert(server_socket >= 0);
@@ -189,7 +216,7 @@ void OrganizeCommands()
 	simple_commands.insert(make_pair("z 1", "1 z"));
 	simple_commands.insert(make_pair("z 2", "2 z"));
 	simple_commands.insert(make_pair("z 3", "3 z"));
-	
+
 	simple_commands.insert(make_pair("r 0", "0 r"));
 	simple_commands.insert(make_pair("r 1", "1 r"));
 	simple_commands.insert(make_pair("r 2", "2 r"));
@@ -208,8 +235,6 @@ int main(int argc, char * argv[])
 	int server_socket = -1;
 	bool connected = false;
 	char buffer[BS];
-	ssize_t bytes_sent;
-	ssize_t bytes_read;
 	string l;
 
 	OrganizeCommands();
@@ -225,7 +250,7 @@ int main(int argc, char * argv[])
 			memset(buffer, 0, BS);
 			cout << "Command: ";
 			getline(cin, l);
-			
+
 			if (l == "quit")
 				break;
 
@@ -258,6 +283,9 @@ int main(int argc, char * argv[])
 
 			if (HandleArgCommand(server_socket, l))
 				continue;
+
+			if (l == "se")
+				HandleSearch(server_socket);
 		}
 	}
 	catch (string s)

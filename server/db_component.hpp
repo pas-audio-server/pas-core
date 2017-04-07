@@ -48,7 +48,7 @@ public:
 	int  GetTrackCount();
 	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
-	void MultiValuedQuery(std::string column, std::string pattern, std::vector<std::string> & results);
+	void MultiValuedQuery(std::string column, std::string pattern, std::string & results);
 	std::string PathFromID(unsigned int id);
 
 private:
@@ -60,6 +60,7 @@ private:
 	int IntegerQuery(std::string & sql);
 	std::vector<std::string> supported_track_column_names;
 	std::string query_columns;
+	std::string query_columns_no_path;
 	std::string parameter_columns;
 };
 

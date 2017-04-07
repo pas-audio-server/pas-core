@@ -1,23 +1,24 @@
- /*  This file is part of pas.
+/*  This file is part of pas.
 
-    pas is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	pas is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    pas is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	pas is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with pas.  If not, see <http://www.gnu.org/licenses/>.
-*/
+	You should have received a copy of the GNU General Public License
+	along with pas.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /*	Copyright 2017 by Perr Kivolowitz
-*/
+ */
 
 #include "db_component.hpp"
+#include <json/json.h>
 
 using namespace std;
 
@@ -47,12 +48,19 @@ DB::DB()
 	// I did not want to make this a static on purpose to avoid race conditions on init.
 	query_columns = "(";
 	parameter_columns = " values (";
-	for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
+	query_columns_no_path = "id, ";
+	size_t n = sizeof(track_column_names) / sizeof(string);
+	for (size_t i = 0; i < n; i++)
 	{
 		if (i > 0)
 		{
 			query_columns += ", ";
 			parameter_columns += ", ";
+			query_columns_no_path += track_column_names[i];
+			if (i >= 1 && i < n - 1)
+			{
+				query_columns_no_path += ", ";
+			}
 		}
 		supported_track_column_names.push_back(track_column_names[i]);
 		query_columns += track_column_names[i];
@@ -60,6 +68,11 @@ DB::DB()
 	}
 	query_columns += ") ";
 	parameter_columns += ") ";
+	cout << query_columns_no_path << endl;
+	/*
+	cout << query_columns << endl;
+	cout << parameter_columns << endl;
+	*/
 }
 
 DB::~DB()
@@ -234,12 +247,14 @@ void DB::PrintMySQLException(sql::SQLException & e)
 	cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
 }
 
-void DB::MultiValuedQuery(string column, string pattern, vector<string> & results)
+void DB::MultiValuedQuery(string column, string pattern, string & results)
 {
+	assert(connection != nullptr);
+
 	sql::Statement * stmt = nullptr;
 	sql::ResultSet * res = nullptr;
+	results = string("");
 
-	assert(connection != nullptr);
 	if (IsAColumn(column))
 	{
 		try
@@ -250,19 +265,38 @@ void DB::MultiValuedQuery(string column, string pattern, vector<string> & result
 			if ((stmt = connection->createStatement()) == nullptr)
 				throw LOG("createStatement() failed");
 
-			string sql("select id,artist,title,album,genre from tracks where ");
+			string sql("select " + query_columns_no_path + string(" from tracks where "));
 			sql += column + " like \"" + pattern + "\" order by " + column + ";";
+			cout << sql << endl;
 			res = stmt->executeQuery(sql.c_str());
+			json_object * jobj = json_object_new_object();
+			if (jobj == nullptr)
+				throw LOG("json_object_new_object() failed");
+
+			json_object * outer_array = json_object_new_array();
+
 			while (res->next())
 			{
-				stringstream ss;
-				ss << res->getString(1) << "\t";
-				ss << res->getString(2) << "\t";
-				ss << res->getString(3) << "\t";
-				ss << res->getString(4) << "\t";
-				ss << res->getString(5) << endl;
-				results.push_back(ss.str());
+				cout << LOG("") << endl;
+				// assumes path is zeroeth column`
+				json_object * inner_array = json_object_new_array();
+				for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
+				{
+					string s;
+					if (i == 0)
+						s = res->getString("id");
+					else
+						s = res->getString(track_column_names[i]);
+					//cout << __LINE__ << " " << track_column_names[i] << " " << s << endl;
+					json_object * jstring = json_object_new_string(s.c_str());
+					json_object_array_add(inner_array, jstring);
+				}
+				json_object_array_add(outer_array, inner_array);
 			}
+			json_object_object_add(jobj, "rows", outer_array);
+			results = json_object_to_json_string(jobj);
+			json_object_put(jobj);
+			//cout << results << endl;
 		}
 		catch (string s)
 		{
@@ -293,6 +327,10 @@ bool DB::IsAColumn(std::string c)
 			break;
 		}
 	}
+
+	if (!rv && c == "id")
+		rv = true;
+
 	return rv;
 }
 

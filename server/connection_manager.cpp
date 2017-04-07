@@ -118,16 +118,12 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			string col, pat;
 			tss >> col >> pat;
 			string answer;
-			vector<string> aq_results;
+			string aq_results;
 			db->MultiValuedQuery(col, pat, aq_results);
-			aq_results.push_back("*************");
-
-			for (size_t i = 0; i < aq_results.size(); i++)
-			{
-				//cout << "sending: " << aq_results.at(i) << endl;
-				if (send(socket, aq_results.at(i).c_str(), aq_results.at(i).size(), 0) != (ssize_t) aq_results.at(i).size())
-					throw LOG("send did not return the correct number of bytes written");
-			}
+			cout << __FUNCTION__ << " " << __LINE__ << " " << col << " " << pat << "\t" << aq_results << endl;
+// I LEFT OFF HERE 
+			if (send(socket, aq_results.c_str(), aq_results.size(), 0) != (ssize_t) aq_results.size())
+				throw LOG("send did not return the correct number of bytes written");
 		}
 		else if (token == string("sq"))
 		{
