@@ -1,5 +1,6 @@
 #include "connection_manager.hpp"
 #include "network_component.hpp"
+#include "audio_component.hpp"
 
 /*	This file is part of pas.
 
@@ -51,6 +52,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 	// purpose of interrupting them, doesn't it? The call to siginterrupt disables this.
 	signal(SIGINT, SIGINTHandler);
 	siginterrupt(SIGINT, 1);
+	int incoming_socket = -1;
 
 	try
 	{
@@ -58,6 +60,14 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		if (listening_socket < 0)
 		{
 			perror("Opening socket failed");
+			throw string("");
+		}
+
+		int optval = 1;
+		optval = setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+		if (optval < 0)
+		{
+			perror("sockopt failed");
 			throw string("");
 		}
 
@@ -82,7 +92,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 
 		sockaddr_in client_info;
 		memset(&client_info, 0, sizeof(sockaddr_in));
-		int incoming_socket, c = sizeof(sockaddr_in);
+		int c = sizeof(sockaddr_in);
 
 		int connection_counter = 0;
 
@@ -101,6 +111,24 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 	{
 		if (e.size() > 0)
 			cerr << e << endl;
+
+
+		AudioCommand cmd;
+		cmd.cmd = QUIT;
+		for (int i = 0; i < ndacs; i++)
+		{
+			AudioComponent * ac = (AudioComponent *) *(((AudioComponent **) dacs) + i);
+			ac->AddCommand(cmd);
+			pthread_yield();
+			pthread_yield();
+			usleep(100000);
+		}
+		usleep(100000);
+		pthread_yield();
+		pthread_yield();
+
+		if (incoming_socket >= 0)
+			close(incoming_socket);
 
 		if (listening_socket >= 0)
 			close(listening_socket);
