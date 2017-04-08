@@ -136,11 +136,12 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			db = InitDB();
 			string col, pat;
 			tss >> col >> pat;
-			string answer;
 			string aq_results;
 			db->MultiValuedQuery(col, pat, aq_results);
-			cout << __FUNCTION__ << " " << __LINE__ << " " << col << " " << pat << "\t" << aq_results << endl;
-// I LEFT OFF HERE 
+			//cout << __FUNCTION__ << " " << __LINE__ << " " << col << " " << pat << "\t" << aq_results << endl;
+			size_t t = aq_results.size();
+			if (send(socket, &t, sizeof(size_t), 0) != sizeof(size_t))
+				throw LOG("bad send");
 			if (send(socket, aq_results.c_str(), aq_results.size(), 0) != (ssize_t) aq_results.size())
 				throw LOG("send did not return the correct number of bytes written");
 		}
