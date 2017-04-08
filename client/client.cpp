@@ -126,12 +126,12 @@ void HandleSearch(int server_socket)
 		throw LOG("send() of search");
 
 	cout << "Sent: " << command << endl;
-//	char buffer[BS];
-//	size_t bytes_read;
-//	while (bytes_read > 0
-//		memset(buffer, 0, BS);
+	//	char buffer[BS];
+	//	size_t bytes_read;
+	//	while (bytes_read > 0
+	//		memset(buffer, 0, BS);
 
-//		command = one_arg_commands[command] + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
+	//		command = one_arg_commands[command] + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
 
 
 }
@@ -180,17 +180,19 @@ bool HandleSimple(int server_socket, string command)
 		command = simple_commands[command];
 
 		size_t bytes_sent = send(server_socket, (const void *) command.c_str(), command.size(), 0);
-		// Note - commands that begin with a digit do not get anything returned.
-		// rewrite this as 0 args, 0 args with return etc
-		if (!isdigit(command.at(0)) && command != "sq" && bytes_sent == command.size())
+
+		if (command.size() < 3 || islower(command.at(2)))
 		{
-			size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-			if (bytes_read > 0)
+			if (command != "sq" && bytes_sent == command.size())
 			{
-				string s(buffer);
-				cout << s;
-				if (s.at(s.size() - 1) != '\n')
-					cout << endl;
+				size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+				if (bytes_read > 0)
+				{
+					string s(buffer);
+					cout << s;
+					if (s.at(s.size() - 1) != '\n')
+						cout << endl;
+				}
 			}
 		}
 	}
@@ -202,31 +204,41 @@ void OrganizeCommands()
 	simple_commands.insert(make_pair("sq", "sq"));
 	simple_commands.insert(make_pair("tc", "tc"));
 	simple_commands.insert(make_pair("ac", "ac"));
-	simple_commands.insert(make_pair("ti 0", "ti 0"));
-	simple_commands.insert(make_pair("ti 1", "ti 1"));
-	simple_commands.insert(make_pair("ti 2", "ti 2"));
-	simple_commands.insert(make_pair("ti 3", "ti 3"));
 
-	simple_commands.insert(make_pair("s 0", "0 s"));
-	simple_commands.insert(make_pair("s 1", "1 s"));
-	simple_commands.insert(make_pair("s 2", "2 s"));
-	simple_commands.insert(make_pair("s 3", "3 s"));
+	simple_commands.insert(make_pair("ti 0", "0 ti"));
+	simple_commands.insert(make_pair("ti 1", "1 ti"));
+	simple_commands.insert(make_pair("ti 2", "2 ti"));
+	simple_commands.insert(make_pair("ti 3", "3 ti"));
 
-	simple_commands.insert(make_pair("z 0", "0 z"));
-	simple_commands.insert(make_pair("z 1", "1 z"));
-	simple_commands.insert(make_pair("z 2", "2 z"));
-	simple_commands.insert(make_pair("z 3", "3 z"));
+	simple_commands.insert(make_pair("s 0", "0 S"));
+	simple_commands.insert(make_pair("s 1", "1 S"));
+	simple_commands.insert(make_pair("s 2", "2 S"));
+	simple_commands.insert(make_pair("s 3", "3 S"));
 
-	simple_commands.insert(make_pair("r 0", "0 r"));
-	simple_commands.insert(make_pair("r 1", "1 r"));
-	simple_commands.insert(make_pair("r 2", "2 r"));
-	simple_commands.insert(make_pair("r 3", "3 r"));
+	simple_commands.insert(make_pair("z 0", "0 Z"));
+	simple_commands.insert(make_pair("z 1", "1 Z"));
+	simple_commands.insert(make_pair("z 2", "2 Z"));
+	simple_commands.insert(make_pair("z 3", "3 Z"));
 
-	one_arg_commands.insert(make_pair("p 0", "0 p "));
-	one_arg_commands.insert(make_pair("p 1", "1 p "));
-	one_arg_commands.insert(make_pair("p 2", "2 p "));
-	one_arg_commands.insert(make_pair("p 3", "3 p "));
+	simple_commands.insert(make_pair("r 0", "0 R"));
+	simple_commands.insert(make_pair("r 1", "1 R"));
+	simple_commands.insert(make_pair("r 2", "2 R"));
+	simple_commands.insert(make_pair("r 3", "3 R"));
 
+	simple_commands.insert(make_pair("what 0", "0 what"));
+	simple_commands.insert(make_pair("what 1", "1 what"));
+	simple_commands.insert(make_pair("what 2", "2 what"));
+	simple_commands.insert(make_pair("what 3", "3 what"));
+
+	simple_commands.insert(make_pair("who 0", "0 who"));
+	simple_commands.insert(make_pair("who 1", "1 who"));
+	simple_commands.insert(make_pair("who 2", "2 who"));
+	simple_commands.insert(make_pair("who 3", "3 who"));
+
+	one_arg_commands.insert(make_pair("p 0", "0 P "));
+	one_arg_commands.insert(make_pair("p 1", "1 P "));
+	one_arg_commands.insert(make_pair("p 2", "2 P "));
+	one_arg_commands.insert(make_pair("p 3", "3 P "));
 
 }
 
