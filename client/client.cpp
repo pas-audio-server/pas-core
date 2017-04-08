@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <time.h>
 #include <assert.h>
+#include <json/json.h>
 
 using namespace std;
 
@@ -126,13 +127,44 @@ void HandleSearch(int server_socket)
 		throw LOG("send() of search");
 
 	cout << "Sent: " << command << endl;
-	//	char buffer[BS];
-	//	size_t bytes_read;
-	//	while (bytes_read > 0
-	//		memset(buffer, 0, BS);
+	size_t result_size;
+	size_t bytes_read = recv(server_socket, (void *) &result_size, sizeof(size_t), 0);
+	if (bytes_read != sizeof(size_t))
+		throw LOG("rcv size");
+	string buffer;
+	buffer.resize(result_size);
+	bytes_read = recv(server_socket, (void *) &buffer[0], result_size, 0);
+	if (bytes_read != result_size)
+		throw LOG("rcv size");
+	
+	json_object * all = json_tokener_parse(buffer.c_str());
+	if (all == nullptr)
+		throw LOG("json_tokener_parse");
+	json_object * rows;
+	json_object_object_get_ex(all, "rows", &rows);
+	if (rows == nullptr)
+		throw LOG("json");
+	//cout << json_object_to_json_string(rows) << endl;	
+	int n = json_object_array_length(rows);
+	for (int i = 0; i < n; i++)
+	{
+		json_object * j = json_object_array_get_idx(rows, i);
+		//cout << json_object_to_json_string(j) << endl;
+		json_object_object_foreach(j, key, val)
+		{
+			cout << key << "\t" << json_object_get_string(val) << endl;
+		}
+	}
+//struct array_list* json_object_get_array	(	struct json_object * 	obj	 ) 	[read]
 
-	//		command = one_arg_commands[command] + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
-
+	/*
+	json_object_object_foreach(rows, key, val)
+	{
+		cout << key << "\n" << json_object_get_string(val) << endl;
+	}
+	json_object_put(all);
+	*/
+	//cout << buffer << endl;
 
 }
 bool HandleArgCommand(int server_socket, string command, int argc = 1)
