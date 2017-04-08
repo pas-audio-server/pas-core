@@ -47,6 +47,9 @@ AudioComponent::~AudioComponent()
 	// in either case then join it.
 	//
 	// This would fail if the thread were hung.
+	//
+	// This is no longer a problem. The threads will now cleanly exit by sending them a QUIT
+	// command.
 
 	int pulse_error = 0;
 	if (pas != nullptr)
@@ -58,6 +61,7 @@ AudioComponent::~AudioComponent()
 
 	if (t != nullptr)
 	{
+		// This rarely happens anymore.
 		pthread_kill((pthread_t) t->native_handle(), SIGKILL);
 		delete t;
 	}
@@ -72,6 +76,11 @@ inline bool GoodCommand(unsigned char c)
 
 // This is used twice, formerly as copy / pasted code. Copy / pasted code
 // is evil. Code in one place, test in one place, fix in one place.
+// This is a good, old fashioned Unix asynchronous I/O block. It was magical
+// to me when I first encountered it. 
+// 
+// Here it is a necessity as with it, the latency of decoding audio is
+// buried in the unavoidable latecy of playing audio.
 void AudioComponent::LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned char * b)
 {
 	assert(b != nullptr);
@@ -88,7 +97,6 @@ void AudioComponent::LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned
 	error = aio_read(&cb);
 	if (error != 0)
 		throw LOG("aio_read() failed: " + to_string(error));
-
 }
 
 void AudioComponent::PlayerThread(AudioComponent * me)
@@ -110,11 +118,14 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	{
 		cerr << "pa_simple_new failed." << endl;
 		cerr << pa_strerror(pulse_error) << endl;
-		// MUST CHANGE THIS
 		me->t = nullptr;
 		return;
 	}
 
+	// Audio is double buffered. The two entry "buffers" allows for each buffer selection.
+	// Inline helpers BufferNext, BufferPrev, BufferToggle help ensure the buffers are
+	// kept straight. This strategy is often not used by younger programmers on projects
+	// involing, for example, grid like data structures.
 	unsigned char * buffer_1 = nullptr;
 	unsigned char * buffer_2 = nullptr;
 	buffer_1 = (unsigned char *) malloc(me->BUFFER_SIZE);
@@ -126,7 +137,6 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	if (buffer_1 == nullptr || buffer_2 == nullptr)     
 	{                                                   
 		cerr << "buffer allocation failed" << endl;     
-		// MUST CHANGE THIS
 		me->t = nullptr;
 		return;                                        
 	}                                                   
@@ -134,6 +144,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	buffers[0] = buffer_1;
 	buffers[1] = buffer_2;
 
+	// terminate_flag will trip when the thread is told to exit.
+	//
+	// restarting will trip when the thread was put to sleep by a PAUSE command.
+	// and awakened specifically by a PLAY. The flag causes the initial sem_wait
+	// to be skipped because the command that woke the thread up has already done
+	// so.
 	bool terminate_flag = false;
 	bool restarting = false;
 
@@ -151,7 +167,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				cout << "No command!" << endl;
 				continue;
 			}
-			cout << LOG("") << "	" << ac.cmd << endl;
+			cout << LOG("") << "\t" << ac.cmd << endl;
 			if (!GoodCommand(ac.cmd))
 			{
 				cout << "Bad command" << endl;
@@ -168,6 +184,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//cerr << LOG(ac.argument) << endl;
 		}
 		restarting = false;
+
 		// OK - It's playtime!
 		FILE * p = nullptr;
 		size_t bytes_read;
@@ -178,9 +195,13 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// hand means the thread should terminate.
 			bool stop_flag = false;
 
-			// assemble the command line
+			// Assemble the command line. The forcing of 44100 ensures that trackes sampled
+			// at other rates (22500, for example) will be resampled. This has a bad side effect
+			// documented a few lines down... the skipping of three buffers.
+			//
+			// NOTE: This can be avoided if the database has knowledge of the sample rate.
+			//
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ac.argument + string("\" -f s24le -ar 44100 -ac 2 -");
-			// Launch the decoder
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG("pipe failed to open");
 			cerr << LOG(player_command) << endl;
@@ -192,6 +213,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// This unfortunate hack is needed to avoid a nasty glitch in ffmpeg output
 			// if it has to resample audio. This will happen on the Moody Blues "On the
 			// Threshold of a Dream" tracks which are sampled at 22500!!!
+			// With 24K buffers, this is a loss of 0.84 seconds.
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
 			me->read_offset += bytes_read;
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
@@ -209,7 +231,9 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
 			bool first_loop = true;
 
-			usleep(10000);
+			// Ensure that the decoder has time to fill the pipe.
+			//usleep(10000);
+			pthread_yield();
 
 			// The preceding has been foreplay, priming the pump for this
 			// main loop of audio play. We'll always launch the NEXT buffer's
@@ -222,7 +246,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				{
 					while ((error = aio_error(&cb)) == EINPROGRESS) 
 					{
-						usleep(100);
+						usleep(1000);
 					}
 
 					if (error > 0)
@@ -253,9 +277,6 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 				first_loop = false;
 
-				//////////////////////////////////////////////
-				// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
-				//////////////////////////////////////////////
 				//cerr << LOG("") << endl;
 				if (me->GetCommand(ac, false))
 				{
@@ -304,11 +325,15 @@ retry_command:		if (GoodCommand(ac.cmd))
 					}
 				}
 				//cerr << LOG("") << endl;
-				//////////////////////////////////////////////
-				// EXPERIMENAL CODE - IF IT WORKS, REFACTOR //
-				//////////////////////////////////////////////
 
-				// Launch blocking write to pulse
+				// Launch blocking write to pulse. The buffer size has already accounted for
+				// the requirement that it be a multiple of six. Enforcing this here will avoid
+				// the case of the pipe filling with a non-compliant number of bytes. This
+				// means there is the POTENTIAL for up to one sample to be lost.
+				//
+				// WAIT - IF THIS SHOULD HAPPEN, IT IS POSSIBLE I MIGHT SOMEDAY HIT A CASE
+				// WHERE THE SAMPLESGET OUT OF FRAMING. WITH A SMALL BUFFER, THIS IS LESS
+				// LIKELY TO HAPPEN.
 				pulse_error = 0;
 				bytes_read = bytes_read / 6 * 6;
 				//cout << "rendr: " << me->BufferPrev(buffer_index) << " " << bytes_read << endl;
@@ -342,16 +367,9 @@ retry_command:		if (GoodCommand(ac.cmd))
 
 }
 
-/*	Initialize is happening at the time pas starts. This means all the DACS are ready to
-	go and can be used by all clients. Here ONE SPECIFIC DAC is being readied. Initialize()
-	is being called from the main thread. This class wraps all communication with the 
-	thread that is actually managing the hardware.
-
-	ONLY Initialize and the destructor can mess with the pas (PulseAudioSimple)!!!!
- */
 bool AudioComponent::Initialize(AudioDevice & ad)
 {
-	cout << LOG(ad.device_name) << endl;
+	//cout << LOG(ad.device_name) << endl;
 
 	bool rv = true;
 	assert(this->ad.device_spec.size() == 0);
@@ -460,17 +478,3 @@ void AudioComponent::Play(unsigned int id)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Make it easier to code in bed`
