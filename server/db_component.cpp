@@ -384,3 +384,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist)
 	return rv;
 }
 
+void DB::FindIDs(std::string column, std::string pattern, std::vector<std::string> & results)
+{
+}
+

@@ -113,7 +113,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	ss.rate = me->SAMPLE_RATE;
 	ss.channels = 2;
 
-	//cerr << LOG(me->ad.device_spec) << endl;
+	cout << LOG(me->ad.device_spec) << endl;
 	if ((me->pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, me->ad.device_spec.c_str(), "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
 	{
 		cerr << "pa_simple_new failed." << endl;
@@ -155,34 +155,46 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 	while (!terminate_flag)
 	{
+		cout << LOG("") << endl;
 		if (!restarting)
 		{
 			// IDLE STATE
+			me->idle = true;
 			me->read_offset = 0;
 			me->title = me->artist = string("");
 			cout << LOG("") << endl;
-			sem_wait(&me->sem);
-			// If we get here, there is a command waiting.
-			if (!me->GetCommand(ac, true))
+			me->m_play_queue.lock();
+			if (me->play_queue.empty())
 			{
-				cout << "No command!" << endl;
-				continue;
-			}
-			cout << LOG("") << "\t" << ac.cmd << endl;
-			if (!GoodCommand(ac.cmd))
-			{
-				cout << "Bad command" << endl;
-				continue;
-			}
-			if (ac.cmd == QUIT)
-			{
+				me->m_play_queue.unlock();
 				cout << LOG("") << endl;
-				terminate_flag = true;
-				break;
+
+				sem_wait(&me->sem);
+
+				// If we get here, there is a command waiting.
+				if (!me->GetCommand(ac, true))
+				{
+					cout << "No command!" << endl;
+					continue;
+				}
+
+				cout << LOG("") << "\t" << ac.cmd << endl;
+				if (!GoodCommand(ac.cmd))
+				{
+					cout << "Bad command" << endl;
+					continue;
+				}
+				if (ac.cmd == QUIT)
+				{
+					cout << LOG("") << endl;
+					terminate_flag = true;
+					break;
+				}
+				if (ac.cmd != PLAY)
+					continue;
+				//cerr << LOG(ac.argument) << endl;
 			}
-			if (ac.cmd != PLAY)
-				continue;
-			//cerr << LOG(ac.argument) << endl;
+			me->m_play_queue.unlock();
 		}
 		restarting = false;
 
@@ -202,7 +214,21 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//
 			// NOTE: This can be avoided if the database has knowledge of the sample rate.
 			//
-			string player_command = string("ffmpeg -loglevel quiet -i \"") + ac.argument + string("\" -f s24le -ar 44100 -ac 2 -");
+			cout << LOG("") << endl;
+			me->m_play_queue.lock();
+			if (me->play_queue.empty())
+			{
+				me->m_play_queue.unlock();
+				cout << LOG("error in queue") << endl;
+				continue;
+			}
+			PlayStruct ps = me->play_queue.front();
+			me->artist = ps.artist;
+			me->title = ps.title;
+			me->play_queue.pop();
+			me->m_play_queue.unlock();
+			cout << LOG("") << endl;
+			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG("pipe failed to open");
 			cerr << LOG(player_command) << endl;
@@ -210,6 +236,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			int fd = fileno(p);
 			int error, pulse_error;
 			aiocb cb;
+			me->idle = false;
 
 			// This unfortunate hack is needed to avoid a nasty glitch in ffmpeg output
 			// if it has to resample audio. This will happen on the Moody Blues "On the
@@ -428,27 +455,32 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 	m.unlock();
 }
 
-/*	Called by the connection manager only.
- */
-void AudioComponent::Play(const string & path)
+void AudioComponent::Clear()
 {
-	AudioCommand ac;
-	ac.argument = path;
-	ac.cmd = 'p';
-	AddCommand(ac);
+	cout << LOG("") << endl;
+	m_play_queue.lock();
+	std::queue<PlayStruct>().swap(play_queue);
+	m_play_queue.unlock();
 }
 
-string AudioComponent::TimeCode()
+/*	Called by the connection manager only.
+ */
+void AudioComponent::Play(const PlayStruct & ps)
 {
-	stringstream ss;
-	//cout << read_offset << endl;
-	int ro = read_offset / (6 * SAMPLE_RATE);
-	int hours, minutes, seconds;
-	seconds = (int) ro % 60;
-	minutes = ((int) ro / 60) % 60;
-	hours = ((int) ro / 3600) % 100;
-	ss << setw(2) << setfill('0') << hours << ":" << setw(2) << minutes << ":" << setw(2) << seconds;
-	return ss.str();
+	AudioCommand ac;
+	cout << LOG("") << endl;
+	// I thought I could use the queue to tell me if the player thread was idle. But I cannot
+	// since the queue is drained immiadtely. I need another flag.
+	m_play_queue.lock();
+	bool was_idle = IsIdle();
+	play_queue.push(ps);
+	if (was_idle)
+	{
+		cout << LOG("sending PLAY") << endl;
+		ac.cmd = PLAY;
+		AddCommand(ac);
+	}
+	m_play_queue.unlock();
 }
 
 void AudioComponent::Play(unsigned int id)
@@ -463,11 +495,12 @@ void AudioComponent::Play(unsigned int id)
 		if (!db->Initialize())
 			throw LOG("db->Initialize() failed");
 
-		string path = db->PathFromID(id, &title, &artist);
+		PlayStruct ps;
+		ps.path = db->PathFromID(id, &ps.title, &ps.artist);
 		delete db;
 		db = nullptr;
-		if (path.size() > 0)
-			Play(path);
+		if (ps.path.size() > 0)
+			Play(ps);
 	}
 	catch (string s)
 	{
@@ -477,6 +510,20 @@ void AudioComponent::Play(unsigned int id)
 
 	if (db != nullptr)
 		delete db;
+}
+
+
+string AudioComponent::TimeCode()
+{
+	stringstream ss;
+	//cout << read_offset << endl;
+	int ro = read_offset / (6 * SAMPLE_RATE);
+	int hours, minutes, seconds;
+	seconds = (int) ro % 60;
+	minutes = ((int) ro / 60) % 60;
+	hours = ((int) ro / 3600) % 100;
+	ss << setw(2) << setfill('0') << hours << ":" << setw(2) << minutes << ":" << setw(2) << seconds;
+	return ss.str();
 }
 
 

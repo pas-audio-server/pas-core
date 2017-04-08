@@ -93,7 +93,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		else if (token == "who")
 		{
 			string s;
-			s = acs[device_index]->artist + "\n";
+			s = acs[device_index]->Who() + "\n";
 			//cout << LOG(s) << endl;
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG("send did not return the correct number of bytes written");
@@ -101,7 +101,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		else if (token == "what")
 		{
 			string s;
-			s = acs[device_index]->title + "\n";
+			s = acs[device_index]->What() + "\n";
 			//cout << LOG(s) << endl;
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG("send did not return the correct number of bytes written");
@@ -118,18 +118,18 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			// The remaining token should be an index number for a track to play
 			unsigned int id;
 			tss >> id;
-			db = InitDB();
-			
-			string path = db->PathFromID(id, &acs[device_index]->title, &acs[device_index]->artist);
-			if (path.size() > 0)
-			{
-				AudioCommand cmd;
-				cmd.cmd = PLAY;
-				cmd.argument = path;
-				acs[device_index]->AddCommand(cmd);
-				// A great miracle happened here.
-			}
-		} 
+			acs[device_index]->Play(id);
+		}
+		else if (token == string("clear"))
+		{
+			acs[device_index]->Clear();
+		}
+		else if (token == string("next"))
+		{
+			AudioCommand cmd;
+			cmd.cmd = PLAY;
+			acs[device_index]->AddCommand(cmd);
+		}
 		else if (token == string("se"))
 		{	
 			// search on column col using pattern pat

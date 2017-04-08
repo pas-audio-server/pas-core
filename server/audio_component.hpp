@@ -48,13 +48,13 @@
 
 enum AUDIO_COMMANDS
 {
-	PLAY = 'P',
-	STOP = 'S',
-	PAUSE = 'Z',
-	RESUME = 'R',
+	PLAY 	= 'P',
+	STOP 	= 'S',
+	PAUSE 	= 'Z',
+	RESUME 	= 'R',
 
-	QUIT = 'Q',
-	NONE = 0
+	QUIT 	= 'Q',
+	NONE 	= 0
 };
 
 struct AudioCommand
@@ -67,14 +67,21 @@ struct AudioCommand
 
 	AudioCommand(const AudioCommand & other)
 	{
-		argument = other.argument;
+//		argument = other.argument;
 		cmd = other.cmd;
 		filler = other.filler;
 	}
 
-	std::string argument;
+//	std::string argument;
 	unsigned char cmd;
 	unsigned char filler;
+};
+
+struct PlayStruct
+{
+	std::string path;
+	std::string artist;
+	std::string title;
 };
 
 class AudioComponent
@@ -85,21 +92,32 @@ public:
 	~AudioComponent();
 	bool Initialize(AudioDevice & ad);
 	void AddCommand(const AudioCommand & c);
-	void Play(const std::string & path);
+	void Play(const PlayStruct & ps);
 	void Play(unsigned int id);
+	bool IsIdle() { return idle; }
 	std::string HumanName() { return ad.device_name; }
 	std::string TimeCode();
+	std::string What() { return title; }
+	std::string Who() { return artist; }
+	void Clear();
+
+private:
 	std::string title;
 	std::string artist;
 
-private:
-
 	bool GetCommand(AudioCommand & ac, bool was_idle);
 	AudioDevice ad;
+
+	// play queue
+	std::queue<PlayStruct> play_queue;
+	std::mutex m_play_queue;
+
 	// used when the audio thread is idle.
+	bool idle;
 	std::queue<AudioCommand> commands;
 	sem_t sem;
 	std::mutex m;
+
 	std::thread * t;
 	off_t read_offset;
 	pa_simple * pas;

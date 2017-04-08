@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <cctype>
 #include <map>
 #include <string>
@@ -29,6 +30,7 @@ bool keep_going = true;
 
 map<string, string> simple_commands;
 map<string, string> one_arg_commands;
+map<string, string> two_arg_commands;
 
 void SIGHandler(int signal_number)
 {
@@ -136,7 +138,7 @@ void HandleSearch(int server_socket)
 	bytes_read = recv(server_socket, (void *) &buffer[0], result_size, 0);
 	if (bytes_read != result_size)
 		throw LOG("rcv size");
-	
+
 	json_object * all = json_tokener_parse(buffer.c_str());
 	if (all == nullptr)
 		throw LOG("json_tokener_parse");
@@ -146,34 +148,33 @@ void HandleSearch(int server_socket)
 		throw LOG("json");
 	//cout << json_object_to_json_string(rows) << endl;	
 	int n = json_object_array_length(rows);
+
+	cout << setw(48) << setfill('-') << "-" << endl;
+	cout << setfill(' ');
 	for (int i = 0; i < n; i++)
 	{
 		json_object * j = json_object_array_get_idx(rows, i);
 		//cout << json_object_to_json_string(j) << endl;
 		json_object_object_foreach(j, key, val)
 		{
-			cout << key << "\t" << json_object_get_string(val) << endl;
+			cout << setw(18) << left << key;
+			cout << json_object_get_string(val) << endl;
 		}
-	}
-//struct array_list* json_object_get_array	(	struct json_object * 	obj	 ) 	[read]
-
-	/*
-	json_object_object_foreach(rows, key, val)
-	{
-		cout << key << "\n" << json_object_get_string(val) << endl;
+		cout << setw(48) << setfill('-') << "-" << endl;
+		cout << setfill(' ');
 	}
 	json_object_put(all);
-	*/
-	//cout << buffer << endl;
-
 }
-bool HandleArgCommand(int server_socket, string command, int argc = 1)
+
+bool HandleArgCommand(int server_socket, string command, map<string, string> & m, int argc)
 {
 	assert(server_socket >= 0);
 
 	bool rv = false;
-	if (one_arg_commands.find(command) != one_arg_commands.end())
+	if (m.find(command) != m.end())
 	{
+		string cmd = m[command];
+		cmd.erase(2, 1);
 		rv = true;
 
 		string l1;
@@ -190,7 +191,7 @@ bool HandleArgCommand(int server_socket, string command, int argc = 1)
 		char buffer[BS];
 		memset(buffer, 0, BS);
 
-		command = one_arg_commands[command] + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
+		command = cmd + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
 
 		send(server_socket, (const void *) command.c_str(), command.size(), 0);
 	}
@@ -206,24 +207,34 @@ bool HandleSimple(int server_socket, string command)
 	{
 		rv = true;
 
+		string temp;
 		char buffer[BS];
 		memset(buffer, 0, BS);
 
-		command = simple_commands[command];
+		//cout << LOG(temp) << endl;
+		temp = command = simple_commands[command];
+		if (temp.size() > 2 && temp[2] == '_') 
+			temp.erase(2, 1);
+			//cout << LOG(temp) << endl;
 
-		size_t bytes_sent = send(server_socket, (const void *) command.c_str(), command.size(), 0);
-
-		if (command.size() < 3 || islower(command.at(2)))
+		size_t bytes_sent = send(server_socket, (const void *) temp.c_str(), temp.size(), 0);
+		if (bytes_sent == temp.size())
 		{
-			if (command != "sq" && bytes_sent == command.size())
+			//cout << LOG("") << endl;
+			if (command.size() < 3 || command.at(2) != '_')
 			{
-				size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-				if (bytes_read > 0)
+				//cout << LOG("") << endl;
+				if (command != "_sq" && bytes_sent == command.size())
 				{
-					string s(buffer);
-					cout << s;
-					if (s.at(s.size() - 1) != '\n')
-						cout << endl;
+					//cout << LOG("") << endl;
+					size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
+					if (bytes_read > 0)
+					{
+						string s(buffer);
+						cout << s;
+						if (s.at(s.size() - 1) != '\n')
+							cout << endl;
+					}
 				}
 			}
 		}
@@ -233,29 +244,39 @@ bool HandleSimple(int server_socket, string command)
 
 void OrganizeCommands()
 {
-	simple_commands.insert(make_pair("sq", "sq"));
+	simple_commands.insert(make_pair("sq", "_sq"));
 	simple_commands.insert(make_pair("tc", "tc"));
 	simple_commands.insert(make_pair("ac", "ac"));
+
+	simple_commands.insert(make_pair("next 0", "0 _next"));
+	simple_commands.insert(make_pair("next 1", "1 _next"));
+	simple_commands.insert(make_pair("next 2", "2 _next"));
+	simple_commands.insert(make_pair("next 3", "3 _next"));
+
+	simple_commands.insert(make_pair("clear 0", "0 _clear"));
+	simple_commands.insert(make_pair("clear 1", "1 _clear"));
+	simple_commands.insert(make_pair("clear 2", "2 _clear"));
+	simple_commands.insert(make_pair("clear 3", "3 _clear"));
 
 	simple_commands.insert(make_pair("ti 0", "0 ti"));
 	simple_commands.insert(make_pair("ti 1", "1 ti"));
 	simple_commands.insert(make_pair("ti 2", "2 ti"));
 	simple_commands.insert(make_pair("ti 3", "3 ti"));
 
-	simple_commands.insert(make_pair("s 0", "0 S"));
-	simple_commands.insert(make_pair("s 1", "1 S"));
-	simple_commands.insert(make_pair("s 2", "2 S"));
-	simple_commands.insert(make_pair("s 3", "3 S"));
+	simple_commands.insert(make_pair("s 0", "0 _S"));
+	simple_commands.insert(make_pair("s 1", "1 _S"));
+	simple_commands.insert(make_pair("s 2", "2 _S"));
+	simple_commands.insert(make_pair("s 3", "3 _S"));
 
-	simple_commands.insert(make_pair("z 0", "0 Z"));
-	simple_commands.insert(make_pair("z 1", "1 Z"));
-	simple_commands.insert(make_pair("z 2", "2 Z"));
-	simple_commands.insert(make_pair("z 3", "3 Z"));
+	simple_commands.insert(make_pair("z 0", "0 _Z"));
+	simple_commands.insert(make_pair("z 1", "1 _Z"));
+	simple_commands.insert(make_pair("z 2", "2 _Z"));
+	simple_commands.insert(make_pair("z 3", "3 _Z"));
 
-	simple_commands.insert(make_pair("r 0", "0 R"));
-	simple_commands.insert(make_pair("r 1", "1 R"));
-	simple_commands.insert(make_pair("r 2", "2 R"));
-	simple_commands.insert(make_pair("r 3", "3 R"));
+	simple_commands.insert(make_pair("r 0", "0 _R"));
+	simple_commands.insert(make_pair("r 1", "1 _R"));
+	simple_commands.insert(make_pair("r 2", "2 _R"));
+	simple_commands.insert(make_pair("r 3", "3 _R"));
 
 	simple_commands.insert(make_pair("what 0", "0 what"));
 	simple_commands.insert(make_pair("what 1", "1 what"));
@@ -267,11 +288,10 @@ void OrganizeCommands()
 	simple_commands.insert(make_pair("who 2", "2 who"));
 	simple_commands.insert(make_pair("who 3", "3 who"));
 
-	one_arg_commands.insert(make_pair("p 0", "0 P "));
-	one_arg_commands.insert(make_pair("p 1", "1 P "));
-	one_arg_commands.insert(make_pair("p 2", "2 P "));
-	one_arg_commands.insert(make_pair("p 3", "3 P "));
-
+	one_arg_commands.insert(make_pair("p 0", "0 _P "));
+	one_arg_commands.insert(make_pair("p 1", "1 _P "));
+	one_arg_commands.insert(make_pair("p 2", "2 _P "));
+	one_arg_commands.insert(make_pair("p 3", "3 _P "));
 }
 
 int main(int argc, char * argv[])
@@ -325,7 +345,10 @@ int main(int argc, char * argv[])
 				continue;
 			}
 
-			if (HandleArgCommand(server_socket, l))
+			if (HandleArgCommand(server_socket, l, one_arg_commands, 1))
+				continue;
+
+			if (HandleArgCommand(server_socket, l, two_arg_commands, 2))
 				continue;
 
 			if (l == "se")

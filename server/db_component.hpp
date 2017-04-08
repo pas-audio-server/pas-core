@@ -49,6 +49,7 @@ public:
 	int  GetArtistCount();
 	bool AddMedia(std::string & path, bool force);
 	void MultiValuedQuery(std::string column, std::string pattern, std::string & results);
+	void FindIDs(std::string column, std::string pattern, std::vector<std::string> & results);
 	std::string PathFromID(unsigned int id, std::string * title, std::string * artist);
 
 private:

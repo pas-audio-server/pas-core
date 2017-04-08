@@ -20,7 +20,7 @@ clear_screen			:
 
 server.o				: server.cpp network_component.hpp file_system_component.hpp utility.hpp audio_component.hpp audio_device.hpp
 
-connection_manager.o	: connection_manager.cpp connection_manager.hpp
+connection_manager.o	: connection_manager.cpp connection_manager.hpp audio_component.hpp
 
 network_component.o		: network_component.cpp network_component.hpp utility.hpp connection_manager.hpp
 
