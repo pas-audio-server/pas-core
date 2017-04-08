@@ -89,7 +89,7 @@ int main(int argc, char * argv[])
 		if (!dacs[1]->Initialize(devices[1]))
 			throw string("DAC 1 failed to Initialize()");
 	
-		cout << "DACs 0 and 1 are allocated and initialized" << endl;
+		//cout << "DACs 0 and 1 are allocated and initialized" << endl;
 		cout << "Entering network monitoring" << endl;
 
 		nw.AcceptConnections((void *) dacs, 2);
