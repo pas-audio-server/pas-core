@@ -113,7 +113,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	ss.rate = me->SAMPLE_RATE;
 	ss.channels = 2;
 
-	cerr << LOG(me->ad.device_spec) << endl;
+	//cerr << LOG(me->ad.device_spec) << endl;
 	if ((me->pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, me->ad.device_spec.c_str(), "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
 	{
 		cerr << "pa_simple_new failed." << endl;
@@ -159,6 +159,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 		{
 			// IDLE STATE
 			me->read_offset = 0;
+			me->title = me->artist = string("");
 			cout << LOG("") << endl;
 			sem_wait(&me->sem);
 			// If we get here, there is a command waiting.
@@ -291,6 +292,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 						}
 						if (ac.cmd == STOP)
 						{
+							cout << LOG("STOP") << endl;
 							// This will break the playing loop. The thread will go to sleep again.
 							stop_flag = true;
 							break;
@@ -461,7 +463,7 @@ void AudioComponent::Play(unsigned int id)
 		if (!db->Initialize())
 			throw LOG("db->Initialize() failed");
 
-		string path = db->PathFromID(id);
+		string path = db->PathFromID(id, &title, &artist);
 		delete db;
 		db = nullptr;
 		if (path.size() > 0)

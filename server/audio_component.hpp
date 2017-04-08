@@ -48,10 +48,10 @@
 
 enum AUDIO_COMMANDS
 {
-	PLAY = 'p',
-	STOP = 's',
-	PAUSE = 'z',
-	RESUME = 'r',
+	PLAY = 'P',
+	STOP = 'S',
+	PAUSE = 'Z',
+	RESUME = 'R',
 
 	QUIT = 'Q',
 	NONE = 0
@@ -89,6 +89,8 @@ public:
 	void Play(unsigned int id);
 	std::string HumanName() { return ad.device_name; }
 	std::string TimeCode();
+	std::string title;
+	std::string artist;
 
 private:
 
@@ -100,7 +102,6 @@ private:
 	std::mutex m;
 	std::thread * t;
 	off_t read_offset;
-
 	pa_simple * pas;
 
 
@@ -136,4 +137,3 @@ private:
 
 };
 
-void AudioThread(AudioComponent * ac);

@@ -68,7 +68,7 @@ DB::DB()
 	}
 	query_columns += ") ";
 	parameter_columns += ") ";
-	cout << query_columns_no_path << endl;
+	//cout << query_columns_no_path << endl;
 	/*
 	cout << query_columns << endl;
 	cout << parameter_columns << endl;
@@ -345,11 +345,11 @@ bool DB::Initialized()
 	return connection != nullptr;
 }
 
-string DB::PathFromID(unsigned int id)
+string DB::PathFromID(unsigned int id, string * title, string * artist)
 {
 	string rv;
 	assert(Initialized());
-	string sql("select path from tracks where id = " + to_string(id) + ";");
+	string sql("select path,title,artist from tracks where id = " + to_string(id) + ";");
 	sql::Statement * stmt = connection->createStatement();
 	sql::ResultSet *res = nullptr;
 
@@ -361,7 +361,11 @@ string DB::PathFromID(unsigned int id)
 		res = stmt->executeQuery(sql.c_str());
 		if (res->next())
 		{
-			rv = res->getString(1);
+			rv = res->getString("path");
+			if (title != nullptr)
+				*title = res->getString("title");
+			if (artist != nullptr)
+				*artist = res->getString("artist");
 		}
 	}
 	catch (string s)

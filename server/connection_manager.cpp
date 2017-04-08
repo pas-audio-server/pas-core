@@ -52,7 +52,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 	
 	int device_index = 0;
 	int buffer_offset = 0;
-	// We only get here if the buffer has something in it (based on bytes_read).
+
 	if (buffer[0] >= '0' && buffer[0] <= '9')
 	{
 		device_index = buffer[0] - '0';
@@ -73,6 +73,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		string token;
 
 		tss >> token;
+		cout << LOG(token) << endl;
 
 		// This can happen now. Suppose the string is "0 ". The zero and
 		// space would be skipped by buffer_offset being 2. Then tss would
@@ -80,13 +81,30 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		if (token.size() == 0)
 			throw LOG("");
 
-		if (token == "Q" || token == "c" || token == "r" || token == "z" || token == "s")
+		if (isupper(token.at(0)) && token.at(0) != PLAY)
 		{
+			cout << LOG(token) << endl;
 			AudioCommand cmd;
 			cmd.cmd = (unsigned char) token[0];
 			acs[device_index]->AddCommand(cmd);
 			if (cmd.cmd == 'Q')
 				throw LOG("quitting");
+		}
+		else if (token == "who")
+		{
+			string s;
+			s = acs[device_index]->artist + "\n";
+			//cout << LOG(s) << endl;
+			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
+				throw LOG("send did not return the correct number of bytes written");
+		}
+		else if (token == "what")
+		{
+			string s;
+			s = acs[device_index]->title + "\n";
+			//cout << LOG(s) << endl;
+			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
+				throw LOG("send did not return the correct number of bytes written");
 		}
 		else if (token == "ti")
 		{
@@ -95,20 +113,21 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG("send did not return the correct number of bytes written");
 		}
-		else if (token == "p")
+		else if (token.at(0) == PLAY)
 		{
 			// The remaining token should be an index number for a track to play
 			unsigned int id;
 			tss >> id;
 			db = InitDB();
-			string path = db->PathFromID(id);
+			
+			string path = db->PathFromID(id, &acs[device_index]->title, &acs[device_index]->artist);
 			if (path.size() > 0)
 			{
 				AudioCommand cmd;
 				cmd.cmd = PLAY;
 				cmd.argument = path;
 				acs[device_index]->AddCommand(cmd);
-				// and a miracle happens here?
+				// A great miracle happened here.
 			}
 		} 
 		else if (token == string("se"))
