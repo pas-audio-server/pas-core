@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+// Since we are using proto3, all fields are optional by default.
+// I (lozord), believe in "required considered harmful".
+
+package pas;
+
+/*  NOTE(lozord): This is one way of representing commands. */
+// We have two command types, one that deals with players and one that deals
+// with the database.
+
+message PlayerCommand {
+    enum CommandType {
+        UNKNOWN = 0;
+        PLAY_TRACK = 1;
+        PAUSE_DEVICE = 2;
+        RESUME_DEVICE = 3;
+        STOP_DEVICE = 4;
+        WHAT_TRACK = 5;
+        WHAT_TIME = 6;
+    }
+
+    CommandType command_type = 1;
+
+    uint64 device_id = 2;
+    uint64 track_id = 3;
+}
+
+message DatabaseCommand {
+    enum CommandType {
+        UNNOWN = 0;
+        TRACK_COUNT = 1;
+        ARTIST_COUNT = 2;
+        FOLDER_COUNT = 3;
+        SELECT = 4;
+        CONTENTS = 5;
+    }
+
+    CommandType command_type = 1;
+
+    string column = 2;
+    string pattern = 3;
+    string path = 4;
+}
+
+/* NOTE(lozord): This is the other way to represent commands. */
+// Each command gets its own proto definition.
+
+message PlayTrackCommand {
+    uint64 device_id = 1;
+    uint64 track_id = 2;
+}
+
+message PauseDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message ResumeDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message StopDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message TrackQueryCommand {
+    uint64 device_id = 1;
+}
+
+message TimeQueryCommand {
+    uint64 device_id = 1;
+}
+
+message TrackCountQuery {
+}
+
+message ArtistCountQuery {
+}
+
+message FolderCountQuery {
+}
+
+message SelectQuery {
+    string column = 1;
+    string pattern = 2;
+}
+
+message ContentQuery {
+    string path = 1;
+}
