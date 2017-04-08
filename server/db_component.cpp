@@ -253,7 +253,7 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 
 	sql::Statement * stmt = nullptr;
 	sql::ResultSet * res = nullptr;
-	results = string("");
+	results = string(" ");
 
 	if (IsAColumn(column))
 	{
@@ -267,7 +267,7 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 
 			string sql("select " + query_columns_no_path + string(" from tracks where "));
 			sql += column + " like \"" + pattern + "\" order by " + column + ";";
-			cout << sql << endl;
+			//cout << sql << endl;
 			res = stmt->executeQuery(sql.c_str());
 			json_object * jobj = json_object_new_object();
 			if (jobj == nullptr)
@@ -277,21 +277,23 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 
 			while (res->next())
 			{
-				cout << LOG("") << endl;
+				//cout << LOG("") << endl;
 				// assumes path is zeroeth column`
-				json_object * inner_array = json_object_new_array();
+				//json_object * inner_array = json_object_new_array();
+				json_object * inner_obj = json_object_new_object();
 				for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
 				{
-					string s;
+					string col = track_column_names[i];
 					if (i == 0)
-						s = res->getString("id");
-					else
-						s = res->getString(track_column_names[i]);
+						col = "id";
+					string s;
+					s = res->getString(col);
 					//cout << __LINE__ << " " << track_column_names[i] << " " << s << endl;
 					json_object * jstring = json_object_new_string(s.c_str());
-					json_object_array_add(inner_array, jstring);
+					//json_object_array_add(inner_array, jstring);
+					json_object_object_add(inner_obj, col.c_str(), jstring);
 				}
-				json_object_array_add(outer_array, inner_array);
+				json_object_array_add(outer_array, inner_obj);
 			}
 			json_object_object_add(jobj, "rows", outer_array);
 			results = json_object_to_json_string(jobj);
