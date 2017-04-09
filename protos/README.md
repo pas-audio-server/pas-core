@@ -20,7 +20,23 @@ Make edits as you normally would.
 Just run this command (assuming you are in the root of `pas`):
 
 ```bash
-protoc -I=protos --cpp_out=protos --go_out=protos protos/{FILE}.proto
+protoc -I=protos --cpp_out=protos/cpp --go_out=protos/go protos/{FILE}.proto
 ```
 
 ## To use
+
+### C++
+
+Just include the `pas` namespace:
+
+```cpp
+#include "path/to/protos/cpp/{FILE}.pb.h"
+```
+
+### Go
+
+Just import the `pas` proto package:
+
+```golang
+import pas "path/to/protos/go"
+```
