@@ -17,5 +17,4 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define LOG(m)  (std::string(__FILE__) + std::string(" ") + std::to_string(__LINE__) + std::string(" ") + std::string(m))
 

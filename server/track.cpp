@@ -1,6 +1,9 @@
 #include "track.hpp"
+#include "logger.hpp"
 
 using namespace std;
+
+extern Logger _log_;
 
 void Track::SetPath(string & path)
 {

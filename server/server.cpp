@@ -34,8 +34,11 @@
 #include "file_system_component.hpp"
 #include "audio_component.hpp"
 #include "audio_device.hpp"
+#include "logger.hpp"
 
 using namespace std;
+
+Logger _log_("/tmp/paslog.txt");
 
 bool keep_going = true;
 int  port = 5077;
@@ -57,18 +60,26 @@ int main(int argc, char * argv[])
 
 	try
 	{
+		vector<string> valid_extensions;
+		vector<AudioDevice> devices;
+
+		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", (int) devices.size()));
+		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", (int) devices.size()));
+
+		for (size_t i = 0; i < devices.size(); i++)
+		{
+			LOG(_log_, devices[i].device_name + " index: " + to_string(devices[i].index));
+		}
+
 		if ((dacs[0] = new AudioComponent()) == nullptr)
-			throw string("DAC 0 failed to allocate");
+			throw LOG(_log_, "DAC 0 failed to allocate");
  
 		if ((dacs[1] = new AudioComponent()) == nullptr)
-			throw string("DAC 1 failed to allocate");
+			throw LOG(_log_, "DAC 1 failed to allocate");
 		
 		if (argc > 1)
 			path = string(argv[1]);
 
-		vector<string> valid_extensions;
-		vector<AudioDevice> devices;
-	
 		NetworkComponent nw;
 	
 		valid_extensions.push_back("mp3");
@@ -80,24 +91,20 @@ int main(int argc, char * argv[])
 		//Enumerate2(path, valid_extensions, false);
 		//return 0;
 	
-		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black"));
-		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3"));
-	
-		if (!dacs[0]->Initialize(devices[0]))
-			throw string("DAC 0 failed to Initialize()");
-	
-		if (!dacs[1]->Initialize(devices[1]))
-			throw string("DAC 1 failed to Initialize()");
-	
+
+		for (size_t i = 0; i < devices.size(); i++)
+		{	
+			if (!dacs[i]->Initialize(devices[i]))
+				LOG(_log_, "DAC " + to_string((int) i) + " failed to Initialize()");
+			LOG(_log_, "DAC " + to_string((int) i) + " initialized");
+		}	
 		//cout << "DACs 0 and 1 are allocated and initialized" << endl;
 		cout << "Entering network monitoring" << endl;
 
 		nw.AcceptConnections((void *) dacs, 2);
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 
 	if (dacs[0] != nullptr)

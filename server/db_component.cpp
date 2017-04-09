@@ -19,10 +19,11 @@
 
 #include "db_component.hpp"
 #include <json/json.h>
+#include "logger.hpp"
 
 using namespace std;
 
-//const int DB::_db_sleep_time = 1000;
+extern Logger _log_;
 
 string track_column_names[] =
 {
@@ -91,7 +92,7 @@ bool DB::Initialize()
 	driver = get_driver_instance();
 	if (driver == nullptr)
 	{
-		cerr << LOG("get_driver_instance() failed") << endl;
+		LOG(_log_, "get_driver_instance() failed");
 		rv = false;
 	}
 	else
@@ -99,7 +100,7 @@ bool DB::Initialize()
 		connection = driver->connect("tcp://127.0.0.1:3306", "pas", "pas");
 		if (connection == nullptr)
 		{
-			cerr << LOG("connect() failed") << endl;
+			LOG(_log_, "connect() failed");
 			rv = false;
 		}
 		else
@@ -139,7 +140,7 @@ bool DB::AddMedia(std::string & path, bool force)
 		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags -show_entries format=duration -sexagesimal \"") + path + string("\"");
 
 		if ((p = popen(cmdline.c_str(), "r")) == nullptr)
-			throw LOG(path);
+			throw LOG(_log_, path);
 
 		const int bsize = 1024;
 		char buffer[bsize];
@@ -160,25 +161,20 @@ bool DB::AddMedia(std::string & path, bool force)
 		string sql = string("insert into tracks ") + query_columns + parameter_columns;
 		stmt = connection->prepareStatement(sql.c_str());
 		if (stmt == nullptr)
-			throw LOG("prepareStatement() failed");
+			throw LOG(_log_, "prepareStatement() failed");
 
 		int i = 1;
 		for (auto it = supported_track_column_names.begin(); it < supported_track_column_names.end(); it++, i++)
 		{
 			string v = track.GetTag(*it);
-			//cout << *it << "	" << v << endl;
 			stmt->setString(i, v.c_str());
 		}
 
 		stmt->execute();
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-		{
-			cerr << s << endl;
-			rv = false;
-		}
+		rv = false;
 	}
 	catch (sql::SQLException &e)
 	{
@@ -206,7 +202,7 @@ int DB::IntegerQuery(string & sql)
 	stmt = connection->createStatement();
 	if (stmt == nullptr)
 	{
-		cerr << LOG("createStatement() failed") << endl;
+		LOG(_log_, "createStatement() failed");
 	}
 	else
 	{
@@ -263,7 +259,7 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 			// NOTE: SQL Injection vulnerability here.
 			// NOTE:
 			if ((stmt = connection->createStatement()) == nullptr)
-				throw LOG("createStatement() failed");
+				throw LOG(_log_, "createStatement() failed");
 
 			string sql("select " + query_columns_no_path + string(" from tracks where "));
 			sql += column + " like \"" + pattern + "\" order by " + column + ";";
@@ -271,7 +267,7 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 			res = stmt->executeQuery(sql.c_str());
 			json_object * jobj = json_object_new_object();
 			if (jobj == nullptr)
-				throw LOG("json_object_new_object() failed");
+				throw LOG(_log_, "json_object_new_object() failed");
 
 			json_object * outer_array = json_object_new_array();
 
@@ -300,10 +296,8 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 			json_object_put(jobj);
 			//cout << results << endl;
 		}
-		catch (string s)
+		catch (LoggedException s)
 		{
-			if (s.size() > 0)
-				cerr << s << endl;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -358,7 +352,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist)
 	try
 	{
 		if (stmt == nullptr)
-			throw LOG("createStatement() failed");
+			throw LOG(_log_, "createStatement() failed");
 
 		res = stmt->executeQuery(sql.c_str());
 		if (res->next())
@@ -370,12 +364,8 @@ string DB::PathFromID(unsigned int id, string * title, string * artist)
 				*artist = res->getString("artist");
 		}
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-		{
-			cerr << s << endl;
-		}
 	}
 	catch (sql::SQLException &e)
 	{

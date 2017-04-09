@@ -24,14 +24,17 @@
 #include <signal.h>
 #include "audio_component.hpp"
 #include "utility.hpp"
+#include "logger.hpp"
 
 using namespace std;
+
+extern Logger _log_;
 
 AudioComponent::AudioComponent()
 {
 	pas = nullptr;
 	t = nullptr;
-	// There are no commands waiting for the player.
+	// There are no commands waiting for the player so set initial count to 0.
 	sem_init(&sem, 0, 0);
 }
 
@@ -96,7 +99,7 @@ void AudioComponent::LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned
 	//cout << "async: 1 " << read_offset << " * " << endl;
 	error = aio_read(&cb);
 	if (error != 0)
-		throw LOG("aio_read() failed: " + to_string(error));
+		throw LOG(_log_, "aio_read() failed: " + to_string(error));
 }
 
 void AudioComponent::PlayerThread(AudioComponent * me)
@@ -113,15 +116,14 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	ss.rate = me->SAMPLE_RATE;
 	ss.channels = 2;
 
-	cout << LOG(me->ad.device_spec) << endl;
+	LOG(_log_, to_string(me->ad.index) + " " + me->ad.device_spec);
 	if ((me->pas = pa_simple_new(NULL, "pas_out", PA_STREAM_PLAYBACK, me->ad.device_spec.c_str(), "playback", &ss, &cm, NULL, &pulse_error)) == NULL)
 	{
-		cerr << "pa_simple_new failed." << endl;
-		cerr << pa_strerror(pulse_error) << endl;
-		me->t = nullptr;
+		LOG(_log_, "pa_simple_new failed: " + to_string(me->ad.index) + " " + me->ad.device_spec);
+		LOG(_log_, pa_strerror(pulse_error));
 		return;
 	}
-
+	LOG(_log_, nullptr);
 	// Audio is double buffered. The two entry "buffers" allows for each buffer selection.
 	// Inline helpers BufferNext, BufferPrev, BufferToggle help ensure the buffers are
 	// kept straight. This strategy is often not used by younger programmers on projects
@@ -132,12 +134,11 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	buffer_2 = (unsigned char *) malloc(me->BUFFER_SIZE);   
 	unsigned char * buffers[2];
 
-	//cerr << LOG(to_string(me->BUFFER_SIZE)) << endl;
+	//LOG(_log_, to_string(me->BUFFER_SIZE));
 
 	if (buffer_1 == nullptr || buffer_2 == nullptr)     
-	{                                                   
-		cerr << "buffer allocation failed" << endl;     
-		me->t = nullptr;
+	{
+		LOG(_log_, "buffer allocation failed");     
 		return;                                        
 	}                                                   
 
@@ -155,44 +156,43 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 	while (!terminate_flag)
 	{
-		cout << LOG("") << endl;
+		LOG(_log_, nullptr);
 		if (!restarting)
 		{
 			// IDLE STATE
 			me->idle = true;
 			me->read_offset = 0;
 			me->title = me->artist = string("");
-			cout << LOG("") << endl;
+			LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
 				me->m_play_queue.unlock();
-				cout << LOG("") << endl;
+				LOG(_log_, nullptr);
 
 				sem_wait(&me->sem);
 
 				// If we get here, there is a command waiting.
 				if (!me->GetCommand(ac, true))
 				{
-					cout << "No command!" << endl;
+					LOG(_log_, "No command!");
 					continue;
 				}
 
-				cout << LOG("") << "\t" << ac.cmd << endl;
+				LOG(_log_, string(1, ac.cmd));
 				if (!GoodCommand(ac.cmd))
 				{
-					cout << "Bad command" << endl;
+					LOG(_log_, "Bad command");
 					continue;
 				}
 				if (ac.cmd == QUIT)
 				{
-					cout << LOG("") << endl;
+					LOG(_log_, "QUIT");
 					terminate_flag = true;
 					break;
 				}
 				if (ac.cmd != PLAY)
 					continue;
-				//cerr << LOG(ac.argument) << endl;
 			}
 			me->m_play_queue.unlock();
 		}
@@ -214,12 +214,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//
 			// NOTE: This can be avoided if the database has knowledge of the sample rate.
 			//
-			cout << LOG("") << endl;
+			LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
 				me->m_play_queue.unlock();
-				cout << LOG("error in queue") << endl;
+				LOG(_log_, "error in queue");
 				continue;
 			}
 			PlayStruct ps = me->play_queue.front();
@@ -227,11 +227,11 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->title = ps.title;
 			me->play_queue.pop();
 			me->m_play_queue.unlock();
-			cout << LOG("") << endl;
+			LOG(_log_, nullptr);
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
-				throw LOG("pipe failed to open");
-			cerr << LOG(player_command) << endl;
+				throw LOG(_log_, "pipe failed to open");
+			LOG(_log_, player_command);
 			int buffer_index = 0;
 			int fd = fileno(p);
 			int error, pulse_error;
@@ -248,7 +248,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->read_offset += bytes_read;
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
 			me->read_offset += bytes_read;
-			//cerr << LOG("") << endl;
+			//LOG(_log_, nullptr);
 
 			// There needs to be one I/O already in flight by 
 			// the time the loop starts. I found a gap happening
@@ -256,7 +256,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 			memset(&cb, 0, sizeof(aiocb));
 			me->LaunchAIO(cb, fd, me, buffers[1]);
-			//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
+			//LOG(_log_, "bytes_read: " + to_string(bytes_read));
 			bool first_loop = true;
 
 			// Ensure that the decoder has time to fill the pipe.
@@ -269,7 +269,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// in a blocking manner.
 			while (bytes_read > 0 && !terminate_flag && !stop_flag)
 			{
-				//cerr << LOG("") << endl;
+				//LOG(_log_, nullptr);
 				if (!first_loop)
 				{
 					while ((error = aio_error(&cb)) == EINPROGRESS) 
@@ -278,19 +278,22 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					}
 
 					if (error > 0)
-						throw LOG("async i/o returned error");
+						throw LOG(_log_, "async i/o returned error");
 
 					assert(error == 0);
 					int t = aio_return(&cb);
 					assert(t >= 0);
 					if (t == 0)
+					{
+						LOG(_log_, nullptr);
 						break;
+					}
 
 					me->read_offset += t;
 					bytes_read = t;
-					//cerr << LOG("bytes_read: " + to_string(bytes_read)) << endl;
+					//LOG(_log_, "bytes_read: " + to_string(bytes_read));
 				}
-				//cerr << LOG("") << endl;
+				//LOG(_log_, nullptr);
 
 				if (bytes_read <= 0)
 					break;
@@ -305,12 +308,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 				first_loop = false;
 
-				//cerr << LOG("") << endl;
+				//LOG(_log_, nullptr);
 				if (me->GetCommand(ac, false))
 				{
 retry_command:		if (GoodCommand(ac.cmd))
 					{
-						//cerr << LOG("") << endl;
+						//LOG(_log_, nullptr);
 						if (ac.cmd == QUIT)
 						{
 							// This will break the outermost loop causing the thread to terminate.
@@ -319,7 +322,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 						}
 						if (ac.cmd == STOP)
 						{
-							cout << LOG("STOP") << endl;
+							LOG(_log_, "STOP");
 							// This will break the playing loop. The thread will go to sleep again.
 							stop_flag = true;
 							break;
@@ -330,6 +333,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 							// Instead, it starts playing a new track. Recall, when the play loop
 							// is broken, the pipe to ffmpeg is closed. This will cause ffmpeg
 							// to exit (writing on closed pipe is fatal).
+							LOG(_log_, nullptr);
 							restarting = true;
 							break;
 						}
@@ -341,19 +345,19 @@ retry_command:		if (GoodCommand(ac.cmd))
 						 */
 						if (ac.cmd == PAUSE)
 						{
-							cout << LOG("") << endl;
+							LOG(_log_, nullptr);
 							sem_wait(&me->sem);
 							me->GetCommand(ac, true);
-							cout << LOG("") << endl;
+							LOG(_log_, "PAUSE");
 							goto retry_command;
 						}
 						if (ac.cmd == RESUME)
 						{
-							cout << LOG("") << endl;
+							LOG(_log_, "RESUME");
 						}
+						//LOG(_log_, nullptr);
 					}
 				}
-				//cerr << LOG("") << endl;
 
 				// Launch blocking write to pulse. The buffer size has already accounted for
 				// the requirement that it be a multiple of six. Enforcing this here will avoid
@@ -368,21 +372,19 @@ retry_command:		if (GoodCommand(ac.cmd))
 				//cout << "rendr: " << me->BufferPrev(buffer_index) << " " << bytes_read << endl;
 				if (pa_simple_write(me->pas, (const void *) buffers[me->BufferPrev(buffer_index)], bytes_read, &pulse_error) < 0)
 				{
-					throw LOG("lost my pulse: " + string(pa_strerror(pulse_error)));
+					throw LOG(_log_, "lost my pulse: " + string(pa_strerror(pulse_error)));
 				}
 			}
 		}
-		catch (string s)
+		catch (LoggedException e)
 		{
-			if (s.size() > 0)
-				cerr << s << endl;
+			LOG(_log_, e.Msg());
 		}
-		//cout << LOG("") << endl;
+		LOG(_log_, nullptr);
 		if (p != nullptr)
 			pclose(p);
 	}
-	cout << "Player thread exiting" << endl;
-	me->t = nullptr;
+	LOG(_log_, "Player thread exiting");
 
 	pa_simple_flush(me->pas, &pulse_error);
 	pa_simple_free(me->pas);
@@ -394,11 +396,12 @@ retry_command:		if (GoodCommand(ac.cmd))
 	if (buffer_2 != nullptr)
 		free(buffer_2);
 
+	LOG(_log_, nullptr);
 }
 
 bool AudioComponent::Initialize(AudioDevice & ad)
 {
-	//cout << LOG(ad.device_name) << endl;
+	//LOG(_log_, ad.device_name);
 
 	bool rv = true;
 	assert(this->ad.device_spec.size() == 0);
@@ -408,6 +411,12 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 
 	// Launch the thread associated with this DAC.
 	t = new thread(PlayerThread, this);
+	if (false)//t->joinable())
+	{
+		LOG(_log_, "Initialize() failed");
+		rv = false;
+	}
+	LOG(_log_, nullptr);
 	return rv;
 }
 
@@ -416,10 +425,10 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
-	//cerr << LOG("") << endl;
+	//LOG(_log_, nullptr);
 	if (m.try_lock())
 	{
-		//cerr << LOG("") << endl;
+		//LOG(_log_, nullptr);
 		if (commands.size() > 0)
 		{
 			// If the commands queue is non-empty, someone must have done an
@@ -430,16 +439,16 @@ bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 			// for something to do.
 			ac = commands.front();
 			commands.pop();
-			//cerr << LOG("") << endl;
+			//LOG(_log_, nullptr);
 			if (!was_idle)
 				sem_wait(&sem);
-			//cerr << LOG("") << endl;
+			//LOG(_log_, nullptr);
 			rv = true;
 		}
 		m.unlock();
-		//cerr << LOG("") << endl;
+		//LOG(_log_, nullptr);
 	}
-	//cerr << LOG("") << endl;
+	//LOG(_log_, nullptr);
 	return rv;
 }
 
@@ -457,7 +466,7 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 
 void AudioComponent::Clear()
 {
-	cout << LOG("") << endl;
+	LOG(_log_, nullptr);
 	m_play_queue.lock();
 	std::queue<PlayStruct>().swap(play_queue);
 	m_play_queue.unlock();
@@ -468,7 +477,7 @@ void AudioComponent::Clear()
 void AudioComponent::Play(const PlayStruct & ps)
 {
 	AudioCommand ac;
-	cout << LOG("") << endl;
+	LOG(_log_, nullptr);
 	// I thought I could use the queue to tell me if the player thread was idle. But I cannot
 	// since the queue is drained immiadtely. I need another flag.
 	m_play_queue.lock();
@@ -476,7 +485,7 @@ void AudioComponent::Play(const PlayStruct & ps)
 	play_queue.push(ps);
 	if (was_idle)
 	{
-		cout << LOG("sending PLAY") << endl;
+		//LOG(_log_, "sending PLAY");
 		ac.cmd = PLAY;
 		AddCommand(ac);
 	}
@@ -490,10 +499,10 @@ void AudioComponent::Play(unsigned int id)
 	try
 	{
 		if (db == nullptr)
-			throw LOG("allocating db failed");
+			throw LOG(_log_, "allocating db failed");
 
 		if (!db->Initialize())
-			throw LOG("db->Initialize() failed");
+			throw LOG(_log_, "db->Initialize() failed");
 
 		PlayStruct ps;
 		ps.path = db->PathFromID(id, &ps.title, &ps.artist);
@@ -502,10 +511,8 @@ void AudioComponent::Play(unsigned int id)
 		if (ps.path.size() > 0)
 			Play(ps);
 	}
-	catch (string s)
+	catch (LoggedException e)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 
 	if (db != nullptr)

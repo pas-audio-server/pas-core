@@ -1,6 +1,9 @@
 #include "file_system_component.hpp"
+#include "logger.hpp"
 
 using namespace std;
+
+extern Logger _log_;
 
 /*	This file is part of pas.
 
@@ -110,10 +113,10 @@ static void AddFolders(string path, vector<string> & v)
 	try
 	{
 		if (!(d = opendir(path.c_str())))
-			throw(LOG(path));
+			throw LOG(_log_, path);
 
 		if (!(entry = readdir(d)))
-			throw(LOG(path));
+			throw LOG(_log_, path);
 
 		do
 		{
@@ -130,10 +133,8 @@ static void AddFolders(string path, vector<string> & v)
 		if (d != nullptr)
 			closedir(d);
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 }
 
@@ -148,16 +149,16 @@ static void EnumerateFolder(string folder, const vector<string> & allowable_exte
 	try
 	{
 		if (db == nullptr)
-			throw LOG("Allocating a DB failed");
+			throw LOG(_log_, "Allocating a DB failed");
 
 		if (!db->Initialized())
-			throw LOG("DB failed to initialize");
+			throw LOG(_log_, "DB failed to initialize");
 
 		if (!(d = opendir(folder.c_str())))
-			throw(LOG(folder));
+			throw LOG(_log_, folder);
 
 		if (!(entry = readdir(d)))
-			throw(LOG(folder));
+			throw LOG(_log_, folder);
 
 		do
 		{
@@ -172,10 +173,8 @@ static void EnumerateFolder(string folder, const vector<string> & allowable_exte
 			}
 		} while ((entry = readdir(d)) != nullptr);
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 
 	if (db)
@@ -193,27 +192,25 @@ bool Enumerate2(string path, vector<string> & allowed_extensions, bool force)
 	bool rv = true;
 	vector<string> dirs;
 
-	cout << "Starting to enumerate folders" << endl;
+	LOG(_log_, "Starting to enumerate folders");
 	try
 	{
 		if (allowed_extensions.size() == 0)
-			throw(LOG("extension vector has size zero"));
+			throw LOG(_log_, "extension vector has size zero");
 
 		dirs.push_back(path);
 		AddFolders(path, dirs);
-		cout << "Folders: " << dirs.size() << endl;
+		LOG(_log_, "Folders: " + to_string(dirs.size()));
 
 		#pragma omp parallel for
 		for (int i = 0; i < (int) dirs.size(); i++)
 		{
 			EnumerateFolder(dirs.at(i), (const vector<string>) allowed_extensions);
 		}
-		cout << "Done" << endl;
+		LOG(_log_, "Done");
 	}
-	catch (string m)
+	catch (LoggedException m)
 	{
-		if (m.size() > 0)
-			cerr << m << endl;
 	}
 
 	return rv;

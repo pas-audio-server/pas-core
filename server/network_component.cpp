@@ -1,6 +1,7 @@
 #include "connection_manager.hpp"
 #include "network_component.hpp"
 #include "audio_component.hpp"
+#include "logger.hpp"
 
 /*	This file is part of pas.
 
@@ -22,6 +23,8 @@
 */
 
 using namespace std;
+
+extern Logger _log_;
 
 bool NetworkComponent::keep_going = true;
 
@@ -59,16 +62,18 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		listening_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (listening_socket < 0)
 		{
+			// TODO - fod perror into log
 			perror("Opening socket failed");
-			throw string("");
+			throw LOG(_log_, nullptr);
 		}
 
 		int optval = 1;
 		optval = setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 		if (optval < 0)
 		{
+			// TODO - fod perror into log
 			perror("sockopt failed");
-			throw string("");
+			throw LOG(_log_, nullptr);
 		}
 
 		sockaddr_in listening_sockaddr;
@@ -80,14 +85,16 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 
 		if (bind(listening_socket, (sockaddr *) &listening_sockaddr, sizeof(sockaddr_in)) < 0)
 		{
+			// TODO - fod perror into log
 			perror("Bind failed");
-			throw string("");
+			throw LOG(_log_, nullptr);
 		}
 
 		if (listen(listening_socket , max_connections) != 0)
 		{
+			// TODO - fod perror into log
 			perror("Error attempting to listen to socket:");
-			throw string("");
+			throw LOG(_log_, nullptr);
 		}
 
 		sockaddr_in client_info;
@@ -105,14 +112,10 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		}
 		// We ought never get here. This last throw ensures we get to the cleanup taking place in
 		// the catch.
-		throw string("");
+		throw LOG(_log_, nullptr);
 	}
-	catch (string e)
+	catch (LoggedException e)
 	{
-		if (e.size() > 0)
-			cerr << e << endl;
-
-
 		AudioCommand cmd;
 		cmd.cmd = QUIT;
 		for (int i = 0; i < ndacs; i++)
@@ -139,7 +142,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 			threads.erase(threads.begin());
 		}
 
-		cerr << endl << "Server shutting down." << endl;
+		LOG(_log_, "Server shutting down");
 	}
 }
 

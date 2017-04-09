@@ -23,18 +23,21 @@
 #include "connection_manager.hpp"
 #include "audio_component.hpp"
 #include "db_component.hpp"
+#include "logger.hpp"
 
 using namespace std;
+
+extern Logger _log_;
 
 static DB * InitDB()
 {
 	DB * db = new DB();
 
 	if (db == nullptr)
-		throw LOG("new of DB failed???");
+		throw LOG(_log_, "new of DB failed???");
 
 	if (!db->Initialize())
-		throw LOG("DB failed to initialize: ");
+		throw LOG(_log_, "DB failed to initialize: ");
 
 	return db;
 }
@@ -65,7 +68,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		{
 			string s("bad device index");
 			send(socket, s.c_str(), s.size(), 0);
-			throw LOG(s);
+			throw LOG(_log_, s);
 		}
 
 		// We are depending upon the memset of buffer to ensure we have a null terminator.
@@ -73,45 +76,45 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 		string token;
 
 		tss >> token;
-		cout << LOG(token) << endl;
+		LOG(_log_, token);
 
 		// This can happen now. Suppose the string is "0 ". The zero and
 		// space would be skipped by buffer_offset being 2. Then tss would
 		// have nothing in it. 
 		if (token.size() == 0)
-			throw LOG("");
+			throw LOG(_log_, "");
 
 		if (isupper(token.at(0)) && token.at(0) != PLAY)
 		{
-			cout << LOG(token) << endl;
+			LOG(_log_, token);
 			AudioCommand cmd;
 			cmd.cmd = (unsigned char) token[0];
 			acs[device_index]->AddCommand(cmd);
 			if (cmd.cmd == 'Q')
-				throw LOG("quitting");
+				throw LOG(_log_, "quitting");
 		}
 		else if (token == "who")
 		{
 			string s;
 			s = acs[device_index]->Who() + "\n";
-			//cout << LOG(s) << endl;
+			//LOG(_log_, s);
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 		else if (token == "what")
 		{
 			string s;
 			s = acs[device_index]->What() + "\n";
-			//cout << LOG(s) << endl;
+			//LOG(_log_, s);
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 		else if (token == "ti")
 		{
 			string s;
 			s = acs[device_index]->TimeCode();
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 		else if (token.at(0) == PLAY)
 		{
@@ -141,15 +144,15 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			//cout << __FUNCTION__ << " " << __LINE__ << " " << col << " " << pat << "\t" << aq_results << endl;
 			size_t t = aq_results.size();
 			if (send(socket, &t, sizeof(size_t), 0) != sizeof(size_t))
-				throw LOG("bad send");
+				throw LOG(_log_, "bad send");
 			if (send(socket, aq_results.c_str(), aq_results.size(), 0) != (ssize_t) aq_results.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 		else if (token == string("sq"))
 		{
 			// requested that we quit
 			rv = false;
-			throw string("");
+			throw LOG(_log_, string(""));
 		}
 		else if (token == string("ac"))
 		{
@@ -160,7 +163,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			ss << artist_count << endl;
 			string s = ss.str();
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 		else if (token == string("tc"))
 		{
@@ -171,13 +174,11 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			ss << track_count << endl;
 			string s = ss.str();
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG("send did not return the correct number of bytes written");
+				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 	
 	if (db != nullptr)
@@ -218,10 +219,8 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 			memset(buffer, 0, BS);
 		}
 	}
-	catch (string s)
+	catch (LoggedException s)
 	{
-		if (s.size() > 0)
-			cerr << s << endl;
 	}
 	cerr << "ConnectionHandler(" << connection_number << ") exiting!" << endl;
 }
