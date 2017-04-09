@@ -214,7 +214,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//
 			// NOTE: This can be avoided if the database has knowledge of the sample rate.
 			//
-			LOG(_log_, nullptr);
+			//LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
@@ -227,7 +227,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->title = ps.title;
 			me->play_queue.pop();
 			me->m_play_queue.unlock();
-			LOG(_log_, nullptr);
+			//LOG(_log_, nullptr);
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG(_log_, "pipe failed to open");
@@ -285,7 +285,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					assert(t >= 0);
 					if (t == 0)
 					{
-						LOG(_log_, nullptr);
+						//LOG(_log_, nullptr);
 						break;
 					}
 
@@ -380,7 +380,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 		{
 			LOG(_log_, e.Msg());
 		}
-		LOG(_log_, nullptr);
+		//LOG(_log_, nullptr);
 		if (p != nullptr)
 			pclose(p);
 	}

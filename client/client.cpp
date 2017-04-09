@@ -19,8 +19,10 @@
 #include <time.h>
 #include <assert.h>
 #include <json/json.h>
+#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
+using namespace pas;
 
 #define	LOG(s)		(string(__FILE__) + string(":") + string(__FUNCTION__) + string("() line: ") + to_string(__LINE__) + string(" msg: ") + string(s))
 
@@ -296,8 +298,26 @@ void OrganizeCommands()
 	one_arg_commands.insert(make_pair("p 3", "3 _P "));
 }
 
+void PBExperiment(int server_socket)
+{
+	assert(server_socket >= 0);
+	ArtistCountQuery acq;
+	SelectQuery sq;
+	string s;
+	sq.set_column("huggy");
+	sq.set_pattern("bear");
+	cout << sq.DebugString() << endl;
+	cout << sq.IsInitialized() << endl;
+	cout << sq.SerializeToString(&s) << " " << s.size() << endl;
+	size_t length = s.size();
+	size_t bytes_sent = send(server_socket, (const void *) length, sizeof(length), 0);
+	bytes_sent = send(server_socket, (const void *) s.c_str(), s.size(), 0);
+}
+
 int main(int argc, char * argv[])
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
 	int server_socket = -1;
 	bool connected = false;
 	char buffer[BS];
@@ -316,6 +336,9 @@ int main(int argc, char * argv[])
 			memset(buffer, 0, BS);
 			cout << "Command: ";
 			getline(cin, l);
+
+			if (l == "PB")
+				PBExperiment(server_socket);
 
 			if (l == "quit")
 				break;

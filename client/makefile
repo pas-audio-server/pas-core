@@ -1,8 +1,13 @@
 CC	= g++
-CFLAGS	= -g -Wall -std=c++11
-LDFLAGS	= -lpthread -ljson-c
+CFLAGS	= -g -Wall -std=c++11 -pthread
+LDFLAGS	= -ljson-c -lprotobuf
 
-client.out	:	client.cpp
-			$(CC) $(CFLAGS) $< $(LDFLAGS) -o $@
+%.o			: %.cpp
+			$(CC) -c $(CFLAGS) $< -o $@
 
+client.out	:	client.o commands.pb.o
+			$(CC) client.o commands.pb.o $(LDFLAGS) -o $@
+
+commands.pb.o	:	../protos/cpp/commands.pb.cc
+			$(CC) -c $(CFLAGS) $< -o $@
 

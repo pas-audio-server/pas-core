@@ -24,6 +24,7 @@
 #include "audio_component.hpp"
 #include "db_component.hpp"
 #include "logger.hpp"
+#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
 
@@ -205,12 +206,13 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 	try
 	{
 
+/*
 		size_t bytes_read;
 		const int BS = 2048;
 		char buffer[BS];
 	
 		memset(buffer, 0, BS);
-		cout << "ConnectionHandler(" << connection_number << ") servicing client at " << inet_ntoa(sa.sin_addr) << endl;
+		LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client");
 		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
 		{
 			//cerr << "Raw: " << buffer << endl;
@@ -218,9 +220,10 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 				break;
 			memset(buffer, 0, BS);
 		}
+*/
 	}
 	catch (LoggedException s)
 	{
 	}
-	cerr << "ConnectionHandler(" << connection_number << ") exiting!" << endl;
+	LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") exiting!");
 }
