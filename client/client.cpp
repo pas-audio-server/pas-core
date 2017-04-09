@@ -216,6 +216,8 @@ bool HandleSimple(int server_socket, string command)
 		if (temp.size() > 2 && temp[2] == '_') 
 			temp.erase(2, 1);
 			//cout << LOG(temp) << endl;
+		if (temp == "_sq")
+			temp.erase(0, 1);
 
 		size_t bytes_sent = send(server_socket, (const void *) temp.c_str(), temp.size(), 0);
 		if (bytes_sent == temp.size())

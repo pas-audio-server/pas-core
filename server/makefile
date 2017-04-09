@@ -7,7 +7,7 @@ OBJS	= $(SRC:.cpp=.o)
 
 all						: clear_screen server.out
 
-server.out				: server.o network_component.o file_system_component.o db_component.o track.o connection_manager.o audio_component.o
+server.out				: server.o network_component.o file_system_component.o db_component.o track.o connection_manager.o audio_component.o logger.o
 						$(CC) $^ -o $@ $(LDFLAGS)
 
 %.o						: %.cpp
@@ -20,17 +20,19 @@ clear_screen			:
 
 server.o				: server.cpp network_component.hpp file_system_component.hpp utility.hpp audio_component.hpp audio_device.hpp
 
-connection_manager.o	: connection_manager.cpp connection_manager.hpp audio_component.hpp
+logger.o				: logger.cpp logger.hpp
 
-network_component.o		: network_component.cpp network_component.hpp utility.hpp connection_manager.hpp
+connection_manager.o	: connection_manager.cpp connection_manager.hpp audio_component.hpp logger.hpp
 
-db_component.o			: db_component.cpp db_component.hpp utility.hpp track.hpp
+network_component.o		: network_component.cpp network_component.hpp utility.hpp connection_manager.hpp logger.hpp
 
-file_system_component.o	: file_system_component.cpp file_system_component.hpp db_component.hpp utility.hpp track.hpp
+db_component.o			: db_component.cpp db_component.hpp utility.hpp track.hpp logger.hpp
 
-track.o					: track.cpp track.hpp
+file_system_component.o	: file_system_component.cpp file_system_component.hpp db_component.hpp utility.hpp track.hpp logger.hpp
 
-audio_component.o		: audio_component.cpp audio_component.hpp
+track.o					: track.cpp track.hpp logger.hpp
+
+audio_component.o		: audio_component.cpp audio_component.hpp logger.hpp
 
 clean					:
 						rm -f server $(OBJS)

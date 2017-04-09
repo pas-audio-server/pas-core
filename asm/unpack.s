@@ -10,6 +10,11 @@
 	LEFT 0		RIGHT 0		LEFT 1		RIGHT 1
 
 	ldrd is load double word
+
+	more learning:
+6400 00ff ff87 6400 00ff ff87 6600 00ff in s24le is
+0000 ff64 0000 ff87 0000 ff64 0000 ff87 in s32le
+
 */
 
 		.text
