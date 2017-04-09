@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+// Since we are using proto3, all fields are optional by default.
+// I (lozord), believe in "required considered harmful".
+
+package pas;
+
+message PlayTrackCommand {
+    uint64 device_id = 1;
+    uint64 track_id = 2;
+}
+
+message PauseDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message ResumeDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message StopDeviceCommand {
+    uint64 device_id = 1;
+}
+
+message TrackQueryCommand {
+    uint64 device_id = 1;
+}
+
+message TimeQueryCommand {
+    uint64 device_id = 1;
+}
+
+message TrackCountQuery {
+}
+
+message ArtistCountQuery {
+}
+
+message FolderCountQuery {
+}
+
+message SelectQuery {
+    string column = 1;
+    string pattern = 2;
+}
+
+message ContentQuery {
+    string path = 1;
+}
