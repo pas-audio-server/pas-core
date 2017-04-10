@@ -163,12 +163,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->idle = true;
 			me->read_offset = 0;
 			me->title = me->artist = string("");
-			LOG(_log_, nullptr);
+			//LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
 				me->m_play_queue.unlock();
-				LOG(_log_, nullptr);
+				//LOG(_log_, nullptr);
 
 				sem_wait(&me->sem);
 
@@ -179,7 +179,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					continue;
 				}
 
-				LOG(_log_, string(1, ac.cmd));
+				//LOG(_log_, string(1, ac.cmd));
 				if (!GoodCommand(ac.cmd))
 				{
 					LOG(_log_, "Bad command");
@@ -214,7 +214,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			//
 			// NOTE: This can be avoided if the database has knowledge of the sample rate.
 			//
-			LOG(_log_, nullptr);
+			//LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
@@ -227,7 +227,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->title = ps.title;
 			me->play_queue.pop();
 			me->m_play_queue.unlock();
-			LOG(_log_, nullptr);
+			//LOG(_log_, nullptr);
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG(_log_, "pipe failed to open");
