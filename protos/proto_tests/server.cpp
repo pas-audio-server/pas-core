@@ -22,8 +22,39 @@ void SIGINTHandler(int)
     keep_going = false;
 }
 
-void ConnectionHandler(int incoming_socket, int connection_counter)
+void ConnectionHandler(int incoming_socket, int connection_number)
 {
+	size_t length;
+	size_t bytes_received;
+
+	cout << "handling a connection: " << connection_number << endl;
+	bytes_received = recv(incoming_socket, &length, sizeof(length), 0);
+	if (bytes_received != sizeof(length))
+		throw string("received bad size when reading length");
+	cout << "Message length: " << length << endl;
+
+	string s;
+	s.resize(length);
+	bytes_received = recv(incoming_socket, &s[0], length, 0);
+	if (bytes_received != length)
+		throw string("received size when reading message");
+
+	GenericPB generic;
+	generic.ParseFromString(s);
+	if (generic.type() == Type::PLAY_TRACK_DEVICE)
+	{
+		PlayTrackCommand ptc;
+		ptc.ParseFromString(s);
+		cout << "server device: " << ptc.device_id() << endl;
+		cout << "server track id: " << ptc.track_id() << endl;
+	}
+	else if (generic.type() == Type::SELECT_QUERY)
+	{
+		SelectQuery sq;
+		sq.ParseFromString(s);
+		cout << "server column: " << sq.column() << endl;
+		cout << "server pattern: " << sq.pattern() << endl;
+	}
 }
 
 int main(int argc, char * argv[])

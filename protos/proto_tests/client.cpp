@@ -84,6 +84,50 @@ int main(int argc, char * argv[])
 	try
 	{
 		server_socket = InitializeNetworkConnection(argc, argv);
+		if (server_socket < 0)
+		{
+			perror("bad socket");
+			throw string("bad socket");
+		}
+		
+		SelectQuery sq;
+		sq.set_type(SELECT_QUERY);
+		sq.set_column("artist");
+		sq.set_pattern("%joyous%");
+
+		PlayTrackCommand ptc;
+		ptc.set_type(Type::PLAY_TRACK_DEVICE);
+		ptc.set_device_id(0);
+		ptc.set_track_id(1000);
+		cout << ptc.DebugString() << endl;
+
+		string s;
+		bool outcome = sq.SerializeToString(&s);
+		if (!outcome)
+			throw string("SerializeToString() failed");
+		
+		size_t length = s.size();
+		cout << "size() of string s: " << length << endl;
+		cout << "does this agree with: " << sq.ByteSize() << endl;
+
+		size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
+
+		if (bytes_sent != sizeof(length))
+		{
+			perror("sending length");
+			throw string("sent returns bad value for sending length: ") + to_string(sizeof(length)) + " value returned is: " + to_string(bytes_sent);
+		}
+
+		bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
+		if (bytes_sent != length)
+		{
+			perror("sending message");
+			throw string("sent returns bad value for sending message") + to_string(length) + " value returned is: " + to_string(bytes_sent);
+		}
+
+		cout << "Hit enter to exit:";
+		cin.get();
+		cin.get();
 	}
 	catch (string s)
 	{

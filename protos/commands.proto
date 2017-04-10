@@ -1,49 +1,80 @@
 syntax = "proto3";
 
 // Since we are using proto3, all fields are optional by default.
-// I (lozord), believe in "required considered harmful".
+// I (lozord), believe in "considered harmful".
 
 package pas;
 
+enum Type {
+	GENERIC = 0;
+	PLAY_TRACK_DEVICE = 1;
+	PAUSE_DEVICE = 2;
+	RESUME_DEVICE = 3;
+	STOP_DEVICE = 4;
+	WHO_DEVICE = 5;
+	WHAT_DEVICE = 6;
+	TRACK_COUNT = 7;
+	ARTIST_COUNT = 8;
+	FOLDER_COUNT = 9;
+	SELECT_QUERY = 10;
+	CONTENT_QUERY = 11;
+	WHEN_DEVICE = 12;
+}
+
+message GenericPB {
+	Type type = 1; 
+}
+
 message PlayTrackCommand {
-    uint64 device_id = 1;
-    uint64 track_id = 2;
+	Type type = 1; 
+    uint64 device_id = 2;
+    uint64 track_id = 3;
 }
 
 message PauseDeviceCommand {
-    uint64 device_id = 1;
+	Type type = 1; 
+    uint64 device_id = 2;
 }
 
 message ResumeDeviceCommand {
-    uint64 device_id = 1;
+	Type type = 1; 
+    uint64 device_id = 2;
 }
 
 message StopDeviceCommand {
-    uint64 device_id = 1;
+	Type type = 1; 
+    uint64 device_id = 2;
 }
 
 message TrackQueryCommand {
-    uint64 device_id = 1;
+	Type type = 1; 
+    uint64 device_id = 2;
 }
 
 message TimeQueryCommand {
-    uint64 device_id = 1;
+	Type type = 1; 
+    uint64 device_id = 2;
 }
 
 message TrackCountQuery {
+	Type type = 1; 
 }
 
 message ArtistCountQuery {
+	Type type = 1; 
 }
 
 message FolderCountQuery {
+	Type type = 1; 
 }
 
 message SelectQuery {
-    string column = 1;
-    string pattern = 2;
+	Type type = 1; 
+    string column = 2;
+    string pattern = 3;
 }
 
 message ContentQuery {
-    string path = 1;
+	Type type = 1; 
+    string path = 2;
 }
