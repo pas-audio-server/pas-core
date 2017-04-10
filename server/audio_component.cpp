@@ -102,6 +102,18 @@ void AudioComponent::LaunchAIO(aiocb & cb, int fd, AudioComponent * me, unsigned
 		throw LOG(_log_, "aio_read() failed: " + to_string(error));
 }
 
+static bool HasEnding (string const & fullString, string const & ending)
+{
+	bool rv = false;
+
+	if (fullString.length() >= ending.length())
+	{
+		rv = (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+	}
+	return rv;
+}
+
+
 void AudioComponent::PlayerThread(AudioComponent * me)
 {
 	AudioCommand ac;
@@ -229,6 +241,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->m_play_queue.unlock();
 			//LOG(_log_, nullptr);
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
+			bool is_mp3 = HasEnding(ps.path, "mp3");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG(_log_, "pipe failed to open");
 			LOG(_log_, player_command);
@@ -244,10 +257,22 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// With 24K buffers, this is a loss of 0.84 seconds.
 			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
 			me->read_offset += bytes_read;
-			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
-			me->read_offset += bytes_read;
-			bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
-			me->read_offset += bytes_read;
+			if (is_mp3)
+			{	
+				// It turns out flac will die if these are done. So,
+				// there are competing fixes. Without these, upsampled mp3
+				// will pssst. With these, flac dies. So, up above I am
+				// testing for file names ending in mp3. If a match,
+				// add the skips.
+				//
+				// Note: watch for psssst in the future as there may
+				// be other low resolution file formats out there.
+				//
+				bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
+				me->read_offset += bytes_read;
+				bytes_read = fread(buffers[0], 1, me->BUFFER_SIZE, p);
+				me->read_offset += bytes_read;
+			}
 			//LOG(_log_, nullptr);
 
 			// There needs to be one I/O already in flight by 
