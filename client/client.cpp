@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <cctype>
 #include <map>
@@ -340,10 +341,35 @@ int main(int argc, char * argv[])
 			if (l == "PB")
 				PBExperiment(server_socket);
 
-			if (l == "quit")
+			if (l == "PL")
+			{
+				cout << "DAC: ";
+				getline(cin, l);
+				int d = atoi(l.c_str());
+				if (d < 0 || d > 3)
+					continue;
+				cout << "File: ";
+				getline(cin, l);
+				ifstream f(l);
+				if (f.is_open())
+				{
+					while (getline(f, l))
+					{
+						if (l.size() == 0)
+							continue;
+						string s = to_string(d) + " P " + l;
+						cout << s << endl;
+						send(server_socket, (void *) s.c_str(), (int) s.size(), 0);
+						usleep(900000);
+					}
+					f.close();
+				}
+			}
+			else if (l == "quit")
+			{
 				break;
-
-			if (l == "rc")
+			}
+			else if (l == "rc")
 			{
 				if (!connected)
 				{
