@@ -205,8 +205,6 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 
 	try
 	{
-
-/*
 		size_t bytes_read;
 		const int BS = 2048;
 		char buffer[BS];
@@ -220,7 +218,6 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 				break;
 			memset(buffer, 0, BS);
 		}
-*/
 	}
 	catch (LoggedException s)
 	{
