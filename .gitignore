@@ -39,3 +39,7 @@ core
 
 # SQLite
 *.db
+
+# Text files
+play*.txt
+
