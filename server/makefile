@@ -1,13 +1,13 @@
 CC	= g++
-CFLAGS	= -O3 -Wall -std=c++11 -fopenmp
+CFLAGS	= -O3 -Wall -std=c++11 -fopenmp -pthread
 #CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
-LDFLAGS	= -ljson-c -lpthread -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt
+LDFLAGS	= -ljson-c -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt
 SRC		= $(wildcard *.cpp)
 OBJS	= $(SRC:.cpp=.o)
 
 all						: clear_screen server.out
 
-server.out				: server.o network_component.o file_system_component.o db_component.o track.o connection_manager.o audio_component.o logger.o
+server.out				: server.o network_component.o file_system_component.o db_component.o track.o connection_manager.o audio_component.o logger.o 
 						$(CC) $^ -o $@ $(LDFLAGS)
 
 %.o						: %.cpp

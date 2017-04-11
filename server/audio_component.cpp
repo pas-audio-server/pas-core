@@ -310,7 +310,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					assert(t >= 0);
 					if (t == 0)
 					{
-						LOG(_log_, nullptr);
+						//LOG(_log_, nullptr);
 						break;
 					}
 
@@ -405,7 +405,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 		{
 			LOG(_log_, e.Msg());
 		}
-		LOG(_log_, nullptr);
+		//LOG(_log_, nullptr);
 		if (p != nullptr)
 			pclose(p);
 	}
