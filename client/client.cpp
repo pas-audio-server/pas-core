@@ -32,10 +32,10 @@ const int BS = 2048;
 bool keep_going = true;
 
 /*
-map<string, string> simple_commands;
-map<string, string> one_arg_commands;
-map<string, string> two_arg_commands;
-*/
+   map<string, string> simple_commands;
+   map<string, string> one_arg_commands;
+   map<string, string> two_arg_commands;
+ */
 
 void SIGHandler(int signal_number)
 {
@@ -116,12 +116,32 @@ bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
+string GetResponse(int server_socket, Type & type)
+{
+	size_t length = 0;
+	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
+	if (bytes_read != sizeof(length))
+		throw LOG("bad recv getting length: " + to_string(bytes_read));
+	LOG("recv of length: " + to_string(length));
+	string s;
+	s.resize(length);
+	bytes_read = recv(server_socket, (void *) &s[0], length, 0);
+	if (bytes_read != length)
+		throw LOG("bad recv getting pbuffer: " + to_string(bytes_read));
+	GenericPB g;
+	// Start out as generic and return this if a) it IS generic or b) does not parse out.
+	type = GENERIC;
+	if (g.ParseFromString(s))
+		type = g.type();
+	return s;
+}
+
 int GetDeviceNumber()
 {
 	string l;
 	cout << "Device number: ";
 	getline(cin, l);
-	
+
 	int device_id = atoi(l.c_str());
 	if (device_id < 0 || device_id > 3)
 		device_id = -1;
@@ -163,7 +183,7 @@ void ResumeCommand(int server_socket)
 }
 
 /*	This is broken out to make the playlist feature easier.
-*/
+ */
 static void InnerPlayCommand(int device_id, int track, int server_socket)
 {
 	assert(server_socket >= 0);
@@ -232,12 +252,39 @@ void PauseCommand(int server_socket)
 	}
 }
 
+void WhoCommand(int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
+	{
+		string s;
+		WhoDeviceCommand sc;
+		sc.set_type(Type::WHO_DEVICE);
+		sc.set_device_id(device_id);
+		bool outcome = sc.SerializeToString(&s);
+		if (!outcome)
+			throw string("WhoCommand() bad serialize");
+		SendPB(s, server_socket);
+		Type type;
+		s = GetResponse(server_socket, type);
+		if (type == Type::ROW)
+		{
+			cout << "Yay! Got a ROW" << endl;
+// LEFT OFF HERE
+		}
+		else
+		{
+			cout << "Did not get a ROW" << endl;
+		}
+	}
+}
 void SelectCommand(int server_socket)
 {
 	assert(server_socket >= 0);
 
 	string s;
 	SelectQuery c;
+	c.set_type(SELECT_QUERY);
 	cout << "Column: ";
 	getline(cin, s);
 	c.set_column(s);
@@ -315,47 +362,49 @@ int main(int argc, char * argv[])
 				ClearCommand(server_socket);
 			else if (l == "select")
 				SelectCommand(server_socket);
-/*
-			else if (l == "quit")
-			{
-				break;
-			}
-			else if (l == "rc")
-			{
-				if (!connected)
-				{
-					server_socket = InitializeNetworkConnection(argc, argv);
-					if (server_socket < 0)
-						break;
-					connected = true;
-					cout << "Connected" << endl;
-				}
-				continue;
-			}
+			else if (l == "who")
+				WhoCommand(server_socket);
+			/*
+			   else if (l == "quit")
+			   {
+			   break;
+			   }
+			   else if (l == "rc")
+			   {
+			   if (!connected)
+			   {
+			   server_socket = InitializeNetworkConnection(argc, argv);
+			   if (server_socket < 0)
+			   break;
+			   connected = true;
+			   cout << "Connected" << endl;
+			   }
+			   continue;
+			   }
 
-			if (!connected)
-				continue;
+			   if (!connected)
+			   continue;
 
-			if (HandleSimple(server_socket, l))
-			{
-				if (l == "sq")
-				{
-					cout << "Disconnected" << endl;
-					connected = false;
-					server_socket = -1;
-				}
-				continue;
-			}
+			   if (HandleSimple(server_socket, l))
+			   {
+			   if (l == "sq")
+			   {
+			   cout << "Disconnected" << endl;
+			   connected = false;
+			   server_socket = -1;
+			   }
+			   continue;
+			   }
 
-			if (HandleArgCommand(server_socket, l, one_arg_commands, 1))
-				continue;
+			   if (HandleArgCommand(server_socket, l, one_arg_commands, 1))
+			   continue;
 
-			if (HandleArgCommand(server_socket, l, two_arg_commands, 2))
-				continue;
+			   if (HandleArgCommand(server_socket, l, two_arg_commands, 2))
+			   continue;
 
-			if (l == "se")
-				HandleSearch(server_socket);
-*/
+			   if (l == "se")
+			   HandleSearch(server_socket);
+			 */
 		}
 	}
 	catch (string s)

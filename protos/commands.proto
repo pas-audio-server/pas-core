@@ -20,10 +20,12 @@ enum Type {
 	WHEN_DEVICE = 12;
 	CLEAR_DEVICE = 13;
 	SELECT_RESULT = 14;
+	ROW = 15;
 }
 
 message Row {
-	map <string, string> results = 1;
+	Type type = 1;
+	map <string, string> results = 2;
 }
 
 message SelectResult

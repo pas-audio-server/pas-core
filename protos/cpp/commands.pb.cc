@@ -80,7 +80,8 @@ void protobuf_AssignDesc_commands_2eproto() {
       "commands.proto");
   GOOGLE_CHECK(file != NULL);
   Row_descriptor_ = file->message_type(0);
-  static const int Row_offsets_[1] = {
+  static const int Row_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Row, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Row, results_),
   };
   Row_reflection_ =
@@ -415,37 +416,38 @@ void protobuf_AddDesc_commands_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\016commands.proto\022\003pas\"]\n\003Row\022&\n\007results\030"
-    "\001 \003(\0132\025.pas.Row.ResultsEntry\032.\n\014ResultsE"
-    "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\">\n\014"
-    "SelectResult\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\025\n"
-    "\003row\030\002 \003(\0132\010.pas.Row\"$\n\tGenericPB\022\027\n\004typ"
-    "e\030\001 \001(\0162\t.pas.Type\"P\n\020PlayTrackCommand\022\027"
-    "\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001"
-    "(\004\022\020\n\010track_id\030\003 \001(\004\"@\n\022PauseDeviceComma"
-    "nd\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id"
-    "\030\002 \001(\004\"A\n\023ResumeDeviceCommand\022\027\n\004type\030\001 "
-    "\001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"\?\n\021Sto"
-    "pDeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022"
-    "\021\n\tdevice_id\030\002 \001(\004\">\n\020WhoDeviceCommand\022\027"
-    "\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001"
-    "(\004\"\?\n\021WhatDeviceCommand\022\027\n\004type\030\001 \001(\0162\t."
-    "pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"*\n\017TrackCoun"
-    "tQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Type\"+\n\020Artis"
-    "tCountQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Type\"+\n\020"
-    "FolderCountQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Typ"
-    "e\"G\n\013SelectQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Typ"
-    "e\022\016\n\006column\030\002 \001(\t\022\017\n\007pattern\030\003 \001(\t\"\?\n\021Wh"
-    "enDeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type"
-    "\022\021\n\tdevice_id\030\002 \001(\004\"@\n\022ClearDeviceComman"
-    "d\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030"
-    "\002 \001(\004*\376\001\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_TRAC"
-    "K_DEVICE\020\001\022\020\n\014PAUSE_DEVICE\020\002\022\021\n\rRESUME_D"
-    "EVICE\020\003\022\017\n\013STOP_DEVICE\020\004\022\016\n\nWHO_DEVICE\020\005"
-    "\022\017\n\013WHAT_DEVICE\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n\014AR"
-    "TIST_COUNT\020\010\022\020\n\014FOLDER_COUNT\020\t\022\020\n\014SELECT"
-    "_QUERY\020\n\022\017\n\013WHEN_DEVICE\020\014\022\020\n\014CLEAR_DEVIC"
-    "E\020\r\022\021\n\rSELECT_RESULT\020\016b\006proto3", 1230);
+    "\n\016commands.proto\022\003pas\"v\n\003Row\022\027\n\004type\030\001 \001"
+    "(\0162\t.pas.Type\022&\n\007results\030\002 \003(\0132\025.pas.Row"
+    ".ResultsEntry\032.\n\014ResultsEntry\022\013\n\003key\030\001 \001"
+    "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\">\n\014SelectResult\022\027\n"
+    "\004type\030\001 \001(\0162\t.pas.Type\022\025\n\003row\030\002 \003(\0132\010.pa"
+    "s.Row\"$\n\tGenericPB\022\027\n\004type\030\001 \001(\0162\t.pas.T"
+    "ype\"P\n\020PlayTrackCommand\022\027\n\004type\030\001 \001(\0162\t."
+    "pas.Type\022\021\n\tdevice_id\030\002 \001(\004\022\020\n\010track_id\030"
+    "\003 \001(\004\"@\n\022PauseDeviceCommand\022\027\n\004type\030\001 \001("
+    "\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"A\n\023Resum"
+    "eDeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022"
+    "\021\n\tdevice_id\030\002 \001(\004\"\?\n\021StopDeviceCommand\022"
+    "\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 "
+    "\001(\004\">\n\020WhoDeviceCommand\022\027\n\004type\030\001 \001(\0162\t."
+    "pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"\?\n\021WhatDevic"
+    "eCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdev"
+    "ice_id\030\002 \001(\004\"*\n\017TrackCountQuery\022\027\n\004type\030"
+    "\001 \001(\0162\t.pas.Type\"+\n\020ArtistCountQuery\022\027\n\004"
+    "type\030\001 \001(\0162\t.pas.Type\"+\n\020FolderCountQuer"
+    "y\022\027\n\004type\030\001 \001(\0162\t.pas.Type\"G\n\013SelectQuer"
+    "y\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\016\n\006column\030\002 \001"
+    "(\t\022\017\n\007pattern\030\003 \001(\t\"\?\n\021WhenDeviceCommand"
+    "\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002"
+    " \001(\004\"@\n\022ClearDeviceCommand\022\027\n\004type\030\001 \001(\016"
+    "2\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004*\207\002\n\004Type\022"
+    "\013\n\007GENERIC\020\000\022\025\n\021PLAY_TRACK_DEVICE\020\001\022\020\n\014P"
+    "AUSE_DEVICE\020\002\022\021\n\rRESUME_DEVICE\020\003\022\017\n\013STOP"
+    "_DEVICE\020\004\022\016\n\nWHO_DEVICE\020\005\022\017\n\013WHAT_DEVICE"
+    "\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n\014ARTIST_COUNT\020\010\022\020\n"
+    "\014FOLDER_COUNT\020\t\022\020\n\014SELECT_QUERY\020\n\022\017\n\013WHE"
+    "N_DEVICE\020\014\022\020\n\014CLEAR_DEVICE\020\r\022\021\n\rSELECT_R"
+    "ESULT\020\016\022\007\n\003ROW\020\017b\006proto3", 1264);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "commands.proto", &protobuf_RegisterTypes);
   Row::default_instance_ = new Row();
@@ -507,6 +509,7 @@ bool Type_IsValid(int value) {
     case 12:
     case 13:
     case 14:
+    case 15:
       return true;
     default:
       return false;
@@ -517,6 +520,7 @@ bool Type_IsValid(int value) {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int Row::kTypeFieldNumber;
 const int Row::kResultsFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -542,6 +546,7 @@ void Row::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  type_ = 0;
   results_.SetAssignDescriptorCallback(
       protobuf_AssignDescriptorsOnce);
   results_.SetEntryDescriptor(
@@ -585,6 +590,7 @@ Row* Row::New(::google::protobuf::Arena* arena) const {
 
 void Row::Clear() {
 // @@protoc_insertion_point(message_clear_start:pas.Row)
+  type_ = 0;
   results_.Clear();
 }
 
@@ -598,9 +604,25 @@ bool Row::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // map<string, string> results = 1;
+      // optional .pas.Type type = 1;
       case 1: {
-        if (tag == 10) {
+        if (tag == 8) {
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_type(static_cast< ::pas::Type >(value));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_results;
+        break;
+      }
+
+      // map<string, string> results = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_results:
           DO_(input->IncrementRecursionDepth());
          parse_loop_results:
           Row_ResultsEntry::Parser< ::google::protobuf::internal::MapField<
@@ -622,7 +644,7 @@ bool Row::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(10)) goto parse_loop_results;
+        if (input->ExpectTag(18)) goto parse_loop_results;
         input->UnsafeDecrementRecursionDepth();
         if (input->ExpectAtEnd()) goto success;
         break;
@@ -652,7 +674,13 @@ failure:
 void Row::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:pas.Row)
-  // map<string, string> results = 1;
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      1, this->type(), output);
+  }
+
+  // map<string, string> results = 2;
   if (!this->results().empty()) {
     typedef ::google::protobuf::Map< ::std::string, ::std::string >::const_pointer
         ConstPtr;
@@ -688,7 +716,7 @@ void Row::SerializeWithCachedSizes(
         entry.reset(results_.NewEntryWrapper(
             items[i]->first, items[i]->second));
         ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-            1, *entry, output);
+            2, *entry, output);
         Utf8Check::Check(items[i]);
       }
     } else {
@@ -699,7 +727,7 @@ void Row::SerializeWithCachedSizes(
         entry.reset(results_.NewEntryWrapper(
             it->first, it->second));
         ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-            1, *entry, output);
+            2, *entry, output);
         Utf8Check::Check(&*it);
       }
     }
@@ -711,7 +739,13 @@ void Row::SerializeWithCachedSizes(
 ::google::protobuf::uint8* Row::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:pas.Row)
-  // map<string, string> results = 1;
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      1, this->type(), target);
+  }
+
+  // map<string, string> results = 2;
   if (!this->results().empty()) {
     typedef ::google::protobuf::Map< ::std::string, ::std::string >::const_pointer
         ConstPtr;
@@ -748,7 +782,7 @@ void Row::SerializeWithCachedSizes(
             items[i]->first, items[i]->second));
         target = ::google::protobuf::internal::WireFormatLite::
                    InternalWriteMessageNoVirtualToArray(
-                       1, *entry, deterministic, target);
+                       2, *entry, deterministic, target);
 ;
         Utf8Check::Check(items[i]);
       }
@@ -761,7 +795,7 @@ void Row::SerializeWithCachedSizes(
             it->first, it->second));
         target = ::google::protobuf::internal::WireFormatLite::
                    InternalWriteMessageNoVirtualToArray(
-                       1, *entry, deterministic, target);
+                       2, *entry, deterministic, target);
 ;
         Utf8Check::Check(&*it);
       }
@@ -776,7 +810,13 @@ int Row::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:pas.Row)
   int total_size = 0;
 
-  // map<string, string> results = 1;
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+  }
+
+  // map<string, string> results = 2;
   total_size += 1 * this->results_size();
   {
     ::google::protobuf::scoped_ptr<Row_ResultsEntry> entry;
@@ -818,6 +858,9 @@ void Row::MergeFrom(const Row& from) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
   results_.MergeFrom(from.results_);
+  if (from.type() != 0) {
+    set_type(from.type());
+  }
 }
 
 void Row::CopyFrom(const ::google::protobuf::Message& from) {
@@ -844,6 +887,7 @@ void Row::Swap(Row* other) {
   InternalSwap(other);
 }
 void Row::InternalSwap(Row* other) {
+  std::swap(type_, other->type_);
   results_.Swap(&other->results_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -860,7 +904,21 @@ void Row::InternalSwap(Row* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // Row
 
-// map<string, string> results = 1;
+// optional .pas.Type type = 1;
+void Row::clear_type() {
+  type_ = 0;
+}
+ ::pas::Type Row::type() const {
+  // @@protoc_insertion_point(field_get:pas.Row.type)
+  return static_cast< ::pas::Type >(type_);
+}
+ void Row::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.Row.type)
+}
+
+// map<string, string> results = 2;
 int Row::results_size() const {
   return results_.size();
 }

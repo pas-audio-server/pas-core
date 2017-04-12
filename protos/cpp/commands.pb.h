@@ -70,12 +70,13 @@ enum Type {
   WHEN_DEVICE = 12,
   CLEAR_DEVICE = 13,
   SELECT_RESULT = 14,
+  ROW = 15,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = SELECT_RESULT;
+const Type Type_MAX = ROW;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();
@@ -151,10 +152,16 @@ class Row : public ::google::protobuf::Message /* @@protoc_insertion_point(class
 
   // accessors -------------------------------------------------------
 
-  // map<string, string> results = 1;
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // map<string, string> results = 2;
   int results_size() const;
   void clear_results();
-  static const int kResultsFieldNumber = 1;
+  static const int kResultsFieldNumber = 2;
   const ::google::protobuf::Map< ::std::string, ::std::string >&
       results() const;
   ::google::protobuf::Map< ::std::string, ::std::string >*
@@ -176,6 +183,7 @@ class Row : public ::google::protobuf::Message /* @@protoc_insertion_point(class
       ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
       ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
       0 > results_;
+  int type_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_commands_2eproto();
   friend void protobuf_AssignDesc_commands_2eproto();
@@ -1440,7 +1448,21 @@ class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insert
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
 // Row
 
-// map<string, string> results = 1;
+// optional .pas.Type type = 1;
+inline void Row::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type Row::type() const {
+  // @@protoc_insertion_point(field_get:pas.Row.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void Row::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.Row.type)
+}
+
+// map<string, string> results = 2;
 inline int Row::results_size() const {
   return results_.size();
 }

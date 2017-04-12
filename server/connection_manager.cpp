@@ -59,6 +59,20 @@ static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int 
 	}
 }
 
+static void SendPB(string & s, int server_socket)
+{
+	assert(server_socket >= 0);
+
+	size_t length = s.size();
+	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
+	if (bytes_sent != sizeof(length))
+		throw string("bad bytes_sent for length");
+
+	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
+	if (bytes_sent != length)
+		throw string("bad bytes_sent for message");
+}
+
 static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 {
 	AudioComponent ** acs = (AudioComponent **) dacs;
@@ -73,9 +87,30 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 	try
 	{
 		GenericPB g;
+		//LOG(_log_, nullptr);
 		g.ParseFromString(s);
+		//LOG(_log_, nullptr);
 		switch (g.type())
 		{
+			case Type::WHO_DEVICE:
+				{
+					Row r;
+					r.set_type(ROW);
+		LOG(_log_, nullptr);
+					google::protobuf::Map<string, string> * result = r.mutable_results();
+		LOG(_log_, nullptr);
+		// LEFT OFF HERE
+					(*result)[string("happy")] = string("joy");
+		LOG(_log_, nullptr);
+					string s;
+					bool outcome = r.SerializeToString(&s);
+					if (!outcome)
+						throw string("WHO_DEVICE bad serialize");
+		LOG(_log_, nullptr);
+					SendPB(s, socket);
+				}
+				break;
+
 			case Type::STOP_DEVICE:
 				{
 					LOG(_log_, "STOP_DEVICE");
@@ -129,7 +164,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					SelectQuery c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "select failed to parse");
-					db = InitDB();
+//					db = InitDB();
 // TIRED - LEFT OFF HERE - DB COMP NEEDS TO LEARN ABOUT PBUFFERS
 				}
 			default:
