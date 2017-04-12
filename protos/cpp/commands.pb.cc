@@ -25,6 +25,9 @@ const ::google::protobuf::Descriptor* Row_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Row_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Row_ResultsEntry_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* DacInfo_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  DacInfo_reflection_ = NULL;
 const ::google::protobuf::Descriptor* SelectResult_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SelectResult_reflection_ = NULL;
@@ -105,7 +108,23 @@ void protobuf_AssignDesc_commands_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Row, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Row, _is_default_instance_));
   Row_ResultsEntry_descriptor_ = Row_descriptor_->nested_type(0);
-  SelectResult_descriptor_ = file->message_type(1);
+  DacInfo_descriptor_ = file->message_type(1);
+  static const int DacInfo_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DacInfo, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DacInfo, row_),
+  };
+  DacInfo_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      DacInfo_descriptor_,
+      DacInfo::default_instance_,
+      DacInfo_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(DacInfo),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DacInfo, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DacInfo, _is_default_instance_));
+  SelectResult_descriptor_ = file->message_type(2);
   static const int SelectResult_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectResult, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectResult, row_),
@@ -121,7 +140,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(SelectResult),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectResult, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectResult, _is_default_instance_));
-  GenericPB_descriptor_ = file->message_type(2);
+  GenericPB_descriptor_ = file->message_type(3);
   static const int GenericPB_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GenericPB, type_),
   };
@@ -136,7 +155,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(GenericPB),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GenericPB, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GenericPB, _is_default_instance_));
-  PlayTrackCommand_descriptor_ = file->message_type(3);
+  PlayTrackCommand_descriptor_ = file->message_type(4);
   static const int PlayTrackCommand_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayTrackCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayTrackCommand, device_id_),
@@ -153,7 +172,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(PlayTrackCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayTrackCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayTrackCommand, _is_default_instance_));
-  PauseDeviceCommand_descriptor_ = file->message_type(4);
+  PauseDeviceCommand_descriptor_ = file->message_type(5);
   static const int PauseDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PauseDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PauseDeviceCommand, device_id_),
@@ -169,7 +188,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(PauseDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PauseDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PauseDeviceCommand, _is_default_instance_));
-  ResumeDeviceCommand_descriptor_ = file->message_type(5);
+  ResumeDeviceCommand_descriptor_ = file->message_type(6);
   static const int ResumeDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ResumeDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ResumeDeviceCommand, device_id_),
@@ -185,7 +204,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(ResumeDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ResumeDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ResumeDeviceCommand, _is_default_instance_));
-  ClearDeviceCommand_descriptor_ = file->message_type(6);
+  ClearDeviceCommand_descriptor_ = file->message_type(7);
   static const int ClearDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ClearDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ClearDeviceCommand, device_id_),
@@ -201,7 +220,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(ClearDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ClearDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ClearDeviceCommand, _is_default_instance_));
-  StopDeviceCommand_descriptor_ = file->message_type(7);
+  StopDeviceCommand_descriptor_ = file->message_type(8);
   static const int StopDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopDeviceCommand, device_id_),
@@ -217,7 +236,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(StopDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopDeviceCommand, _is_default_instance_));
-  WhoDeviceCommand_descriptor_ = file->message_type(8);
+  WhoDeviceCommand_descriptor_ = file->message_type(9);
   static const int WhoDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhoDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhoDeviceCommand, device_id_),
@@ -233,7 +252,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(WhoDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhoDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhoDeviceCommand, _is_default_instance_));
-  WhatDeviceCommand_descriptor_ = file->message_type(9);
+  WhatDeviceCommand_descriptor_ = file->message_type(10);
   static const int WhatDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhatDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhatDeviceCommand, device_id_),
@@ -249,7 +268,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(WhatDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhatDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhatDeviceCommand, _is_default_instance_));
-  TrackCountQuery_descriptor_ = file->message_type(10);
+  TrackCountQuery_descriptor_ = file->message_type(11);
   static const int TrackCountQuery_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrackCountQuery, type_),
   };
@@ -264,7 +283,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(TrackCountQuery),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrackCountQuery, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrackCountQuery, _is_default_instance_));
-  ArtistCountQuery_descriptor_ = file->message_type(11);
+  ArtistCountQuery_descriptor_ = file->message_type(12);
   static const int ArtistCountQuery_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArtistCountQuery, type_),
   };
@@ -279,7 +298,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(ArtistCountQuery),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArtistCountQuery, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArtistCountQuery, _is_default_instance_));
-  FolderCountQuery_descriptor_ = file->message_type(12);
+  FolderCountQuery_descriptor_ = file->message_type(13);
   static const int FolderCountQuery_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FolderCountQuery, type_),
   };
@@ -294,7 +313,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(FolderCountQuery),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FolderCountQuery, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FolderCountQuery, _is_default_instance_));
-  SelectQuery_descriptor_ = file->message_type(13);
+  SelectQuery_descriptor_ = file->message_type(14);
   static const int SelectQuery_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectQuery, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectQuery, column_),
@@ -311,7 +330,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(SelectQuery),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectQuery, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SelectQuery, _is_default_instance_));
-  WhenDeviceCommand_descriptor_ = file->message_type(14);
+  WhenDeviceCommand_descriptor_ = file->message_type(15);
   static const int WhenDeviceCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhenDeviceCommand, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhenDeviceCommand, device_id_),
@@ -327,7 +346,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(WhenDeviceCommand),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhenDeviceCommand, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WhenDeviceCommand, _is_default_instance_));
-  OneInteger_descriptor_ = file->message_type(15);
+  OneInteger_descriptor_ = file->message_type(16);
   static const int OneInteger_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneInteger, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneInteger, value_),
@@ -343,7 +362,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(OneInteger),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneInteger, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneInteger, _is_default_instance_));
-  OneString_descriptor_ = file->message_type(16);
+  OneString_descriptor_ = file->message_type(17);
   static const int OneString_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneString, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneString, value_),
@@ -359,7 +378,7 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(OneString),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneString, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneString, _is_default_instance_));
-  OneFloat_descriptor_ = file->message_type(17);
+  OneFloat_descriptor_ = file->message_type(18);
   static const int OneFloat_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneFloat, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneFloat, value_),
@@ -401,6 +420,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
             0>::CreateDefaultInstance(
                 Row_ResultsEntry_descriptor_));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      DacInfo_descriptor_, &DacInfo::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       SelectResult_descriptor_, &SelectResult::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       GenericPB_descriptor_, &GenericPB::default_instance());
@@ -441,6 +462,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void protobuf_ShutdownFile_commands_2eproto() {
   delete Row::default_instance_;
   delete Row_reflection_;
+  delete DacInfo::default_instance_;
+  delete DacInfo_reflection_;
   delete SelectResult::default_instance_;
   delete SelectResult_reflection_;
   delete GenericPB::default_instance_;
@@ -488,43 +511,46 @@ void protobuf_AddDesc_commands_2eproto() {
     "\n\016commands.proto\022\003pas\"v\n\003Row\022\027\n\004type\030\001 \001"
     "(\0162\t.pas.Type\022&\n\007results\030\002 \003(\0132\025.pas.Row"
     ".ResultsEntry\032.\n\014ResultsEntry\022\013\n\003key\030\001 \001"
-    "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\">\n\014SelectResult\022\027\n"
-    "\004type\030\001 \001(\0162\t.pas.Type\022\025\n\003row\030\002 \003(\0132\010.pa"
-    "s.Row\"$\n\tGenericPB\022\027\n\004type\030\001 \001(\0162\t.pas.T"
-    "ype\"P\n\020PlayTrackCommand\022\027\n\004type\030\001 \001(\0162\t."
-    "pas.Type\022\021\n\tdevice_id\030\002 \001(\004\022\020\n\010track_id\030"
-    "\003 \001(\004\"@\n\022PauseDeviceCommand\022\027\n\004type\030\001 \001("
-    "\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"A\n\023Resum"
-    "eDeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022"
-    "\021\n\tdevice_id\030\002 \001(\004\"@\n\022ClearDeviceCommand"
-    "\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002"
-    " \001(\004\"\?\n\021StopDeviceCommand\022\027\n\004type\030\001 \001(\0162"
-    "\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\">\n\020WhoDevi"
-    "ceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tde"
-    "vice_id\030\002 \001(\004\"\?\n\021WhatDeviceCommand\022\027\n\004ty"
-    "pe\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"*"
-    "\n\017TrackCountQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Ty"
-    "pe\"+\n\020ArtistCountQuery\022\027\n\004type\030\001 \001(\0162\t.p"
-    "as.Type\"+\n\020FolderCountQuery\022\027\n\004type\030\001 \001("
-    "\0162\t.pas.Type\"G\n\013SelectQuery\022\027\n\004type\030\001 \001("
-    "\0162\t.pas.Type\022\016\n\006column\030\002 \001(\t\022\017\n\007pattern\030"
-    "\003 \001(\t\"\?\n\021WhenDeviceCommand\022\027\n\004type\030\001 \001(\016"
-    "2\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"4\n\nOneInt"
-    "eger\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\r\n\005value\030\002"
-    " \001(\004\"3\n\tOneString\022\027\n\004type\030\001 \001(\0162\t.pas.Ty"
-    "pe\022\r\n\005value\030\002 \001(\t\"2\n\010OneFloat\022\027\n\004type\030\001 "
-    "\001(\0162\t.pas.Type\022\r\n\005value\030\002 \001(\002*\263\002\n\004Type\022\013"
-    "\n\007GENERIC\020\000\022\025\n\021PLAY_TRACK_DEVICE\020\001\022\020\n\014PA"
-    "USE_DEVICE\020\002\022\021\n\rRESUME_DEVICE\020\003\022\017\n\013STOP_"
-    "DEVICE\020\004\022\016\n\nWHO_DEVICE\020\005\022\017\n\013WHAT_DEVICE\020"
-    "\006\022\017\n\013TRACK_COUNT\020\007\022\020\n\014ARTIST_COUNT\020\010\022\020\n\014"
-    "FOLDER_COUNT\020\t\022\020\n\014SELECT_QUERY\020\n\022\017\n\013WHEN"
-    "_DEVICE\020\014\022\020\n\014CLEAR_DEVICE\020\r\022\021\n\rSELECT_RE"
-    "SULT\020\016\022\007\n\003ROW\020\017\022\013\n\007ONE_INT\020\020\022\016\n\nONE_STRI"
-    "NG\020\021\022\r\n\tONE_FLOAT\020\022b\006proto3", 1467);
+    "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"9\n\007DacInfo\022\027\n\004type"
+    "\030\001 \001(\0162\t.pas.Type\022\025\n\003row\030\002 \003(\0132\010.pas.Row"
+    "\">\n\014SelectResult\022\027\n\004type\030\001 \001(\0162\t.pas.Typ"
+    "e\022\025\n\003row\030\002 \003(\0132\010.pas.Row\"$\n\tGenericPB\022\027\n"
+    "\004type\030\001 \001(\0162\t.pas.Type\"P\n\020PlayTrackComma"
+    "nd\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id"
+    "\030\002 \001(\004\022\020\n\010track_id\030\003 \001(\004\"@\n\022PauseDeviceC"
+    "ommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevic"
+    "e_id\030\002 \001(\004\"A\n\023ResumeDeviceCommand\022\027\n\004typ"
+    "e\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"@\n"
+    "\022ClearDeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas."
+    "Type\022\021\n\tdevice_id\030\002 \001(\004\"\?\n\021StopDeviceCom"
+    "mand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice_"
+    "id\030\002 \001(\004\">\n\020WhoDeviceCommand\022\027\n\004type\030\001 \001"
+    "(\0162\t.pas.Type\022\021\n\tdevice_id\030\002 \001(\004\"\?\n\021What"
+    "DeviceCommand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021"
+    "\n\tdevice_id\030\002 \001(\004\"*\n\017TrackCountQuery\022\027\n\004"
+    "type\030\001 \001(\0162\t.pas.Type\"+\n\020ArtistCountQuer"
+    "y\022\027\n\004type\030\001 \001(\0162\t.pas.Type\"+\n\020FolderCoun"
+    "tQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Type\"G\n\013Selec"
+    "tQuery\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\016\n\006colum"
+    "n\030\002 \001(\t\022\017\n\007pattern\030\003 \001(\t\"\?\n\021WhenDeviceCo"
+    "mmand\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\021\n\tdevice"
+    "_id\030\002 \001(\004\"4\n\nOneInteger\022\027\n\004type\030\001 \001(\0162\t."
+    "pas.Type\022\r\n\005value\030\002 \001(\004\"3\n\tOneString\022\027\n\004"
+    "type\030\001 \001(\0162\t.pas.Type\022\r\n\005value\030\002 \001(\t\"2\n\010"
+    "OneFloat\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\r\n\005val"
+    "ue\030\002 \001(\002*\311\002\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_T"
+    "RACK_DEVICE\020\001\022\020\n\014PAUSE_DEVICE\020\002\022\021\n\rRESUM"
+    "E_DEVICE\020\003\022\017\n\013STOP_DEVICE\020\004\022\016\n\nWHO_DEVIC"
+    "E\020\005\022\017\n\013WHAT_DEVICE\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n"
+    "\014ARTIST_COUNT\020\010\022\020\n\014FOLDER_COUNT\020\t\022\020\n\014SEL"
+    "ECT_QUERY\020\n\022\017\n\013WHEN_DEVICE\020\014\022\020\n\014CLEAR_DE"
+    "VICE\020\r\022\021\n\rSELECT_RESULT\020\016\022\007\n\003ROW\020\017\022\013\n\007ON"
+    "E_INT\020\020\022\016\n\nONE_STRING\020\021\022\r\n\tONE_FLOAT\020\022\022\024"
+    "\n\020DAC_INFO_COMMAND\020\023b\006proto3", 1548);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "commands.proto", &protobuf_RegisterTypes);
   Row::default_instance_ = new Row();
+  DacInfo::default_instance_ = new DacInfo();
   SelectResult::default_instance_ = new SelectResult();
   GenericPB::default_instance_ = new GenericPB();
   PlayTrackCommand::default_instance_ = new PlayTrackCommand();
@@ -543,6 +569,7 @@ void protobuf_AddDesc_commands_2eproto() {
   OneString::default_instance_ = new OneString();
   OneFloat::default_instance_ = new OneFloat();
   Row::default_instance_->InitAsDefaultInstance();
+  DacInfo::default_instance_->InitAsDefaultInstance();
   SelectResult::default_instance_->InitAsDefaultInstance();
   GenericPB::default_instance_->InitAsDefaultInstance();
   PlayTrackCommand::default_instance_->InitAsDefaultInstance();
@@ -593,6 +620,7 @@ bool Type_IsValid(int value) {
     case 16:
     case 17:
     case 18:
+    case 19:
       return true;
     default:
       return false;
@@ -1017,6 +1045,318 @@ Row::results() const {
 Row::mutable_results() {
   // @@protoc_insertion_point(field_mutable_map:pas.Row.results)
   return results_.MutableMap();
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int DacInfo::kTypeFieldNumber;
+const int DacInfo::kRowFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+DacInfo::DacInfo()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:pas.DacInfo)
+}
+
+void DacInfo::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+DacInfo::DacInfo(const DacInfo& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:pas.DacInfo)
+}
+
+void DacInfo::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  type_ = 0;
+}
+
+DacInfo::~DacInfo() {
+  // @@protoc_insertion_point(destructor:pas.DacInfo)
+  SharedDtor();
+}
+
+void DacInfo::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void DacInfo::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* DacInfo::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return DacInfo_descriptor_;
+}
+
+const DacInfo& DacInfo::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_commands_2eproto();
+  return *default_instance_;
+}
+
+DacInfo* DacInfo::default_instance_ = NULL;
+
+DacInfo* DacInfo::New(::google::protobuf::Arena* arena) const {
+  DacInfo* n = new DacInfo;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void DacInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:pas.DacInfo)
+  type_ = 0;
+  row_.Clear();
+}
+
+bool DacInfo::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:pas.DacInfo)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .pas.Type type = 1;
+      case 1: {
+        if (tag == 8) {
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_type(static_cast< ::pas::Type >(value));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_row;
+        break;
+      }
+
+      // repeated .pas.Row row = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_row:
+          DO_(input->IncrementRecursionDepth());
+         parse_loop_row:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtualNoRecursionDepth(
+                input, add_row()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_loop_row;
+        input->UnsafeDecrementRecursionDepth();
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:pas.DacInfo)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:pas.DacInfo)
+  return false;
+#undef DO_
+}
+
+void DacInfo::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:pas.DacInfo)
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      1, this->type(), output);
+  }
+
+  // repeated .pas.Row row = 2;
+  for (unsigned int i = 0, n = this->row_size(); i < n; i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->row(i), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:pas.DacInfo)
+}
+
+::google::protobuf::uint8* DacInfo::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pas.DacInfo)
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      1, this->type(), target);
+  }
+
+  // repeated .pas.Row row = 2;
+  for (unsigned int i = 0, n = this->row_size(); i < n; i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        2, this->row(i), false, target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:pas.DacInfo)
+  return target;
+}
+
+int DacInfo::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:pas.DacInfo)
+  int total_size = 0;
+
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+  }
+
+  // repeated .pas.Row row = 2;
+  total_size += 1 * this->row_size();
+  for (int i = 0; i < this->row_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->row(i));
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void DacInfo::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pas.DacInfo)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const DacInfo* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const DacInfo>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pas.DacInfo)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pas.DacInfo)
+    MergeFrom(*source);
+  }
+}
+
+void DacInfo::MergeFrom(const DacInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pas.DacInfo)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  row_.MergeFrom(from.row_);
+  if (from.type() != 0) {
+    set_type(from.type());
+  }
+}
+
+void DacInfo::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pas.DacInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DacInfo::CopyFrom(const DacInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pas.DacInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DacInfo::IsInitialized() const {
+
+  return true;
+}
+
+void DacInfo::Swap(DacInfo* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void DacInfo::InternalSwap(DacInfo* other) {
+  std::swap(type_, other->type_);
+  row_.UnsafeArenaSwap(&other->row_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata DacInfo::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = DacInfo_descriptor_;
+  metadata.reflection = DacInfo_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// DacInfo
+
+// optional .pas.Type type = 1;
+void DacInfo::clear_type() {
+  type_ = 0;
+}
+ ::pas::Type DacInfo::type() const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.type)
+  return static_cast< ::pas::Type >(type_);
+}
+ void DacInfo::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.DacInfo.type)
+}
+
+// repeated .pas.Row row = 2;
+int DacInfo::row_size() const {
+  return row_.size();
+}
+void DacInfo::clear_row() {
+  row_.Clear();
+}
+const ::pas::Row& DacInfo::row(int index) const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.row)
+  return row_.Get(index);
+}
+::pas::Row* DacInfo::mutable_row(int index) {
+  // @@protoc_insertion_point(field_mutable:pas.DacInfo.row)
+  return row_.Mutable(index);
+}
+::pas::Row* DacInfo::add_row() {
+  // @@protoc_insertion_point(field_add:pas.DacInfo.row)
+  return row_.Add();
+}
+::google::protobuf::RepeatedPtrField< ::pas::Row >*
+DacInfo::mutable_row() {
+  // @@protoc_insertion_point(field_mutable_list:pas.DacInfo.row)
+  return &row_;
+}
+const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
+DacInfo::row() const {
+  // @@protoc_insertion_point(field_list:pas.DacInfo.row)
+  return row_;
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

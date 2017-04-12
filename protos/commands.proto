@@ -24,12 +24,21 @@ enum Type {
 	ONE_INT = 16;
 	ONE_STRING = 17;
 	ONE_FLOAT = 18;
+	DAC_INFO_COMMAND = 19;
 }
 
 // This is a return type
 message Row {
 	Type type = 1;
 	map <string, string> results = 2;
+}
+
+// This is a command type
+// It expects a SelectResult in response.
+message DacInfo
+{
+	Type type = 1;
+	repeated Row row = 2;
 }
 
 // This is a return type

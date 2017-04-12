@@ -107,6 +107,32 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 		//LOG(_log_, nullptr);
 		switch (g.type())
 		{
+			case Type::DAC_INFO_COMMAND:
+			{
+				SelectResult sr;
+				sr.set_type(SELECT_RESULT);
+				LOG(_log_, nullptr);
+				for (int i = 0; i < ndacs; i++)
+				{
+					Row * r = sr.add_row();
+				LOG(_log_, nullptr);
+					r->set_type(ROW);
+					google::protobuf::Map<string, string> * result = r->mutable_results();
+				LOG(_log_, nullptr);
+					(*result)[string("index")] = to_string(i);
+					(*result)[string("name")] = acs[i]->HumanName();
+					(*result)[string("who")] = acs[i]->Who();
+					(*result)[string("what")] = acs[i]->What();
+					(*result)[string("when")] = acs[i]->TimeCode();
+				LOG(_log_, nullptr);
+				}
+				if (!sr.SerializeToString(&s))
+						throw LOG(_log_, "t_c could not serialize");
+				LOG(_log_, nullptr);
+				SendPB(s, socket);
+			}
+			break;
+
 			case Type::TRACK_COUNT:
 				{
 					db = InitDB();

@@ -252,6 +252,47 @@ void PauseCommand(int server_socket)
 	}
 }
 
+void DacInfoCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+	string s;
+	DacInfo a;
+	a.set_type(DAC_INFO_COMMAND);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("DacInfoCommand() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	// NOTE
+	// NOTE - this is a mistake I was supposed to result at DacInfo not a SelectResult
+	//
+	if (type == Type::SELECT_RESULT)
+	{
+		cout << LOG("got select result back") << endl;
+		SelectResult sr;
+		if (!sr.ParseFromString(s))
+		{
+			throw string("dacinfocomment parsefromstring failed");
+		}
+		cout << setw(8) << left << "Index";
+		cout << setw(32) << "Name";
+		cout << right << endl;
+		for (int i = 0; i < sr.row_size(); i++)
+		{
+			Row r = sr.row(i);
+			google::protobuf::Map<string, string> results = r.results();
+			cout << setw(8) << left << results[string("index")];
+			cout << setw(32) << results[string("name")];
+			cout << right << endl;
+		}
+	}
+	else
+	{
+		throw string("did not get select_result back");
+	}
+}
+
 /*
    if (type == Type::ROW)
    {
@@ -485,6 +526,8 @@ int main(int argc, char * argv[])
 				ArtistCountCommand(server_socket);
 			else if (l == "quit")
 				break;
+			else if (l == "dacs")
+				DacInfoCommand(server_socket);
 			else if (l == "rc")
 			{
 				if (!connected)

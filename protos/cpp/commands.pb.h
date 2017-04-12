@@ -41,6 +41,7 @@ void protobuf_ShutdownFile_commands_2eproto();
 
 class ArtistCountQuery;
 class ClearDeviceCommand;
+class DacInfo;
 class FolderCountQuery;
 class GenericPB;
 class OneFloat;
@@ -77,12 +78,13 @@ enum Type {
   ONE_INT = 16,
   ONE_STRING = 17,
   ONE_FLOAT = 18,
+  DAC_INFO_COMMAND = 19,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = ONE_FLOAT;
+const Type Type_MAX = DAC_INFO_COMMAND;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();
@@ -197,6 +199,101 @@ class Row : public ::google::protobuf::Message /* @@protoc_insertion_point(class
 
   void InitAsDefaultInstance();
   static Row* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DacInfo : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.DacInfo) */ {
+ public:
+  DacInfo();
+  virtual ~DacInfo();
+
+  DacInfo(const DacInfo& from);
+
+  inline DacInfo& operator=(const DacInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DacInfo& default_instance();
+
+  void Swap(DacInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  inline DacInfo* New() const { return New(NULL); }
+
+  DacInfo* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DacInfo& from);
+  void MergeFrom(const DacInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(DacInfo* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // repeated .pas.Row row = 2;
+  int row_size() const;
+  void clear_row();
+  static const int kRowFieldNumber = 2;
+  const ::pas::Row& row(int index) const;
+  ::pas::Row* mutable_row(int index);
+  ::pas::Row* add_row();
+  ::google::protobuf::RepeatedPtrField< ::pas::Row >*
+      mutable_row();
+  const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
+      row() const;
+
+  // @@protoc_insertion_point(class_scope:pas.DacInfo)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::RepeatedPtrField< ::pas::Row > row_;
+  int type_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_commands_2eproto();
+  friend void protobuf_AssignDesc_commands_2eproto();
+  friend void protobuf_ShutdownFile_commands_2eproto();
+
+  void InitAsDefaultInstance();
+  static DacInfo* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1760,6 +1857,54 @@ Row::mutable_results() {
 
 // -------------------------------------------------------------------
 
+// DacInfo
+
+// optional .pas.Type type = 1;
+inline void DacInfo::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type DacInfo::type() const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void DacInfo::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.DacInfo.type)
+}
+
+// repeated .pas.Row row = 2;
+inline int DacInfo::row_size() const {
+  return row_.size();
+}
+inline void DacInfo::clear_row() {
+  row_.Clear();
+}
+inline const ::pas::Row& DacInfo::row(int index) const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.row)
+  return row_.Get(index);
+}
+inline ::pas::Row* DacInfo::mutable_row(int index) {
+  // @@protoc_insertion_point(field_mutable:pas.DacInfo.row)
+  return row_.Mutable(index);
+}
+inline ::pas::Row* DacInfo::add_row() {
+  // @@protoc_insertion_point(field_add:pas.DacInfo.row)
+  return row_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::pas::Row >*
+DacInfo::mutable_row() {
+  // @@protoc_insertion_point(field_mutable_list:pas.DacInfo.row)
+  return &row_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
+DacInfo::row() const {
+  // @@protoc_insertion_point(field_list:pas.DacInfo.row)
+  return row_;
+}
+
+// -------------------------------------------------------------------
+
 // SelectResult
 
 // optional .pas.Type type = 1;
@@ -2381,6 +2526,8 @@ inline void OneFloat::set_value(float value) {
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
