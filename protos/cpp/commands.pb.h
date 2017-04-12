@@ -43,6 +43,9 @@ class ArtistCountQuery;
 class ClearDeviceCommand;
 class FolderCountQuery;
 class GenericPB;
+class OneFloat;
+class OneInteger;
+class OneString;
 class PauseDeviceCommand;
 class PlayTrackCommand;
 class ResumeDeviceCommand;
@@ -71,12 +74,15 @@ enum Type {
   CLEAR_DEVICE = 13,
   SELECT_RESULT = 14,
   ROW = 15,
+  ONE_INT = 16,
+  ONE_STRING = 17,
+  ONE_FLOAT = 18,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = ROW;
+const Type Type_MAX = ONE_FLOAT;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();
@@ -642,6 +648,95 @@ class ResumeDeviceCommand : public ::google::protobuf::Message /* @@protoc_inser
 
   void InitAsDefaultInstance();
   static ResumeDeviceCommand* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.ClearDeviceCommand) */ {
+ public:
+  ClearDeviceCommand();
+  virtual ~ClearDeviceCommand();
+
+  ClearDeviceCommand(const ClearDeviceCommand& from);
+
+  inline ClearDeviceCommand& operator=(const ClearDeviceCommand& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ClearDeviceCommand& default_instance();
+
+  void Swap(ClearDeviceCommand* other);
+
+  // implements Message ----------------------------------------------
+
+  inline ClearDeviceCommand* New() const { return New(NULL); }
+
+  ClearDeviceCommand* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ClearDeviceCommand& from);
+  void MergeFrom(const ClearDeviceCommand& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(ClearDeviceCommand* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // optional uint64 device_id = 2;
+  void clear_device_id();
+  static const int kDeviceIdFieldNumber = 2;
+  ::google::protobuf::uint64 device_id() const;
+  void set_device_id(::google::protobuf::uint64 value);
+
+  // @@protoc_insertion_point(class_scope:pas.ClearDeviceCommand)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::uint64 device_id_;
+  int type_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_commands_2eproto();
+  friend void protobuf_AssignDesc_commands_2eproto();
+  friend void protobuf_ShutdownFile_commands_2eproto();
+
+  void InitAsDefaultInstance();
+  static ClearDeviceCommand* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1353,32 +1448,32 @@ class WhenDeviceCommand : public ::google::protobuf::Message /* @@protoc_inserti
 };
 // -------------------------------------------------------------------
 
-class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.ClearDeviceCommand) */ {
+class OneInteger : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneInteger) */ {
  public:
-  ClearDeviceCommand();
-  virtual ~ClearDeviceCommand();
+  OneInteger();
+  virtual ~OneInteger();
 
-  ClearDeviceCommand(const ClearDeviceCommand& from);
+  OneInteger(const OneInteger& from);
 
-  inline ClearDeviceCommand& operator=(const ClearDeviceCommand& from) {
+  inline OneInteger& operator=(const OneInteger& from) {
     CopyFrom(from);
     return *this;
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ClearDeviceCommand& default_instance();
+  static const OneInteger& default_instance();
 
-  void Swap(ClearDeviceCommand* other);
+  void Swap(OneInteger* other);
 
   // implements Message ----------------------------------------------
 
-  inline ClearDeviceCommand* New() const { return New(NULL); }
+  inline OneInteger* New() const { return New(NULL); }
 
-  ClearDeviceCommand* New(::google::protobuf::Arena* arena) const;
+  OneInteger* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ClearDeviceCommand& from);
-  void MergeFrom(const ClearDeviceCommand& from);
+  void CopyFrom(const OneInteger& from);
+  void MergeFrom(const OneInteger& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1397,7 +1492,7 @@ class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insert
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(ClearDeviceCommand* other);
+  void InternalSwap(OneInteger* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -1419,18 +1514,18 @@ class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insert
   ::pas::Type type() const;
   void set_type(::pas::Type value);
 
-  // optional uint64 device_id = 2;
-  void clear_device_id();
-  static const int kDeviceIdFieldNumber = 2;
-  ::google::protobuf::uint64 device_id() const;
-  void set_device_id(::google::protobuf::uint64 value);
+  // optional uint64 value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  ::google::protobuf::uint64 value() const;
+  void set_value(::google::protobuf::uint64 value);
 
-  // @@protoc_insertion_point(class_scope:pas.ClearDeviceCommand)
+  // @@protoc_insertion_point(class_scope:pas.OneInteger)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
-  ::google::protobuf::uint64 device_id_;
+  ::google::protobuf::uint64 value_;
   int type_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_commands_2eproto();
@@ -1438,7 +1533,190 @@ class ClearDeviceCommand : public ::google::protobuf::Message /* @@protoc_insert
   friend void protobuf_ShutdownFile_commands_2eproto();
 
   void InitAsDefaultInstance();
-  static ClearDeviceCommand* default_instance_;
+  static OneInteger* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class OneString : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneString) */ {
+ public:
+  OneString();
+  virtual ~OneString();
+
+  OneString(const OneString& from);
+
+  inline OneString& operator=(const OneString& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const OneString& default_instance();
+
+  void Swap(OneString* other);
+
+  // implements Message ----------------------------------------------
+
+  inline OneString* New() const { return New(NULL); }
+
+  OneString* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const OneString& from);
+  void MergeFrom(const OneString& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(OneString* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // optional string value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  const ::std::string& value() const;
+  void set_value(const ::std::string& value);
+  void set_value(const char* value);
+  void set_value(const char* value, size_t size);
+  ::std::string* mutable_value();
+  ::std::string* release_value();
+  void set_allocated_value(::std::string* value);
+
+  // @@protoc_insertion_point(class_scope:pas.OneString)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::internal::ArenaStringPtr value_;
+  int type_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_commands_2eproto();
+  friend void protobuf_AssignDesc_commands_2eproto();
+  friend void protobuf_ShutdownFile_commands_2eproto();
+
+  void InitAsDefaultInstance();
+  static OneString* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class OneFloat : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneFloat) */ {
+ public:
+  OneFloat();
+  virtual ~OneFloat();
+
+  OneFloat(const OneFloat& from);
+
+  inline OneFloat& operator=(const OneFloat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const OneFloat& default_instance();
+
+  void Swap(OneFloat* other);
+
+  // implements Message ----------------------------------------------
+
+  inline OneFloat* New() const { return New(NULL); }
+
+  OneFloat* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const OneFloat& from);
+  void MergeFrom(const OneFloat& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(OneFloat* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // optional float value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  float value() const;
+  void set_value(float value);
+
+  // @@protoc_insertion_point(class_scope:pas.OneFloat)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  int type_;
+  float value_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_commands_2eproto();
+  friend void protobuf_AssignDesc_commands_2eproto();
+  friend void protobuf_ShutdownFile_commands_2eproto();
+
+  void InitAsDefaultInstance();
+  static OneFloat* default_instance_;
 };
 // ===================================================================
 
@@ -1654,6 +1932,38 @@ inline void ResumeDeviceCommand::set_device_id(::google::protobuf::uint64 value)
   
   device_id_ = value;
   // @@protoc_insertion_point(field_set:pas.ResumeDeviceCommand.device_id)
+}
+
+// -------------------------------------------------------------------
+
+// ClearDeviceCommand
+
+// optional .pas.Type type = 1;
+inline void ClearDeviceCommand::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type ClearDeviceCommand::type() const {
+  // @@protoc_insertion_point(field_get:pas.ClearDeviceCommand.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void ClearDeviceCommand::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.ClearDeviceCommand.type)
+}
+
+// optional uint64 device_id = 2;
+inline void ClearDeviceCommand::clear_device_id() {
+  device_id_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 ClearDeviceCommand::device_id() const {
+  // @@protoc_insertion_point(field_get:pas.ClearDeviceCommand.device_id)
+  return device_id_;
+}
+inline void ClearDeviceCommand::set_device_id(::google::protobuf::uint64 value) {
+  
+  device_id_ = value;
+  // @@protoc_insertion_point(field_set:pas.ClearDeviceCommand.device_id)
 }
 
 // -------------------------------------------------------------------
@@ -1946,37 +2256,137 @@ inline void WhenDeviceCommand::set_device_id(::google::protobuf::uint64 value) {
 
 // -------------------------------------------------------------------
 
-// ClearDeviceCommand
+// OneInteger
 
 // optional .pas.Type type = 1;
-inline void ClearDeviceCommand::clear_type() {
+inline void OneInteger::clear_type() {
   type_ = 0;
 }
-inline ::pas::Type ClearDeviceCommand::type() const {
-  // @@protoc_insertion_point(field_get:pas.ClearDeviceCommand.type)
+inline ::pas::Type OneInteger::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneInteger.type)
   return static_cast< ::pas::Type >(type_);
 }
-inline void ClearDeviceCommand::set_type(::pas::Type value) {
+inline void OneInteger::set_type(::pas::Type value) {
   
   type_ = value;
-  // @@protoc_insertion_point(field_set:pas.ClearDeviceCommand.type)
+  // @@protoc_insertion_point(field_set:pas.OneInteger.type)
 }
 
-// optional uint64 device_id = 2;
-inline void ClearDeviceCommand::clear_device_id() {
-  device_id_ = GOOGLE_ULONGLONG(0);
+// optional uint64 value = 2;
+inline void OneInteger::clear_value() {
+  value_ = GOOGLE_ULONGLONG(0);
 }
-inline ::google::protobuf::uint64 ClearDeviceCommand::device_id() const {
-  // @@protoc_insertion_point(field_get:pas.ClearDeviceCommand.device_id)
-  return device_id_;
+inline ::google::protobuf::uint64 OneInteger::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneInteger.value)
+  return value_;
 }
-inline void ClearDeviceCommand::set_device_id(::google::protobuf::uint64 value) {
+inline void OneInteger::set_value(::google::protobuf::uint64 value) {
   
-  device_id_ = value;
-  // @@protoc_insertion_point(field_set:pas.ClearDeviceCommand.device_id)
+  value_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneInteger.value)
+}
+
+// -------------------------------------------------------------------
+
+// OneString
+
+// optional .pas.Type type = 1;
+inline void OneString::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type OneString::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneString.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void OneString::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneString.type)
+}
+
+// optional string value = 2;
+inline void OneString::clear_value() {
+  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& OneString::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneString.value)
+  return value_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void OneString::set_value(const ::std::string& value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:pas.OneString.value)
+}
+inline void OneString::set_value(const char* value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:pas.OneString.value)
+}
+inline void OneString::set_value(const char* value, size_t size) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:pas.OneString.value)
+}
+inline ::std::string* OneString::mutable_value() {
+  
+  // @@protoc_insertion_point(field_mutable:pas.OneString.value)
+  return value_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* OneString::release_value() {
+  // @@protoc_insertion_point(field_release:pas.OneString.value)
+  
+  return value_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void OneString::set_allocated_value(::std::string* value) {
+  if (value != NULL) {
+    
+  } else {
+    
+  }
+  value_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set_allocated:pas.OneString.value)
+}
+
+// -------------------------------------------------------------------
+
+// OneFloat
+
+// optional .pas.Type type = 1;
+inline void OneFloat::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type OneFloat::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneFloat.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void OneFloat::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneFloat.type)
+}
+
+// optional float value = 2;
+inline void OneFloat::clear_value() {
+  value_ = 0;
+}
+inline float OneFloat::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneFloat.value)
+  return value_;
+}
+inline void OneFloat::set_value(float value) {
+  
+  value_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneFloat.value)
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -83,19 +83,8 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 	// the following pointer uninitalized (preventing the DB from being deleted at the
 	// end of processing this command.
 	DB * db = nullptr;
-	
-	try
-	{
-		GenericPB g;
-		//LOG(_log_, nullptr);
-		g.ParseFromString(s);
-		//LOG(_log_, nullptr);
-		switch (g.type())
-		{
-			case Type::WHO_DEVICE:
-				{
-					Row r;
-					r.set_type(ROW);
+
+/*
 		LOG(_log_, nullptr);
 					google::protobuf::Map<string, string> * result = r.mutable_results();
 		LOG(_log_, nullptr);
@@ -107,6 +96,86 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					if (!outcome)
 						throw string("WHO_DEVICE bad serialize");
 		LOG(_log_, nullptr);
+*/
+	
+	
+	try
+	{
+		GenericPB g;
+		//LOG(_log_, nullptr);
+		g.ParseFromString(s);
+		//LOG(_log_, nullptr);
+		switch (g.type())
+		{
+			case Type::TRACK_COUNT:
+				{
+					db = InitDB();
+					if (db == nullptr)
+						throw LOG(_log_, "could not allocate a DB");
+					OneInteger r;
+					r.set_type(ONE_INT);
+					r.set_value(db->GetTrackCount());
+					if (!r.SerializeToString(&s))
+						throw LOG(_log_, "t_c could not serialize");
+					SendPB(s, socket);
+				}
+				break;
+
+			case Type::ARTIST_COUNT:
+				{
+					db = InitDB();
+					if (db == nullptr)
+						throw LOG(_log_, "could not allocate a DB");
+					OneInteger r;
+					r.set_type(ONE_INT);
+					r.set_value(db->GetArtistCount());
+					if (!r.SerializeToString(&s))
+						throw LOG(_log_, "a_c could not serialize");
+					SendPB(s, socket);
+				}
+				break;
+
+			case Type::WHAT_DEVICE:
+				{
+					//LOG(_log_, nullptr);
+					WhatDeviceCommand w;
+					if (!w.ParseFromString(s))
+						throw LOG(_log_, "what failed to parse");
+
+					OneString r;
+					r.set_type(ONE_STRING);
+					if ((int) w.device_id() < ndacs)
+					{
+						LOG(_log_, acs[w.device_id()]->What());
+						r.set_value(acs[w.device_id()]->What());
+					}
+					if (!r.SerializeToString(&s))
+					{
+						throw LOG(_log_, "what return failed to serialize");
+					}
+					SendPB(s, socket);
+				}
+				break;
+
+			case Type::WHO_DEVICE:
+				{
+					LOG(_log_, nullptr);
+					WhoDeviceCommand w;
+					if (!w.ParseFromString(s))
+						throw LOG(_log_, "who failed to parse");
+
+					OneString r;
+					r.set_type(ONE_STRING);
+					if ((int) w.device_id() < ndacs)
+					{
+						LOG(_log_, acs[w.device_id()]->Who());
+						r.set_value(acs[w.device_id()]->Who());
+					}
+					if (!r.SerializeToString(&s))
+					{
+						throw LOG(_log_, "who return failed to serialize");
+					}
+					LOG(_log_, nullptr);
 					SendPB(s, socket);
 				}
 				break;

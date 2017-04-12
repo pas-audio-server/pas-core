@@ -252,6 +252,111 @@ void PauseCommand(int server_socket)
 	}
 }
 
+/*
+   if (type == Type::ROW)
+   {
+   cout << "Yay! Got a ROW" << endl;
+   }
+   else
+   {
+   cout << "Did not get a ROW" << endl;
+   }
+ */
+
+void TrackCountCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+	string s;
+	TrackCountQuery a;
+	a.set_type(TRACK_COUNT);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("TrackCountQuery() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::ONE_INT)
+	{
+		OneInteger o;
+		if (o.ParseFromString(s))
+		{
+			cout << o.value() << endl;
+		}
+		else
+		{
+			throw string("track_count parsefromstring failed");
+		}
+	}
+	else
+	{
+		throw string("track count did not get a ONE_INTEGER back");
+	}
+}
+
+void ArtistCountCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+	string s;
+	ArtistCountQuery a;
+	a.set_type(ARTIST_COUNT);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("ArtistCountQuery() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::ONE_INT)
+	{
+		OneInteger o;
+		if (o.ParseFromString(s))
+		{
+			cout << o.value() << endl;
+		}
+		else
+		{
+			throw string("artist_count parsefromstring failed");
+		}
+	}
+	else
+	{
+		throw string("artist did not get a ONE_INTEGER back");
+	}
+}
+
+void WhatCommand(int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
+	{
+		string s;
+		WhatDeviceCommand sc;
+		sc.set_type(Type::WHAT_DEVICE);
+		sc.set_device_id(device_id);
+		bool outcome = sc.SerializeToString(&s);
+		if (!outcome)
+			throw string("WhatCommand() bad serialize");
+		SendPB(s, server_socket);
+		Type type;
+		s = GetResponse(server_socket, type);
+		if (type == Type::ONE_STRING)
+		{
+			OneString o;
+			if (o.ParseFromString(s))
+			{
+				cout << o.value() << endl;
+			}
+			else
+			{
+				throw string("what parsefromstring failed");
+			}
+		}
+		else
+		{
+			throw string("what did not get a ONE_STRING back");
+		}
+	}
+}
+
 void WhoCommand(int server_socket)
 {
 	int device_id = GetDeviceNumber();
@@ -267,17 +372,25 @@ void WhoCommand(int server_socket)
 		SendPB(s, server_socket);
 		Type type;
 		s = GetResponse(server_socket, type);
-		if (type == Type::ROW)
+		if (type == Type::ONE_STRING)
 		{
-			cout << "Yay! Got a ROW" << endl;
-// LEFT OFF HERE
+			OneString o;
+			if (o.ParseFromString(s))
+			{
+				cout << o.value() << endl;
+			}
+			else
+			{
+				throw string("who parsefromstring failed");
+			}
 		}
 		else
 		{
-			cout << "Did not get a ROW" << endl;
+			throw string("who did not get a ONE_STRING back");
 		}
 	}
 }
+
 void SelectCommand(int server_socket)
 {
 	assert(server_socket >= 0);
@@ -362,49 +475,37 @@ int main(int argc, char * argv[])
 				ClearCommand(server_socket);
 			else if (l == "select")
 				SelectCommand(server_socket);
+			else if (l == "what")
+				WhatCommand(server_socket);
 			else if (l == "who")
 				WhoCommand(server_socket);
-			/*
-			   else if (l == "quit")
-			   {
-			   break;
-			   }
-			   else if (l == "rc")
-			   {
-			   if (!connected)
-			   {
-			   server_socket = InitializeNetworkConnection(argc, argv);
-			   if (server_socket < 0)
-			   break;
-			   connected = true;
-			   cout << "Connected" << endl;
-			   }
-			   continue;
-			   }
-
-			   if (!connected)
-			   continue;
-
-			   if (HandleSimple(server_socket, l))
-			   {
-			   if (l == "sq")
-			   {
-			   cout << "Disconnected" << endl;
-			   connected = false;
-			   server_socket = -1;
-			   }
-			   continue;
-			   }
-
-			   if (HandleArgCommand(server_socket, l, one_arg_commands, 1))
-			   continue;
-
-			   if (HandleArgCommand(server_socket, l, two_arg_commands, 2))
-			   continue;
-
-			   if (l == "se")
-			   HandleSearch(server_socket);
-			 */
+			else if (l == "tracks")
+				TrackCountCommand(server_socket);
+			else if (l == "artists")
+				ArtistCountCommand(server_socket);
+			else if (l == "quit")
+				break;
+			else if (l == "rc")
+			{
+				if (!connected)
+				{
+					server_socket = InitializeNetworkConnection(argc, argv);
+					if (server_socket < 0)
+						break;
+					connected = true;
+					cout << "Connected" << endl;
+				}
+				continue;
+			}
+			else if (l == "qs")
+			{
+				if (!connected)
+					continue;
+				close(server_socket);
+				cout << "Disconnected" << endl;
+				connected = false;
+				server_socket = -1;
+			}
 		}
 	}
 	catch (string s)
