@@ -1,11 +1,16 @@
 # pas
 Perry's audio server
 
+## Latest Development Highlight
+
+The pas server is nearly all converted to Google Proto Buffers. This is how the pas server will converse with user facing servers / clients. This is an important milestone as real web clients can now be written.
+
 ## Sponsors
 
-AUDIO DAC MAKERS - I NEED MORE DACS TO FIND OUT HOW MANY CONCURRENT STREAMS CAN BE SUPPORTED ON A GIVEN CLASS OF MACHINE. I AM SEEKING SPONSORS TO PROVIDE ONE OR MORE OF THEIR USB DAC PRODUCTS. SPONSORS GET:
-1. Promoted here.
-2. Ceritification as being pas compatible (and pas will be YUGE!)
+**AUDIO DAC MAKERS - WE NEED MORE DACS TO FIND OUT HOW MANY CONCURRENT STREAMS CAN BE SUPPORTED ON A GIVEN CLASS OF MACHINE. I AM SEEKING SPONSORS TO PROVIDE ONE OR MORE OF THEIR USB DAC PRODUCTS. SPONSORS GET:**
+1. **Promoted here.**
+2. **Ceritification as being pas compatible (and pas will be YUGE!)**
+3. **Our thanks!**
 
 PLEASE CONTACT ME IF INTERESTED, USING MY LINKEDIN ACCOUNT (SEE "This is me" BELOW).
 
