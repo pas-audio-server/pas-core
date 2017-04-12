@@ -9,18 +9,21 @@ It is generated from these files:
 	commands.proto
 
 It has these top-level messages:
+	Row
+	SelectResult
 	GenericPB
 	PlayTrackCommand
 	PauseDeviceCommand
 	ResumeDeviceCommand
 	StopDeviceCommand
-	TrackQueryCommand
-	TimeQueryCommand
+	WhoDeviceCommand
+	WhatDeviceCommand
 	TrackCountQuery
 	ArtistCountQuery
 	FolderCountQuery
 	SelectQuery
-	ContentQuery
+	WhenDeviceCommand
+	ClearDeviceCommand
 */
 package pas
 
@@ -53,8 +56,9 @@ const (
 	Type_ARTIST_COUNT      Type = 8
 	Type_FOLDER_COUNT      Type = 9
 	Type_SELECT_QUERY      Type = 10
-	Type_CONTENT_QUERY     Type = 11
 	Type_WHEN_DEVICE       Type = 12
+	Type_CLEAR_DEVICE      Type = 13
+	Type_SELECT_RESULT     Type = 14
 )
 
 var Type_name = map[int32]string{
@@ -69,8 +73,9 @@ var Type_name = map[int32]string{
 	8:  "ARTIST_COUNT",
 	9:  "FOLDER_COUNT",
 	10: "SELECT_QUERY",
-	11: "CONTENT_QUERY",
 	12: "WHEN_DEVICE",
+	13: "CLEAR_DEVICE",
+	14: "SELECT_RESULT",
 }
 var Type_value = map[string]int32{
 	"GENERIC":           0,
@@ -84,14 +89,55 @@ var Type_value = map[string]int32{
 	"ARTIST_COUNT":      8,
 	"FOLDER_COUNT":      9,
 	"SELECT_QUERY":      10,
-	"CONTENT_QUERY":     11,
 	"WHEN_DEVICE":       12,
+	"CLEAR_DEVICE":      13,
+	"SELECT_RESULT":     14,
 }
 
 func (x Type) String() string {
 	return proto.EnumName(Type_name, int32(x))
 }
 func (Type) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+type Row struct {
+	Results map[string]string `protobuf:"bytes,1,rep,name=results" json:"results,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *Row) Reset()                    { *m = Row{} }
+func (m *Row) String() string            { return proto.CompactTextString(m) }
+func (*Row) ProtoMessage()               {}
+func (*Row) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+func (m *Row) GetResults() map[string]string {
+	if m != nil {
+		return m.Results
+	}
+	return nil
+}
+
+type SelectResult struct {
+	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Row  []*Row `protobuf:"bytes,2,rep,name=row" json:"row,omitempty"`
+}
+
+func (m *SelectResult) Reset()                    { *m = SelectResult{} }
+func (m *SelectResult) String() string            { return proto.CompactTextString(m) }
+func (*SelectResult) ProtoMessage()               {}
+func (*SelectResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *SelectResult) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *SelectResult) GetRow() []*Row {
+	if m != nil {
+		return m.Row
+	}
+	return nil
+}
 
 type GenericPB struct {
 	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
@@ -100,7 +146,7 @@ type GenericPB struct {
 func (m *GenericPB) Reset()                    { *m = GenericPB{} }
 func (m *GenericPB) String() string            { return proto.CompactTextString(m) }
 func (*GenericPB) ProtoMessage()               {}
-func (*GenericPB) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*GenericPB) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *GenericPB) GetType() Type {
 	if m != nil {
@@ -118,7 +164,7 @@ type PlayTrackCommand struct {
 func (m *PlayTrackCommand) Reset()                    { *m = PlayTrackCommand{} }
 func (m *PlayTrackCommand) String() string            { return proto.CompactTextString(m) }
 func (*PlayTrackCommand) ProtoMessage()               {}
-func (*PlayTrackCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*PlayTrackCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *PlayTrackCommand) GetType() Type {
 	if m != nil {
@@ -149,7 +195,7 @@ type PauseDeviceCommand struct {
 func (m *PauseDeviceCommand) Reset()                    { *m = PauseDeviceCommand{} }
 func (m *PauseDeviceCommand) String() string            { return proto.CompactTextString(m) }
 func (*PauseDeviceCommand) ProtoMessage()               {}
-func (*PauseDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*PauseDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *PauseDeviceCommand) GetType() Type {
 	if m != nil {
@@ -173,7 +219,7 @@ type ResumeDeviceCommand struct {
 func (m *ResumeDeviceCommand) Reset()                    { *m = ResumeDeviceCommand{} }
 func (m *ResumeDeviceCommand) String() string            { return proto.CompactTextString(m) }
 func (*ResumeDeviceCommand) ProtoMessage()               {}
-func (*ResumeDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*ResumeDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *ResumeDeviceCommand) GetType() Type {
 	if m != nil {
@@ -197,7 +243,7 @@ type StopDeviceCommand struct {
 func (m *StopDeviceCommand) Reset()                    { *m = StopDeviceCommand{} }
 func (m *StopDeviceCommand) String() string            { return proto.CompactTextString(m) }
 func (*StopDeviceCommand) ProtoMessage()               {}
-func (*StopDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*StopDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *StopDeviceCommand) GetType() Type {
 	if m != nil {
@@ -213,48 +259,48 @@ func (m *StopDeviceCommand) GetDeviceId() uint64 {
 	return 0
 }
 
-type TrackQueryCommand struct {
+type WhoDeviceCommand struct {
 	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
 	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
 }
 
-func (m *TrackQueryCommand) Reset()                    { *m = TrackQueryCommand{} }
-func (m *TrackQueryCommand) String() string            { return proto.CompactTextString(m) }
-func (*TrackQueryCommand) ProtoMessage()               {}
-func (*TrackQueryCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (m *WhoDeviceCommand) Reset()                    { *m = WhoDeviceCommand{} }
+func (m *WhoDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhoDeviceCommand) ProtoMessage()               {}
+func (*WhoDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
-func (m *TrackQueryCommand) GetType() Type {
+func (m *WhoDeviceCommand) GetType() Type {
 	if m != nil {
 		return m.Type
 	}
 	return Type_GENERIC
 }
 
-func (m *TrackQueryCommand) GetDeviceId() uint64 {
+func (m *WhoDeviceCommand) GetDeviceId() uint64 {
 	if m != nil {
 		return m.DeviceId
 	}
 	return 0
 }
 
-type TimeQueryCommand struct {
+type WhatDeviceCommand struct {
 	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
 	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
 }
 
-func (m *TimeQueryCommand) Reset()                    { *m = TimeQueryCommand{} }
-func (m *TimeQueryCommand) String() string            { return proto.CompactTextString(m) }
-func (*TimeQueryCommand) ProtoMessage()               {}
-func (*TimeQueryCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (m *WhatDeviceCommand) Reset()                    { *m = WhatDeviceCommand{} }
+func (m *WhatDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhatDeviceCommand) ProtoMessage()               {}
+func (*WhatDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
-func (m *TimeQueryCommand) GetType() Type {
+func (m *WhatDeviceCommand) GetType() Type {
 	if m != nil {
 		return m.Type
 	}
 	return Type_GENERIC
 }
 
-func (m *TimeQueryCommand) GetDeviceId() uint64 {
+func (m *WhatDeviceCommand) GetDeviceId() uint64 {
 	if m != nil {
 		return m.DeviceId
 	}
@@ -268,7 +314,7 @@ type TrackCountQuery struct {
 func (m *TrackCountQuery) Reset()                    { *m = TrackCountQuery{} }
 func (m *TrackCountQuery) String() string            { return proto.CompactTextString(m) }
 func (*TrackCountQuery) ProtoMessage()               {}
-func (*TrackCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*TrackCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *TrackCountQuery) GetType() Type {
 	if m != nil {
@@ -284,7 +330,7 @@ type ArtistCountQuery struct {
 func (m *ArtistCountQuery) Reset()                    { *m = ArtistCountQuery{} }
 func (m *ArtistCountQuery) String() string            { return proto.CompactTextString(m) }
 func (*ArtistCountQuery) ProtoMessage()               {}
-func (*ArtistCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*ArtistCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *ArtistCountQuery) GetType() Type {
 	if m != nil {
@@ -300,7 +346,7 @@ type FolderCountQuery struct {
 func (m *FolderCountQuery) Reset()                    { *m = FolderCountQuery{} }
 func (m *FolderCountQuery) String() string            { return proto.CompactTextString(m) }
 func (*FolderCountQuery) ProtoMessage()               {}
-func (*FolderCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (*FolderCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *FolderCountQuery) GetType() Type {
 	if m != nil {
@@ -318,7 +364,7 @@ type SelectQuery struct {
 func (m *SelectQuery) Reset()                    { *m = SelectQuery{} }
 func (m *SelectQuery) String() string            { return proto.CompactTextString(m) }
 func (*SelectQuery) ProtoMessage()               {}
-func (*SelectQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*SelectQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *SelectQuery) GetType() Type {
 	if m != nil {
@@ -341,75 +387,108 @@ func (m *SelectQuery) GetPattern() string {
 	return ""
 }
 
-type ContentQuery struct {
-	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	Path string `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
+type WhenDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
 }
 
-func (m *ContentQuery) Reset()                    { *m = ContentQuery{} }
-func (m *ContentQuery) String() string            { return proto.CompactTextString(m) }
-func (*ContentQuery) ProtoMessage()               {}
-func (*ContentQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (m *WhenDeviceCommand) Reset()                    { *m = WhenDeviceCommand{} }
+func (m *WhenDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhenDeviceCommand) ProtoMessage()               {}
+func (*WhenDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
-func (m *ContentQuery) GetType() Type {
+func (m *WhenDeviceCommand) GetType() Type {
 	if m != nil {
 		return m.Type
 	}
 	return Type_GENERIC
 }
 
-func (m *ContentQuery) GetPath() string {
+func (m *WhenDeviceCommand) GetDeviceId() uint64 {
 	if m != nil {
-		return m.Path
+		return m.DeviceId
 	}
-	return ""
+	return 0
+}
+
+type ClearDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *ClearDeviceCommand) Reset()                    { *m = ClearDeviceCommand{} }
+func (m *ClearDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*ClearDeviceCommand) ProtoMessage()               {}
+func (*ClearDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+
+func (m *ClearDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *ClearDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
 }
 
 func init() {
+	proto.RegisterType((*Row)(nil), "pas.Row")
+	proto.RegisterType((*SelectResult)(nil), "pas.SelectResult")
 	proto.RegisterType((*GenericPB)(nil), "pas.GenericPB")
 	proto.RegisterType((*PlayTrackCommand)(nil), "pas.PlayTrackCommand")
 	proto.RegisterType((*PauseDeviceCommand)(nil), "pas.PauseDeviceCommand")
 	proto.RegisterType((*ResumeDeviceCommand)(nil), "pas.ResumeDeviceCommand")
 	proto.RegisterType((*StopDeviceCommand)(nil), "pas.StopDeviceCommand")
-	proto.RegisterType((*TrackQueryCommand)(nil), "pas.TrackQueryCommand")
-	proto.RegisterType((*TimeQueryCommand)(nil), "pas.TimeQueryCommand")
+	proto.RegisterType((*WhoDeviceCommand)(nil), "pas.WhoDeviceCommand")
+	proto.RegisterType((*WhatDeviceCommand)(nil), "pas.WhatDeviceCommand")
 	proto.RegisterType((*TrackCountQuery)(nil), "pas.TrackCountQuery")
 	proto.RegisterType((*ArtistCountQuery)(nil), "pas.ArtistCountQuery")
 	proto.RegisterType((*FolderCountQuery)(nil), "pas.FolderCountQuery")
 	proto.RegisterType((*SelectQuery)(nil), "pas.SelectQuery")
-	proto.RegisterType((*ContentQuery)(nil), "pas.ContentQuery")
+	proto.RegisterType((*WhenDeviceCommand)(nil), "pas.WhenDeviceCommand")
+	proto.RegisterType((*ClearDeviceCommand)(nil), "pas.ClearDeviceCommand")
 	proto.RegisterEnum("pas.Type", Type_name, Type_value)
 }
 
 func init() { proto.RegisterFile("commands.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 431 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x94, 0x5d, 0xaf, 0x93, 0x30,
-	0x18, 0xc7, 0xdd, 0x19, 0x6e, 0xe3, 0xd9, 0xdc, 0xe9, 0x6a, 0x34, 0x33, 0xc6, 0xc4, 0x70, 0x65,
-	0xce, 0xc5, 0xe2, 0xcb, 0x27, 0xc0, 0xae, 0xe7, 0x1c, 0xe2, 0x04, 0x56, 0x3a, 0x4f, 0xce, 0x8d,
-	0x0b, 0x42, 0x13, 0x89, 0xe3, 0x25, 0x50, 0x4c, 0xf6, 0x9d, 0xfd, 0x10, 0xd2, 0x0e, 0xbc, 0xdd,
-	0x4c, 0xb8, 0xe3, 0xf9, 0xf5, 0xff, 0xd2, 0x42, 0x03, 0xcc, 0xa3, 0x3c, 0x4d, 0xc3, 0x2c, 0xae,
-	0x56, 0x45, 0x99, 0xcb, 0x1c, 0x0f, 0x8b, 0xb0, 0xb2, 0x6e, 0xc0, 0xbc, 0x13, 0x99, 0x28, 0x93,
-	0xc8, 0xff, 0x8c, 0xdf, 0x80, 0x21, 0x8f, 0x85, 0x58, 0x0e, 0xde, 0x0e, 0xde, 0xcd, 0x3f, 0x9a,
-	0xab, 0x46, 0xb0, 0xe2, 0x0d, 0x60, 0x1a, 0x5b, 0x09, 0x20, 0xff, 0x10, 0x1e, 0x79, 0x19, 0x46,
-	0xbf, 0xc8, 0x29, 0xeb, 0x8c, 0x05, 0xbf, 0x06, 0x33, 0x16, 0xbf, 0x93, 0x48, 0xec, 0x93, 0x78,
-	0x79, 0xd5, 0x68, 0x0c, 0x36, 0x39, 0x01, 0x27, 0xc6, 0xaf, 0x60, 0x22, 0x55, 0x96, 0x5a, 0x1b,
-	0xea, 0xb5, 0xb1, 0x9e, 0x9d, 0xd8, 0xf2, 0x01, 0xfb, 0x61, 0x5d, 0x89, 0xb5, 0xd6, 0xf6, 0x50,
-	0x66, 0x6d, 0xe1, 0x39, 0x13, 0x55, 0x9d, 0xf6, 0x18, 0xe9, 0xc1, 0x22, 0x90, 0x79, 0xd1, 0x6b,
-	0xa0, 0x7e, 0xb9, 0xdb, 0x5a, 0x94, 0xc7, 0x3e, 0x02, 0x5d, 0x40, 0x3c, 0x49, 0x45, 0x6f, 0x79,
-	0xef, 0xe1, 0xba, 0xfd, 0xfa, 0x75, 0x26, 0x75, 0xea, 0xb9, 0x3b, 0xf3, 0x01, 0x90, 0x5d, 0xca,
-	0xa4, 0x92, 0xff, 0x65, 0xb9, 0xcd, 0x0f, 0xb1, 0x28, 0x2f, 0xb7, 0x7c, 0x87, 0x69, 0x20, 0x0e,
-	0x22, 0xba, 0x48, 0x8d, 0x5f, 0xc2, 0x28, 0xca, 0x0f, 0x75, 0x9a, 0xe9, 0xf3, 0x99, 0xac, 0x9d,
-	0xf0, 0x12, 0xc6, 0x45, 0x28, 0xa5, 0x28, 0x33, 0x7d, 0x1d, 0x4d, 0xd6, 0x8d, 0x96, 0x0d, 0x33,
-	0x92, 0x67, 0x52, 0x5c, 0xb6, 0x1d, 0x8c, 0xc1, 0x68, 0x9c, 0x3f, 0xdb, 0x78, 0xfd, 0x7c, 0xf3,
-	0x67, 0x00, 0x86, 0x92, 0xe0, 0x29, 0x8c, 0xef, 0xa8, 0x4b, 0x99, 0x43, 0xd0, 0x13, 0xfc, 0x02,
-	0x16, 0xfe, 0xc6, 0x7e, 0xdc, 0x73, 0x66, 0x93, 0x2f, 0xfb, 0x35, 0xfd, 0xe6, 0x10, 0x8a, 0x06,
-	0x18, 0xc1, 0xcc, 0xb7, 0x77, 0x01, 0xed, 0xc8, 0x15, 0x5e, 0xc0, 0x33, 0x46, 0x83, 0xdd, 0xd7,
-	0x7f, 0x68, 0x88, 0xaf, 0x9b, 0x43, 0x73, 0xcf, 0xef, 0x80, 0x81, 0xe7, 0x00, 0x0f, 0xf7, 0x5e,
-	0x37, 0x3f, 0x55, 0x82, 0x87, 0x7b, 0x9b, 0x77, 0x60, 0xa4, 0xc0, 0xa9, 0x88, 0x78, 0x3b, 0x97,
-	0xa3, 0xb1, 0xea, 0xb1, 0x19, 0x77, 0x02, 0xde, 0x92, 0x89, 0x22, 0xb7, 0xde, 0x66, 0x4d, 0x59,
-	0x4b, 0x4c, 0x45, 0x02, 0xba, 0xa1, 0x84, 0xef, 0xb7, 0x3b, 0xca, 0x1e, 0x11, 0xa8, 0xbd, 0x10,
-	0xcf, 0xe5, 0xd4, 0xed, 0xd0, 0xf4, 0x54, 0x45, 0xdd, 0xae, 0x6a, 0xf6, 0x63, 0xa4, 0xff, 0x31,
-	0x9f, 0xfe, 0x06, 0x00, 0x00, 0xff, 0xff, 0x81, 0x36, 0xc5, 0x4e, 0x75, 0x04, 0x00, 0x00,
+	// 524 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x94, 0x51, 0x6f, 0xda, 0x30,
+	0x10, 0xc7, 0x07, 0xa1, 0x40, 0x0e, 0x4a, 0x83, 0xb7, 0x4e, 0xac, 0xd3, 0xa4, 0x29, 0x4f, 0x55,
+	0x1f, 0xd8, 0xd6, 0xbd, 0x4c, 0x7d, 0xcb, 0x82, 0xdb, 0x46, 0x63, 0x10, 0x1c, 0x33, 0xd4, 0x97,
+	0xa1, 0x2c, 0xb1, 0x54, 0xd4, 0x90, 0x20, 0xc7, 0x69, 0xc5, 0x97, 0x9f, 0x16, 0x3b, 0xc9, 0xb4,
+	0x37, 0x3a, 0x29, 0x6f, 0xb9, 0xdf, 0xdd, 0xfd, 0xef, 0x72, 0x3e, 0x1b, 0x06, 0x41, 0xb2, 0xdd,
+	0xfa, 0x71, 0x98, 0x8e, 0x77, 0x3c, 0x11, 0x09, 0xd2, 0x76, 0x7e, 0x6a, 0x72, 0xd0, 0x48, 0xf2,
+	0x84, 0x3e, 0x40, 0x87, 0xb3, 0x34, 0x8b, 0x44, 0x3a, 0x6a, 0xbc, 0xd7, 0xce, 0x7b, 0x97, 0xa7,
+	0xe3, 0xdc, 0x3b, 0xce, 0x5d, 0x63, 0x52, 0x70, 0x1c, 0x0b, 0xbe, 0x27, 0x55, 0xd4, 0xd9, 0x15,
+	0xf4, 0xff, 0x75, 0x20, 0x03, 0xb4, 0x07, 0xb6, 0xcf, 0x93, 0x1b, 0xe7, 0x3a, 0x91, 0x9f, 0xe8,
+	0x15, 0x1c, 0x3d, 0xfa, 0x51, 0xc6, 0x46, 0x4d, 0xc5, 0x0a, 0xe3, 0xaa, 0xf9, 0xa5, 0x61, 0x3a,
+	0xd0, 0xf7, 0x58, 0xc4, 0x02, 0x51, 0x28, 0xa0, 0x77, 0xd0, 0x12, 0xfb, 0x1d, 0x53, 0xc9, 0x83,
+	0x4b, 0x5d, 0x55, 0xa6, 0x39, 0x20, 0x0a, 0xa3, 0x33, 0xd0, 0x78, 0xf2, 0x94, 0xcb, 0xc8, 0xbe,
+	0xba, 0x55, 0x5f, 0x44, 0x42, 0xf3, 0x02, 0xf4, 0x1b, 0x16, 0x33, 0xbe, 0x09, 0xdc, 0xaf, 0x07,
+	0x74, 0xcc, 0x0d, 0x18, 0x6e, 0xe4, 0xef, 0x29, 0xf7, 0x83, 0x07, 0xbb, 0x18, 0xc5, 0xa1, 0xd2,
+	0x6f, 0x41, 0x0f, 0xd9, 0xe3, 0x26, 0x60, 0xeb, 0x4d, 0xa8, 0xfe, 0xa3, 0x45, 0xba, 0x05, 0x70,
+	0x42, 0xf4, 0x06, 0xba, 0x42, 0x6a, 0x49, 0x9f, 0xa6, 0x7c, 0x1d, 0x65, 0x3b, 0xa1, 0xe9, 0x02,
+	0x72, 0xfd, 0x2c, 0x65, 0x13, 0x15, 0x5b, 0x43, 0x31, 0x73, 0x01, 0x2f, 0xe5, 0xb4, 0xb6, 0x35,
+	0x4a, 0xce, 0x61, 0xe8, 0x89, 0x64, 0x57, 0x9f, 0xe0, 0x0c, 0x8c, 0xd5, 0x7d, 0x52, 0x6b, 0x83,
+	0xab, 0x7b, 0x5f, 0xd4, 0x27, 0xf8, 0x11, 0x4e, 0xca, 0xd3, 0xcf, 0x62, 0xb1, 0xc8, 0x58, 0xbe,
+	0xb7, 0x07, 0x76, 0xe6, 0x13, 0x18, 0x16, 0x17, 0x9b, 0x54, 0xfc, 0x57, 0xca, 0x75, 0x12, 0x85,
+	0x8c, 0x3f, 0x3f, 0xe5, 0x27, 0xf4, 0x8a, 0x0b, 0xf1, 0x9c, 0x68, 0xf4, 0x1a, 0xda, 0x41, 0x12,
+	0x65, 0xdb, 0xb8, 0xbc, 0x59, 0xa5, 0x85, 0x46, 0xd0, 0xd9, 0xf9, 0x42, 0x30, 0x1e, 0xab, 0x75,
+	0xd4, 0x49, 0x65, 0x16, 0x83, 0x64, 0x71, 0x7d, 0x83, 0xcc, 0xf7, 0xdb, 0x8e, 0x98, 0xcf, 0x6b,
+	0x53, 0xbc, 0xf8, 0xdd, 0x80, 0x96, 0x8c, 0x45, 0x3d, 0xe8, 0xdc, 0xe0, 0x19, 0x26, 0x8e, 0x6d,
+	0xbc, 0x40, 0xa7, 0x30, 0x74, 0xa7, 0xd6, 0xdd, 0x9a, 0x12, 0xcb, 0xfe, 0xb6, 0x9e, 0xe0, 0x1f,
+	0x8e, 0x8d, 0x8d, 0x46, 0xfe, 0xd8, 0xf4, 0x5d, 0x6b, 0xe9, 0xe1, 0x8a, 0x34, 0xd1, 0x10, 0x8e,
+	0x09, 0xf6, 0x96, 0xdf, 0xff, 0x22, 0x0d, 0x9d, 0xe4, 0x43, 0xa5, 0x73, 0xb7, 0x02, 0x2d, 0x34,
+	0x00, 0x58, 0xdd, 0xce, 0x2b, 0xfb, 0x48, 0x06, 0xac, 0x6e, 0x2d, 0x5a, 0x81, 0xb6, 0x04, 0x45,
+	0x21, 0x7b, 0xbe, 0x9c, 0x51, 0xa3, 0x23, 0xeb, 0x58, 0x84, 0x3a, 0x1e, 0x2d, 0x49, 0x57, 0x92,
+	0xeb, 0xf9, 0x74, 0x82, 0x49, 0x49, 0x74, 0x49, 0x3c, 0x3c, 0xc5, 0x36, 0x5d, 0x2f, 0x96, 0x98,
+	0xdc, 0x19, 0x50, 0xe8, 0xe2, 0x59, 0xa5, 0xdb, 0x97, 0x21, 0xf6, 0x14, 0x5b, 0xa4, 0x22, 0xc7,
+	0xb2, 0xdd, 0x32, 0x49, 0x76, 0x3d, 0xa5, 0xc6, 0xe0, 0x57, 0x5b, 0x3d, 0xca, 0x9f, 0xff, 0x04,
+	0x00, 0x00, 0xff, 0xff, 0xee, 0x88, 0x71, 0x33, 0xa6, 0x05, 0x00, 0x00,
 }

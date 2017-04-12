@@ -17,8 +17,19 @@ enum Type {
 	ARTIST_COUNT = 8;
 	FOLDER_COUNT = 9;
 	SELECT_QUERY = 10;
-	CONTENT_QUERY = 11;
 	WHEN_DEVICE = 12;
+	CLEAR_DEVICE = 13;
+	SELECT_RESULT = 14;
+}
+
+message Row {
+	map <string, string> results = 1;
+}
+
+message SelectResult
+{
+	Type type = 1;
+	repeated Row row = 2;
 }
 
 message GenericPB {
@@ -46,12 +57,12 @@ message StopDeviceCommand {
     uint64 device_id = 2;
 }
 
-message TrackQueryCommand {
+message WhoDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
-message TimeQueryCommand {
+message WhatDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
@@ -74,7 +85,14 @@ message SelectQuery {
     string pattern = 3;
 }
 
-message ContentQuery {
+message WhenDeviceCommand {
 	Type type = 1; 
-    string path = 2;
+    uint64 device_id = 2;
 }
+
+message ClearDeviceCommand {
+	Type type = 1; 
+    uint64 device_id = 2;
+}
+
+

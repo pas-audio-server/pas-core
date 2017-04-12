@@ -27,6 +27,7 @@
 #include "../protos/cpp/commands.pb.h"
 
 using namespace std;
+using namespace pas;
 
 extern Logger _log_;
 
@@ -43,7 +44,22 @@ static DB * InitDB()
 	return db;
 }
 
-static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
+// d and n supplied only for sanity checking
+static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int n)
+{
+	AudioCommand cmd;
+	cmd.cmd = c;
+	if (d >= 0 && d < n)
+	{
+		ac->AddCommand(cmd);
+	}
+	else
+	{	
+		LOG(_log_, "bad device number");
+	}
+}
+
+static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 {
 	AudioComponent ** acs = (AudioComponent **) dacs;
 
@@ -54,37 +70,73 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 	// end of processing this command.
 	DB * db = nullptr;
 	
-	int device_index = 0;
-	int buffer_offset = 0;
-
-	if (buffer[0] >= '0' && buffer[0] <= '9')
-	{
-		device_index = buffer[0] - '0';
-		buffer_offset = 2;
-	}
-
 	try
 	{
-		if (device_index < 0 || device_index >= ndacs)
+		GenericPB g;
+		g.ParseFromString(s);
+		switch (g.type())
 		{
-			string s("bad device index");
-			send(socket, s.c_str(), s.size(), 0);
-			throw LOG(_log_, s);
+			case Type::STOP_DEVICE:
+				{
+					LOG(_log_, "STOP_DEVICE");
+					StopDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "stop failed to parse");
+					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::RESUME_DEVICE:
+				{
+					LOG(_log_, "RESUME_DEVICE");
+					ResumeDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "resume failed to parse");
+					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::PAUSE_DEVICE:
+				{
+					LOG(_log_, "PAUSE_DEVICE");
+					PauseDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "pause failed to parse");
+					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::PLAY_TRACK_DEVICE:
+				{
+					LOG(_log_, "PLAY_TRACK_DEVICE");
+					PlayTrackCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "play failed to parse");
+					if ((int) c.device_id() < ndacs)
+					{
+						acs[c.device_id()]->Play(c.track_id());
+					}
+					else
+					{
+						LOG(_log_, "PLAY_TRACK_DEVICE: bad device number: " + to_string(c.device_id()));
+					}
+				}
+				break;
+
+			case Type::SELECT_QUERY:
+				{
+					LOG(_log_, "SELECT_QUERY");
+					SelectQuery c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "select failed to parse");
+					db = InitDB();
+// TIRED - LEFT OFF HERE - DB COMP NEEDS TO LEARN ABOUT PBUFFERS
+				}
+			default:
+				LOG(_log_, "switch received type: " + to_string((int) g.type()));
+				break;
 		}
-
-		// We are depending upon the memset of buffer to ensure we have a null terminator.
-		stringstream tss(buffer + buffer_offset);
-		string token;
-
-		tss >> token;
-		LOG(_log_, token);
-
-		// This can happen now. Suppose the string is "0 ". The zero and
-		// space would be skipped by buffer_offset being 2. Then tss would
-		// have nothing in it. 
-		if (token.size() == 0)
-			throw LOG(_log_, "");
-
+/*
 		if (isupper(token.at(0)) && token.at(0) != PLAY)
 		{
 			LOG(_log_, token);
@@ -116,13 +168,6 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			s = acs[device_index]->TimeCode();
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-		else if (token.at(0) == PLAY)
-		{
-			// The remaining token should be an index number for a track to play
-			unsigned int id;
-			tss >> id;
-			acs[device_index]->Play(id);
 		}
 		else if (token == string("clear"))
 		{
@@ -177,6 +222,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
 				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
+*/
 	}
 	catch (LoggedException s)
 	{
@@ -206,17 +252,22 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 	try
 	{
 		size_t bytes_read;
-		const int BS = 2048;
-		char buffer[BS];
 	
-		memset(buffer, 0, BS);
 		LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client");
-		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
+		while (true)
 		{
-			//cerr << "Raw: " << buffer << endl;
-			if (!CommandProcessor(socket, buffer, dacs, ndacs))
+			size_t length = 0;
+			bytes_read = recv(socket, (void *) &length, sizeof(length), 0);
+			if (bytes_read != sizeof(length))
+				throw LOG(_log_, "bad recv getting length: " + to_string(bytes_read));
+			LOG(_log_, "recv of length: " + to_string(length));
+			string s;
+			s.resize(length);
+			bytes_read = recv(socket, (void *) &s[0], length, 0);
+			if (bytes_read != length)
+				throw LOG(_log_, "bad recv getting pbuffer: " + to_string(bytes_read));
+			if (!CommandProcessor(socket, s, dacs, ndacs))
 				break;
-			memset(buffer, 0, BS);
 		}
 	}
 	catch (LoggedException s)
