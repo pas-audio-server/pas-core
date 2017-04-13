@@ -140,6 +140,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		{
 			threads.at(0)->join();
 			threads.erase(threads.begin());
+			LOG(_log_, nullptr);
 		}
 
 		LOG(_log_, "Server shutting down");

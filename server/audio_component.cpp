@@ -64,11 +64,17 @@ AudioComponent::~AudioComponent()
 
 	if (t != nullptr)
 	{
-		// This rarely happens anymore.
+		LOG(_log_, nullptr);
 		pthread_kill((pthread_t) t->native_handle(), SIGKILL);
+		// This join should return immediately because of the 
+		// SIGKILL above, or the thread has already exited due
+		// to QUIT. Without this join, an error message will
+		// be printed by the C++ threading system.
+		t->join();
 		delete t;
+		LOG(_log_, nullptr);
 	}
-
+	LOG(_log_, nullptr);
 	sem_destroy(&sem);
 }
 
@@ -221,6 +227,9 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			}
 			me->m_play_queue.unlock();
 		}
+		if (terminate_flag)
+			continue;
+
 		restarting = false;
 
 		// OK - It's playtime!
