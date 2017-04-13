@@ -31,9 +31,11 @@ const int BS = 2048;
 
 bool keep_going = true;
 
-map<string, string> simple_commands;
-map<string, string> one_arg_commands;
-map<string, string> two_arg_commands;
+/*
+   map<string, string> simple_commands;
+   map<string, string> one_arg_commands;
+   map<string, string> two_arg_commands;
+ */
 
 void SIGHandler(int signal_number)
 {
@@ -114,205 +116,318 @@ bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
-void HandleSearch(int server_socket)
+string GetResponse(int server_socket, Type & type)
 {
-	assert(server_socket >= 0);
-	string l1;
+	size_t length = 0;
+	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
+	if (bytes_read != sizeof(length))
+		throw LOG("bad recv getting length: " + to_string(bytes_read));
+	cout << LOG("recv of length: " + to_string(length)) << endl;
 
-	cout << "Column: ";
-	getline(cin, l1);
-
-	string l2;
-	cout << "Pattern (no spaces): ";
-	getline(cin, l2);
-
-	string command = "se " + l1 + " " + l2;
-	size_t bytes_written = send(server_socket, (const void *) command.c_str(), command.size(), 0);
-	if (bytes_written != command.size())
-		throw LOG("send() of search");
-
-	cout << "Sent: " << command << endl;
-	size_t result_size;
-	size_t bytes_read = recv(server_socket, (void *) &result_size, sizeof(size_t), 0);
-	if (bytes_read != sizeof(size_t))
-		throw LOG("rcv size");
-	string buffer;
-	buffer.resize(result_size);
-	bytes_read = recv(server_socket, (void *) &buffer[0], result_size, 0);
-	if (bytes_read != result_size)
-		throw LOG("rcv size");
-
-	json_object * all = json_tokener_parse(buffer.c_str());
-	if (all == nullptr)
-		throw LOG("json_tokener_parse");
-	json_object * rows;
-	json_object_object_get_ex(all, "rows", &rows);
-	if (rows == nullptr)
-		throw LOG("json");
-	//cout << json_object_to_json_string(rows) << endl;	
-	int n = json_object_array_length(rows);
-
-	cout << setw(48) << setfill('-') << "-" << endl;
-	cout << setfill(' ');
-	for (int i = 0; i < n; i++)
-	{
-		json_object * j = json_object_array_get_idx(rows, i);
-		//cout << json_object_to_json_string(j) << endl;
-		json_object_object_foreach(j, key, val)
-		{
-			cout << setw(18) << left << key;
-			cout << json_object_get_string(val) << endl;
-		}
-		cout << setw(48) << setfill('-') << "-" << endl;
-		cout << setfill(' ');
-	}
-	json_object_put(all);
+	string s;
+	s.resize(length);
+	cout << LOG("string is now: " + to_string(s.size())) << endl;
+	bytes_read = recv(server_socket, (void *) &s[0], length, MSG_WAITALL);
+	if (bytes_read != length)
+		throw LOG("bad recv getting pbuffer: " + to_string(bytes_read));
+	GenericPB g;
+	// Start out as generic and return this if a) it IS generic or b) does not parse out.
+	type = GENERIC;
+	if (g.ParseFromString(s))
+		type = g.type();
+	return s;
 }
 
-bool HandleArgCommand(int server_socket, string command, map<string, string> & m, int argc)
+int GetDeviceNumber()
 {
-	assert(server_socket >= 0);
+	string l;
+	cout << "Device number: ";
+	getline(cin, l);
 
-	bool rv = false;
-	if (m.find(command) != m.end())
-	{
-		string cmd = m[command];
-		cmd.erase(2, 1);
-		rv = true;
-
-		string l1;
-		cout << "Argument 1: ";
-		getline(cin, l1);
-
-		string l2;
-		if (argc == 2)
-		{
-			cout << "Argument 2: ";
-			getline(cin, l2);
-		}
-
-		char buffer[BS];
-		memset(buffer, 0, BS);
-
-		command = cmd + l1 + ((argc > 1) ? (string(" ") + l2) : string(""));
-
-		send(server_socket, (const void *) command.c_str(), command.size(), 0);
-	}
-	return rv;
+	int device_id = atoi(l.c_str());
+	if (device_id < 0 || device_id > 3)
+		device_id = -1;
+	return device_id;
 }
 
-bool HandleSimple(int server_socket, string command)
+void SendPB(string & s, int server_socket);
+
+/*	This is broken out to make the playlist feature easier.
+ */
+static void InnerPlayCommand(int device_id, int track, int server_socket)
 {
 	assert(server_socket >= 0);
 
-	bool rv = false;
-	if (simple_commands.find(command) != simple_commands.end())
+	string s;
+	PlayTrackCommand c;
+	c.set_type(PLAY_TRACK_DEVICE);
+	c.set_device_id(device_id);
+	c.set_track_id(track);
+	bool outcome = c.SerializeToString(&s);
+	if (!outcome)
+		throw string("InnerPlayCommand() bad serialize");
+	SendPB(s, server_socket);
+}
+
+static void PlayCommand(int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
 	{
-		rv = true;
+		string s;
+		cout << "Track number: ";
+		getline(cin, s);
+		int track = atoi(s.c_str());
+		InnerPlayCommand(device_id, track, server_socket);
+	}
+}
 
-		string temp;
-		char buffer[BS];
-		memset(buffer, 0, BS);
-
-		//cout << LOG(temp) << endl;
-		temp = command = simple_commands[command];
-		if (temp.size() > 2 && temp[2] == '_') 
-			temp.erase(2, 1);
-			//cout << LOG(temp) << endl;
-		if (temp == "_sq")
-			temp.erase(0, 1);
-
-		size_t bytes_sent = send(server_socket, (const void *) temp.c_str(), temp.size(), 0);
-		if (bytes_sent == temp.size())
+static void SimplePlayList(int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
+	{
+		string l;
+		cout << "File: ";
+		getline(cin, l);
+		ifstream f(l);
+		if (f.is_open())
 		{
-			//cout << LOG("") << endl;
-			if (command.size() < 3 || command.at(2) != '_')
+			while (getline(f, l))
 			{
-				//cout << LOG("") << endl;
-				if (command != "_sq" && bytes_sent == command.size())
-				{
-					//cout << LOG("") << endl;
-					size_t bytes_read = recv(server_socket, (void *) buffer, BS, 0);
-					if (bytes_read > 0)
-					{
-						string s(buffer);
-						cout << s;
-						if (s.at(s.size() - 1) != '\n')
-							cout << endl;
-					}
-				}
+				if (l.size() == 0)
+					continue;
+				int track = atoi(l.c_str());
+				InnerPlayCommand(device_id, track, server_socket);
+				usleep(900000);
 			}
 		}
+		f.close();
 	}
-	return rv;
 }
 
-void OrganizeCommands()
-{
-	simple_commands.insert(make_pair("sq", "_sq"));
-	simple_commands.insert(make_pair("tc", "tc"));
-	simple_commands.insert(make_pair("ac", "ac"));
-
-	simple_commands.insert(make_pair("next 0", "0 _next"));
-	simple_commands.insert(make_pair("next 1", "1 _next"));
-	simple_commands.insert(make_pair("next 2", "2 _next"));
-	simple_commands.insert(make_pair("next 3", "3 _next"));
-
-	simple_commands.insert(make_pair("clear 0", "0 _clear"));
-	simple_commands.insert(make_pair("clear 1", "1 _clear"));
-	simple_commands.insert(make_pair("clear 2", "2 _clear"));
-	simple_commands.insert(make_pair("clear 3", "3 _clear"));
-
-	simple_commands.insert(make_pair("ti 0", "0 ti"));
-	simple_commands.insert(make_pair("ti 1", "1 ti"));
-	simple_commands.insert(make_pair("ti 2", "2 ti"));
-	simple_commands.insert(make_pair("ti 3", "3 ti"));
-
-	simple_commands.insert(make_pair("s 0", "0 _S"));
-	simple_commands.insert(make_pair("s 1", "1 _S"));
-	simple_commands.insert(make_pair("s 2", "2 _S"));
-	simple_commands.insert(make_pair("s 3", "3 _S"));
-
-	simple_commands.insert(make_pair("z 0", "0 _Z"));
-	simple_commands.insert(make_pair("z 1", "1 _Z"));
-	simple_commands.insert(make_pair("z 2", "2 _Z"));
-	simple_commands.insert(make_pair("z 3", "3 _Z"));
-
-	simple_commands.insert(make_pair("r 0", "0 _R"));
-	simple_commands.insert(make_pair("r 1", "1 _R"));
-	simple_commands.insert(make_pair("r 2", "2 _R"));
-	simple_commands.insert(make_pair("r 3", "3 _R"));
-
-	simple_commands.insert(make_pair("what 0", "0 what"));
-	simple_commands.insert(make_pair("what 1", "1 what"));
-	simple_commands.insert(make_pair("what 2", "2 what"));
-	simple_commands.insert(make_pair("what 3", "3 what"));
-
-	simple_commands.insert(make_pair("who 0", "0 who"));
-	simple_commands.insert(make_pair("who 1", "1 who"));
-	simple_commands.insert(make_pair("who 2", "2 who"));
-	simple_commands.insert(make_pair("who 3", "3 who"));
-
-	one_arg_commands.insert(make_pair("p 0", "0 _P "));
-	one_arg_commands.insert(make_pair("p 1", "1 _P "));
-	one_arg_commands.insert(make_pair("p 2", "2 _P "));
-	one_arg_commands.insert(make_pair("p 3", "3 _P "));
-}
-
-void PBExperiment(int server_socket)
+void DacInfoCommand(int server_socket)
 {
 	assert(server_socket >= 0);
-	ArtistCountQuery acq;
-	SelectQuery sq;
 	string s;
-	sq.set_column("huggy");
-	sq.set_pattern("bear");
-	cout << sq.DebugString() << endl;
-	cout << sq.IsInitialized() << endl;
-	cout << sq.SerializeToString(&s) << " " << s.size() << endl;
+	DacInfo a;
+	a.set_type(DAC_INFO_COMMAND);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("DacInfoCommand() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::SELECT_RESULT)
+	{
+		//cout << LOG("got select result back") << endl;
+		SelectResult sr;
+		if (!sr.ParseFromString(s))
+		{
+			throw string("dacinfocomment parsefromstring failed");
+		}
+		cout << setw(8) << left << "Index";
+		cout << setw(24) << "Name";
+		cout << setw(24) << "Who";
+		cout << setw(24) << "What";
+		cout << setw(10) << "When";
+		cout << right << endl;
+		for (int i = 0; i < sr.row_size(); i++)
+		{
+			Row r = sr.row(i);
+			google::protobuf::Map<string, string> results = r.results();
+			cout << setw(8) << left << results[string("index")];
+			cout << setw(24) << results[string("name")];
+			cout << setw(24) << results[string("who")];
+			cout << setw(24) << results[string("what")];
+			cout << setw(10) << results[string("when")];
+			cout << right << endl;
+		}
+	}
+	else
+	{
+		throw string("did not get select_result back");
+	}
+}
+
+void TrackCountCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+	string s;
+	TrackCountQuery a;
+	a.set_type(TRACK_COUNT);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("TrackCountQuery() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::ONE_INT)
+	{
+		OneInteger o;
+		if (o.ParseFromString(s))
+		{
+			cout << o.value() << endl;
+		}
+		else
+		{
+			throw string("track_count parsefromstring failed");
+		}
+	}
+	else
+	{
+		throw string("track count did not get a ONE_INTEGER back");
+	}
+}
+
+void ArtistCountCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+	string s;
+	ArtistCountQuery a;
+	a.set_type(ARTIST_COUNT);
+	bool outcome = a.SerializeToString(&s);
+	if (!outcome)
+		throw string("ArtistCountQuery() bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::ONE_INT)
+	{
+		OneInteger o;
+		if (o.ParseFromString(s))
+		{
+			cout << o.value() << endl;
+		}
+		else
+		{
+			throw string("artist_count parsefromstring failed");
+		}
+	}
+	else
+	{
+		throw string("artist did not get a ONE_INTEGER back");
+	}
+}
+
+void DevCmdForOneString(Type type, int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
+	{
+		string s;
+		// Using a WhatCommand container - doesn't matter.
+		WhatDeviceCommand sc;
+		sc.set_type(type);
+		sc.set_device_id(device_id);
+		bool outcome = sc.SerializeToString(&s);
+		if (!outcome)
+			throw string("bad serialize");
+		SendPB(s, server_socket);
+		Type type;
+		s = GetResponse(server_socket, type);
+		if (type == Type::ONE_STRING)
+		{
+			OneString o;
+			if (o.ParseFromString(s))
+			{
+				cout << o.value() << endl;
+			}
+			else
+			{
+				throw string("parsefromstring failed");
+			}
+		}
+		else
+		{
+			throw string("did not get a ONE_STRING back");
+		}
+	}
+}
+
+void SelectCommand(int server_socket)
+{
+	assert(server_socket >= 0);
+
+	string s;
+	SelectQuery c;
+	c.set_type(SELECT_QUERY);
+	cout << "Column: ";
+	getline(cin, s);
+	c.set_column(s);
+	cout << "Pattern: ";
+	getline(cin , s);
+	c.set_pattern(s);
+	bool outcome = c.SerializeToString(&s);
+	cout << c.DebugString() << endl;
+	if (!outcome)
+		throw string("bad serialize");
+	cout << LOG(to_string(s.size())) << endl;
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::SELECT_RESULT)
+	{
+		SelectResult sr;
+		if (!sr.ParseFromString(s))
+		{
+			throw string("parsefromstring failed");
+		}
+		cout << left << setw(8) << "id" << setw(24) << "artist" << setw(24) << "title" << setw(10) << "duration" << endl;
+		for (int i = 0; i < sr.row_size(); i++)
+		{
+			Row r = sr.row(i);
+			// r.results_size() tells how many are in map.
+			google::protobuf::Map<string, string> m = r.results();
+			cout << left << setw(8) << m["id"];
+			cout << setw(30) << m["artist"];
+			cout << setw(36) << m["title"];
+			cout << setw(10) << m["duration"];
+			cout << endl;
+/* KEEP THIS AROUND FOR REFERENCE
+			google::protobuf::Map<string, string>::iterator it = m.begin();
+			while (it != m.end())
+			{
+				cout << it->first << "		" << it->second << endl;
+				it++;
+			}
+*/
+		}	
+	}
+	else
+	{
+		throw string("did not get back a SELECT_RESULT");
+	}
+}
+
+void DevCmdNoReply(Type type, int server_socket)
+{
+	int device_id = GetDeviceNumber();
+	if (device_id >= 0)
+	{
+		string s;
+		ClearDeviceCommand c;
+		c.set_type(type);
+		c.set_device_id(device_id);
+		bool outcome = c.SerializeToString(&s);
+		if (!outcome)
+			throw string("bad serialize");
+		SendPB(s, server_socket);
+	}
+}
+
+void SendPB(string & s, int server_socket)
+{
+	assert(server_socket >= 0);
+
 	size_t length = s.size();
-	size_t bytes_sent = send(server_socket, (const void *) length, sizeof(length), 0);
-	bytes_sent = send(server_socket, (const void *) s.c_str(), s.size(), 0);
+	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
+	if (bytes_sent != sizeof(length))
+		throw string("bad bytes_sent for length");
+
+	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
+	if (bytes_sent != length)
+		throw string("bad bytes_sent for message");
 }
 
 int main(int argc, char * argv[])
@@ -321,10 +436,8 @@ int main(int argc, char * argv[])
 
 	int server_socket = -1;
 	bool connected = false;
-	char buffer[BS];
 	string l;
 
-	OrganizeCommands();
 	try
 	{
 		if (signal(SIGINT, SIGHandler) == SIG_ERR)
@@ -332,43 +445,42 @@ int main(int argc, char * argv[])
 
 		server_socket = InitializeNetworkConnection(argc, argv);
 		connected = true;
+
 		while (keep_going)
 		{
-			memset(buffer, 0, BS);
 			cout << "Command: ";
 			getline(cin, l);
 
-			if (l == "PB")
-				PBExperiment(server_socket);
-
-			if (l == "PL")
-			{
-				cout << "DAC: ";
-				getline(cin, l);
-				int d = atoi(l.c_str());
-				if (d < 0 || d > 3)
-					continue;
-				cout << "File: ";
-				getline(cin, l);
-				ifstream f(l);
-				if (f.is_open())
-				{
-					while (getline(f, l))
-					{
-						if (l.size() == 0)
-							continue;
-						string s = to_string(d) + " P " + l;
-						cout << s << endl;
-						send(server_socket, (void *) s.c_str(), (int) s.size(), 0);
-						usleep(900000);
-					}
-					f.close();
-				}
-			}
+			if (l == "stop")
+				DevCmdNoReply(STOP_DEVICE, server_socket);
+			else if (l == "resume")
+				DevCmdNoReply(RESUME_DEVICE, server_socket);
+			else if (l == "pause")
+				DevCmdNoReply(PAUSE_DEVICE, server_socket);
+			else if (l == "play")
+				PlayCommand(server_socket);
+			else if (l == "playlist")
+				SimplePlayList(server_socket);
+			else if (l == "next")
+				DevCmdNoReply(NEXT_DEVICE, server_socket);
+			else if (l == "clear")
+				DevCmdNoReply(CLEAR_DEVICE, server_socket);
+			else if (l == "select")
+				SelectCommand(server_socket);
+			else if (l == "what")
+				DevCmdForOneString(WHAT_DEVICE, server_socket);
+			else if (l == "who")
+				DevCmdForOneString(WHO_DEVICE, server_socket);
+			else if (l == "tracks")
+				TrackCountCommand(server_socket);
+			else if (l == "artists")
+				ArtistCountCommand(server_socket);
 			else if (l == "quit")
-			{
 				break;
-			}
+			else if (l == "dacs")
+				DacInfoCommand(server_socket);
+			else if (l == "timecode")
+				DevCmdForOneString(WHEN_DEVICE, server_socket);
 			else if (l == "rc")
 			{
 				if (!connected)
@@ -381,29 +493,15 @@ int main(int argc, char * argv[])
 				}
 				continue;
 			}
-
-			if (!connected)
-				continue;
-
-			if (HandleSimple(server_socket, l))
+			else if (l == "qs")
 			{
-				if (l == "sq")
-				{
-					cout << "Disconnected" << endl;
-					connected = false;
-					server_socket = -1;
-				}
-				continue;
+				if (!connected)
+					continue;
+				close(server_socket);
+				cout << "Disconnected" << endl;
+				connected = false;
+				server_socket = -1;
 			}
-
-			if (HandleArgCommand(server_socket, l, one_arg_commands, 1))
-				continue;
-
-			if (HandleArgCommand(server_socket, l, two_arg_commands, 2))
-				continue;
-
-			if (l == "se")
-				HandleSearch(server_socket);
 		}
 	}
 	catch (string s)

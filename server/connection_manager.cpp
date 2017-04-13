@@ -27,6 +27,7 @@
 #include "../protos/cpp/commands.pb.h"
 
 using namespace std;
+using namespace pas;
 
 extern Logger _log_;
 
@@ -43,7 +44,39 @@ static DB * InitDB()
 	return db;
 }
 
-static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
+// d and n supplied only for sanity checking
+static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int n)
+{
+	AudioCommand cmd;
+	cmd.cmd = c;
+	if (d >= 0 && d < n)
+	{
+		ac->AddCommand(cmd);
+	}
+	else
+	{	
+		LOG(_log_, "bad device number");
+	}
+}
+
+static void SendPB(string & s, int server_socket)
+{
+	assert(server_socket >= 0);
+
+	size_t length = s.size();
+	LOG(_log_, to_string(length));
+	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
+	if (bytes_sent != sizeof(length))
+		throw string("bad bytes_sent for length");
+	LOG(_log_, to_string(bytes_sent));
+
+	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
+	if (bytes_sent != length)
+		throw string("bad bytes_sent for message");
+	LOG(_log_, to_string(bytes_sent));
+}
+
+static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 {
 	AudioComponent ** acs = (AudioComponent **) dacs;
 
@@ -53,87 +86,199 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 	// the following pointer uninitalized (preventing the DB from being deleted at the
 	// end of processing this command.
 	DB * db = nullptr;
+
+/*
+		LOG(_log_, nullptr);
+					google::protobuf::Map<string, string> * result = r.mutable_results();
+		LOG(_log_, nullptr);
+		// LEFT OFF HERE
+					(*result)[string("happy")] = string("joy");
+		LOG(_log_, nullptr);
+					string s;
+					bool outcome = r.SerializeToString(&s);
+					if (!outcome)
+						throw string("WHO_DEVICE bad serialize");
+		LOG(_log_, nullptr);
+*/
 	
-	int device_index = 0;
-	int buffer_offset = 0;
-
-	if (buffer[0] >= '0' && buffer[0] <= '9')
-	{
-		device_index = buffer[0] - '0';
-		buffer_offset = 2;
-	}
-
+	
 	try
 	{
-		if (device_index < 0 || device_index >= ndacs)
+		GenericPB g;
+		//LOG(_log_, nullptr);
+		g.ParseFromString(s);
+		//LOG(_log_, nullptr);
+		switch (g.type())
 		{
-			string s("bad device index");
-			send(socket, s.c_str(), s.size(), 0);
-			throw LOG(_log_, s);
-		}
+			case Type::DAC_INFO_COMMAND:
+			{
+				SelectResult sr;
+				sr.set_type(SELECT_RESULT);
+				//LOG(_log_, nullptr);
+				for (int i = 0; i < ndacs; i++)
+				{
+					Row * r = sr.add_row();
+					//LOG(_log_, nullptr);
+					r->set_type(ROW);
+					google::protobuf::Map<string, string> * result = r->mutable_results();
+					//LOG(_log_, nullptr);
+					(*result)[string("index")] = to_string(i);
+					(*result)[string("name")] = acs[i]->HumanName();
+					(*result)[string("who")] = acs[i]->Who();
+					(*result)[string("what")] = acs[i]->What();
+					(*result)[string("when")] = acs[i]->TimeCode();
+					//LOG(_log_, nullptr);
+				}
+				if (!sr.SerializeToString(&s))
+						throw LOG(_log_, "t_c could not serialize");
+				//LOG(_log_, nullptr);
+				SendPB(s, socket);
+			}
+			break;
 
-		// We are depending upon the memset of buffer to ensure we have a null terminator.
-		stringstream tss(buffer + buffer_offset);
-		string token;
+			case Type::TRACK_COUNT:
+				{
+					db = InitDB();
+					if (db == nullptr)
+						throw LOG(_log_, "could not allocate a DB");
+					OneInteger r;
+					r.set_type(ONE_INT);
+					r.set_value(db->GetTrackCount());
+					if (!r.SerializeToString(&s))
+						throw LOG(_log_, "t_c could not serialize");
+					SendPB(s, socket);
+				}
+				break;
 
-		tss >> token;
-		LOG(_log_, token);
+			case Type::ARTIST_COUNT:
+				{
+					db = InitDB();
+					if (db == nullptr)
+						throw LOG(_log_, "could not allocate a DB");
+					OneInteger r;
+					r.set_type(ONE_INT);
+					r.set_value(db->GetArtistCount());
+					if (!r.SerializeToString(&s))
+						throw LOG(_log_, "a_c could not serialize");
+					SendPB(s, socket);
+				}
+				break;
 
-		// This can happen now. Suppose the string is "0 ". The zero and
-		// space would be skipped by buffer_offset being 2. Then tss would
-		// have nothing in it. 
-		if (token.size() == 0)
-			throw LOG(_log_, "");
+			case Type::WHEN_DEVICE:
+			case Type::WHO_DEVICE:
+			case Type::WHAT_DEVICE:
+				{
+					//LOG(_log_, nullptr);
+					// Who, What and When are all the same.
+					WhenDeviceCommand w;
+					if (!w.ParseFromString(s))
+						throw LOG(_log_, "what failed to parse");
 
-		if (isupper(token.at(0)) && token.at(0) != PLAY)
-		{
-			LOG(_log_, token);
-			AudioCommand cmd;
-			cmd.cmd = (unsigned char) token[0];
-			acs[device_index]->AddCommand(cmd);
-			if (cmd.cmd == 'Q')
-				throw LOG(_log_, "quitting");
+					OneString r;
+					r.set_type(ONE_STRING);
+					if ((int) w.device_id() < ndacs)
+					{
+						if (g.type() == Type::WHEN_DEVICE)	
+							r.set_value(acs[w.device_id()]->TimeCode());
+						else if (g.type() == Type::WHO_DEVICE)	
+							r.set_value(acs[w.device_id()]->Who());
+						else if (g.type() == Type::WHAT_DEVICE)	
+							r.set_value(acs[w.device_id()]->What());
+						else
+							throw LOG(_log_, "impossible else");
+					}
+					if (!r.SerializeToString(&s))
+					{
+						throw LOG(_log_, "failed to serialize");
+					}
+					SendPB(s, socket);
+				}
+				break;
+
+			case Type::NEXT_DEVICE:
+				{
+					LOG(_log_, "NEXT_DEVICE");
+					// Doesn't matter which command - clean this up someday.
+					StopDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "next failed to parse");
+					AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::STOP_DEVICE:
+				{
+					LOG(_log_, "STOP_DEVICE");
+					StopDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "stop failed to parse");
+					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::RESUME_DEVICE:
+				{
+					LOG(_log_, "RESUME_DEVICE");
+					ResumeDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "resume failed to parse");
+					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::PAUSE_DEVICE:
+				{
+					LOG(_log_, "PAUSE_DEVICE");
+					PauseDeviceCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "pause failed to parse");
+					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+				}
+				break;
+
+			case Type::PLAY_TRACK_DEVICE:
+				{
+					LOG(_log_, "PLAY_TRACK_DEVICE");
+					PlayTrackCommand c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "play failed to parse");
+					if ((int) c.device_id() < ndacs)
+					{
+						acs[c.device_id()]->Play(c.track_id());
+					}
+					else
+					{
+						LOG(_log_, "PLAY_TRACK_DEVICE: bad device number: " + to_string(c.device_id()));
+					}
+				}
+				break;
+
+			case Type::SELECT_QUERY:
+				{
+					LOG(_log_, "SELECT_QUERY");
+					SelectQuery c;
+					if (!c.ParseFromString(s))
+						throw LOG(_log_, "select failed to parse");
+					db = InitDB();
+					if (db == nullptr)
+						throw LOG(_log_, "db failed to initialize");
+					SelectResult r;
+					r.set_type(SELECT_RESULT);
+					db->MultiValuedQuery(c.column(), c.pattern(), r);
+					if (!r.SerializeToString(&s))
+					{
+						throw LOG(_log_, "failed to serialize");
+					}
+					LOG(_log_, to_string(s.size()));
+					SendPB(s, socket);
+				}
+				break;
+
+			default:
+				LOG(_log_, "switch received type: " + to_string((int) g.type()));
+				break;
 		}
-		else if (token == "who")
-		{
-			string s;
-			s = acs[device_index]->Who() + "\n";
-			//LOG(_log_, s);
-			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-		else if (token == "what")
-		{
-			string s;
-			s = acs[device_index]->What() + "\n";
-			//LOG(_log_, s);
-			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-		else if (token == "ti")
-		{
-			string s;
-			s = acs[device_index]->TimeCode();
-			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-		else if (token.at(0) == PLAY)
-		{
-			// The remaining token should be an index number for a track to play
-			unsigned int id;
-			tss >> id;
-			acs[device_index]->Play(id);
-		}
-		else if (token == string("clear"))
-		{
-			acs[device_index]->Clear();
-		}
-		else if (token == string("next"))
-		{
-			AudioCommand cmd;
-			cmd.cmd = PLAY;
-			acs[device_index]->AddCommand(cmd);
-		}
+/*
 		else if (token == string("se"))
 		{	
 			// search on column col using pattern pat
@@ -149,34 +294,7 @@ static bool CommandProcessor(int socket, char * buffer, void * dacs, int ndacs)
 			if (send(socket, aq_results.c_str(), aq_results.size(), 0) != (ssize_t) aq_results.size())
 				throw LOG(_log_, "send did not return the correct number of bytes written");
 		}
-		else if (token == string("sq"))
-		{
-			// requested that we quit
-			rv = false;
-			throw LOG(_log_, string(""));
-		}
-		else if (token == string("ac"))
-		{
-			db = InitDB();
-			// Get count of artists
-			int artist_count = db->GetArtistCount();
-			stringstream ss;
-			ss << artist_count << endl;
-			string s = ss.str();
-			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-		else if (token == string("tc"))
-		{
-			db = InitDB();
-			// Get count of tracks
-			int track_count = db->GetTrackCount();
-			stringstream ss;
-			ss << track_count << endl;
-			string s = ss.str();
-			if (send(socket, s.c_str(), s.size(), 0) != (ssize_t) s.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
+*/
 	}
 	catch (LoggedException s)
 	{
@@ -206,17 +324,22 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 	try
 	{
 		size_t bytes_read;
-		const int BS = 2048;
-		char buffer[BS];
 	
-		memset(buffer, 0, BS);
 		LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client");
-		while ((bytes_read = recv(socket, (void *) buffer, BS, 0)) > 0)
+		while (true)
 		{
-			//cerr << "Raw: " << buffer << endl;
-			if (!CommandProcessor(socket, buffer, dacs, ndacs))
+			size_t length = 0;
+			bytes_read = recv(socket, (void *) &length, sizeof(length), 0);
+			if (bytes_read != sizeof(length))
+				throw LOG(_log_, "bad recv getting length: " + to_string(bytes_read));
+			LOG(_log_, "recv of length: " + to_string(length));
+			string s;
+			s.resize(length);
+			bytes_read = recv(socket, (void *) &s[0], length, 0);
+			if (bytes_read != length)
+				throw LOG(_log_, "bad recv getting pbuffer: " + to_string(bytes_read));
+			if (!CommandProcessor(socket, s, dacs, ndacs))
 				break;
-			memset(buffer, 0, BS);
 		}
 	}
 	catch (LoggedException s)

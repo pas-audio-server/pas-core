@@ -74,7 +74,7 @@ AudioComponent::~AudioComponent()
 
 inline bool GoodCommand(unsigned char c)
 {
-	return (c == PLAY || c == STOP || c == PAUSE || c == RESUME || c == QUIT);
+	return (c == PLAY || c == STOP || c == PAUSE || c == RESUME || c == QUIT || c == NEXT);
 }
 
 // This is used twice, formerly as copy / pasted code. Copy / pasted code
@@ -160,11 +160,17 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	// terminate_flag will trip when the thread is told to exit.
 	//
 	// restarting will trip when the thread was put to sleep by a PAUSE command.
-	// and awakened specifically by a PLAY. The flag causes the initial sem_wait
+	// and awakened specifically by a PLAY or NEXT. The flag causes the initial sem_wait
 	// to be skipped because the command that woke the thread up has already done
 	// so.
 	bool terminate_flag = false;
 	bool restarting = false;
+
+	// If a stop command is received, this flag will be set to true
+	// then the main while loop is broken. terminate_flag on the other
+	// hand means the thread should terminate.
+	bool stop_flag = false;
+
 
 	while (!terminate_flag)
 	{
@@ -177,10 +183,14 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			me->title = me->artist = string("");
 			//LOG(_log_, nullptr);
 			me->m_play_queue.lock();
-			if (me->play_queue.empty())
+			// stop_flag begins as false and will be set to false before playing something. 
+			// If a stop command comes it, stop_flag becomes true and we loop around to here.
+			// Getting here with it still true means we should sem_wait even if the queue
+			// is not empty.
+			if (me->play_queue.empty() || stop_flag)
 			{
 				me->m_play_queue.unlock();
-				//LOG(_log_, nullptr);
+				LOG(_log_, nullptr);
 
 				sem_wait(&me->sem);
 
@@ -191,7 +201,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					continue;
 				}
 
-				//LOG(_log_, string(1, ac.cmd));
+				LOG(_log_, string(1, ac.cmd));
 				if (!GoodCommand(ac.cmd))
 				{
 					LOG(_log_, "Bad command");
@@ -203,8 +213,11 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					terminate_flag = true;
 					break;
 				}
-				if (ac.cmd != PLAY)
+				if (ac.cmd != NEXT && ac.cmd != PLAY)
+				{
+					LOG(_log_, nullptr);
 					continue;
+				}
 			}
 			me->m_play_queue.unlock();
 		}
@@ -215,18 +228,13 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 		size_t bytes_read;
 		try
 		{
-			// If a stop command is received, this flag will be set to true
-			// then the main while loop is broken. terminate_flag on the other
-			// hand means the thread should terminate.
-			bool stop_flag = false;
-
 			// Assemble the command line. The forcing of 44100 ensures that trackes sampled
 			// at other rates (22500, for example) will be resampled. This has a bad side effect
 			// documented a few lines down... the skipping of three buffers.
 			//
 			// NOTE: This can be avoided if the database has knowledge of the sample rate.
 			//
-			//LOG(_log_, nullptr);
+			LOG(_log_, nullptr);
 			me->m_play_queue.lock();
 			if (me->play_queue.empty())
 			{
@@ -292,6 +300,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// main loop of audio play. We'll always launch the NEXT buffer's
 			// asynchonous I/O before writing the PREVIOUS buffer to pulse
 			// in a blocking manner.
+			stop_flag = false;
 			while (bytes_read > 0 && !terminate_flag && !stop_flag)
 			{
 				//LOG(_log_, nullptr);
@@ -352,7 +361,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 							stop_flag = true;
 							break;
 						}
-						if (ac.cmd == PLAY)
+						if (ac.cmd == PLAY || ac.cmd == NEXT)
 						{
 							// This will break the playing loop but the thread will not go to sleep.
 							// Instead, it starts playing a new track. Recall, when the play loop

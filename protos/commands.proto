@@ -17,49 +17,102 @@ enum Type {
 	ARTIST_COUNT = 8;
 	FOLDER_COUNT = 9;
 	SELECT_QUERY = 10;
-	CONTENT_QUERY = 11;
 	WHEN_DEVICE = 12;
+	CLEAR_DEVICE = 13;
+	SELECT_RESULT = 14;
+	ROW = 15;
+	ONE_INT = 16;
+	ONE_STRING = 17;
+	ONE_FLOAT = 18;
+	DAC_INFO_COMMAND = 19;
+	NEXT_DEVICE = 20;
+}
+
+// This is a return type
+message Row {
+	Type type = 1;
+	map <string, string> results = 2;
+}
+
+// This is a command type
+// It expects a SelectResult in response.
+message DacInfo
+{
+	Type type = 1;
+	repeated Row row = 2;
+}
+
+// This is a return type
+message SelectResult
+{
+	Type type = 1;
+	repeated Row row = 2;
 }
 
 message GenericPB {
 	Type type = 1; 
 }
 
+// This is a send type.
+// No respnse is expected.
 message PlayTrackCommand {
 	Type type = 1; 
     uint64 device_id = 2;
     uint64 track_id = 3;
 }
 
+// This is a send type.
+// No respnse is expected.
 message PauseDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
+// This is a send type.
+// No respnse is expected.
 message ResumeDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
+// This is a send type.
+// No respnse is expected.
+message ClearDeviceCommand {
+	Type type = 1; 
+    uint64 device_id = 2;
+}
+
+// This is a send type.
+// No respnse is expected.
 message StopDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
-message TrackQueryCommand {
+// This is a send type.
+// A OneString is expected back.
+// Will combine all the device_id/one_strings together.
+message WhoDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
-message TimeQueryCommand {
+// This is a send type.
+// A OneString is expected back.
+// Will combine all the device_id/one_strings together.
+message WhatDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
 }
 
+// This is a send type.
+// A OneInteger is expected back.
 message TrackCountQuery {
 	Type type = 1; 
 }
 
+// This is a send type.
+// A OneInteger is expected back.
 message ArtistCountQuery {
 	Type type = 1; 
 }
@@ -68,13 +121,37 @@ message FolderCountQuery {
 	Type type = 1; 
 }
 
+// This is a send type.
+// A SelectResult is expected back.
 message SelectQuery {
 	Type type = 1; 
     string column = 2;
     string pattern = 3;
 }
 
-message ContentQuery {
+// This is a send type.
+// A OneString is expected back.
+// Will combine all the device_id/one_strings together.
+message WhenDeviceCommand {
 	Type type = 1; 
-    string path = 2;
+    uint64 device_id = 2;
 }
+
+// This is a return type.
+message OneInteger {
+	Type type = 1; 
+    uint64 value = 2;
+}
+
+// This is a return type.
+message OneString {
+	Type type = 1; 
+    string value = 2;
+}
+
+// This is a return type.
+message OneFloat {
+	Type type = 1; 
+    float value = 2;
+}
+

@@ -52,7 +52,7 @@ enum AUDIO_COMMANDS
 	STOP 	= 'S',
 	PAUSE 	= 'Z',
 	RESUME 	= 'R',
-
+	NEXT	= 'N',
 	QUIT 	= 'Q',
 	NONE 	= 0
 };
