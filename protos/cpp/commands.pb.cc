@@ -538,7 +538,7 @@ void protobuf_AddDesc_commands_2eproto() {
     "pas.Type\022\r\n\005value\030\002 \001(\004\"3\n\tOneString\022\027\n\004"
     "type\030\001 \001(\0162\t.pas.Type\022\r\n\005value\030\002 \001(\t\"2\n\010"
     "OneFloat\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\r\n\005val"
-    "ue\030\002 \001(\002*\311\002\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_T"
+    "ue\030\002 \001(\002*\332\002\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_T"
     "RACK_DEVICE\020\001\022\020\n\014PAUSE_DEVICE\020\002\022\021\n\rRESUM"
     "E_DEVICE\020\003\022\017\n\013STOP_DEVICE\020\004\022\016\n\nWHO_DEVIC"
     "E\020\005\022\017\n\013WHAT_DEVICE\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n"
@@ -546,7 +546,8 @@ void protobuf_AddDesc_commands_2eproto() {
     "ECT_QUERY\020\n\022\017\n\013WHEN_DEVICE\020\014\022\020\n\014CLEAR_DE"
     "VICE\020\r\022\021\n\rSELECT_RESULT\020\016\022\007\n\003ROW\020\017\022\013\n\007ON"
     "E_INT\020\020\022\016\n\nONE_STRING\020\021\022\r\n\tONE_FLOAT\020\022\022\024"
-    "\n\020DAC_INFO_COMMAND\020\023b\006proto3", 1548);
+    "\n\020DAC_INFO_COMMAND\020\023\022\017\n\013NEXT_DEVICE\020\024b\006p"
+    "roto3", 1565);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "commands.proto", &protobuf_RegisterTypes);
   Row::default_instance_ = new Row();
@@ -621,6 +622,7 @@ bool Type_IsValid(int value) {
     case 17:
     case 18:
     case 19:
+    case 20:
       return true;
     default:
       return false;

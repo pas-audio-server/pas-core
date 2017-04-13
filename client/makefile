@@ -1,6 +1,6 @@
 CC	= g++
 CFLAGS	= -g -Wall -std=c++11 -pthread
-LDFLAGS	= -ljson-c -lprotobuf
+LDFLAGS	= -lprotobuf
 
 %.o			: %.cpp
 			$(CC) -c $(CFLAGS) $< -o $@

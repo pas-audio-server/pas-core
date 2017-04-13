@@ -79,12 +79,13 @@ enum Type {
   ONE_STRING = 17,
   ONE_FLOAT = 18,
   DAC_INFO_COMMAND = 19,
+  NEXT_DEVICE = 20,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = DAC_INFO_COMMAND;
+const Type Type_MAX = NEXT_DEVICE;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();

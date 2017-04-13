@@ -122,10 +122,12 @@ string GetResponse(int server_socket, Type & type)
 	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
 	if (bytes_read != sizeof(length))
 		throw LOG("bad recv getting length: " + to_string(bytes_read));
-	LOG("recv of length: " + to_string(length));
+	cout << LOG("recv of length: " + to_string(length)) << endl;
+
 	string s;
 	s.resize(length);
-	bytes_read = recv(server_socket, (void *) &s[0], length, 0);
+	cout << LOG("string is now: " + to_string(s.size())) << endl;
+	bytes_read = recv(server_socket, (void *) &s[0], length, MSG_WAITALL);
 	if (bytes_read != length)
 		throw LOG("bad recv getting pbuffer: " + to_string(bytes_read));
 	GenericPB g;
@@ -149,38 +151,6 @@ int GetDeviceNumber()
 }
 
 void SendPB(string & s, int server_socket);
-
-void StopCommand(int server_socket)
-{
-	int device_id = GetDeviceNumber();
-	if (device_id >= 0)
-	{
-		string s;
-		StopDeviceCommand sc;
-		sc.set_type(Type::STOP_DEVICE);
-		sc.set_device_id(device_id);
-		bool outcome = sc.SerializeToString(&s);
-		if (!outcome)
-			throw string("StopCommand() bad serialize");
-		SendPB(s, server_socket);
-	}
-}
-
-void ResumeCommand(int server_socket)
-{
-	int device_id = GetDeviceNumber();
-	if (device_id >= 0)
-	{
-		string s;
-		ResumeDeviceCommand sc;
-		sc.set_type(Type::RESUME_DEVICE);
-		sc.set_device_id(device_id);
-		bool outcome = sc.SerializeToString(&s);
-		if (!outcome)
-			throw string("ResumeCommand() bad serialize");
-		SendPB(s, server_socket);
-	}
-}
 
 /*	This is broken out to make the playlist feature easier.
  */
@@ -236,22 +206,6 @@ static void SimplePlayList(int server_socket)
 	}
 }
 
-void PauseCommand(int server_socket)
-{
-	int device_id = GetDeviceNumber();
-	if (device_id >= 0)
-	{
-		string s;
-		PauseDeviceCommand sc;
-		sc.set_type(Type::PAUSE_DEVICE);
-		sc.set_device_id(device_id);
-		bool outcome = sc.SerializeToString(&s);
-		if (!outcome)
-			throw string("PauseCommand() bad serialize");
-		SendPB(s, server_socket);
-	}
-}
-
 void DacInfoCommand(int server_socket)
 {
 	assert(server_socket >= 0);
@@ -264,26 +218,29 @@ void DacInfoCommand(int server_socket)
 	SendPB(s, server_socket);
 	Type type;
 	s = GetResponse(server_socket, type);
-	// NOTE
-	// NOTE - this is a mistake I was supposed to result at DacInfo not a SelectResult
-	//
 	if (type == Type::SELECT_RESULT)
 	{
-		cout << LOG("got select result back") << endl;
+		//cout << LOG("got select result back") << endl;
 		SelectResult sr;
 		if (!sr.ParseFromString(s))
 		{
 			throw string("dacinfocomment parsefromstring failed");
 		}
 		cout << setw(8) << left << "Index";
-		cout << setw(32) << "Name";
+		cout << setw(24) << "Name";
+		cout << setw(24) << "Who";
+		cout << setw(24) << "What";
+		cout << setw(10) << "When";
 		cout << right << endl;
 		for (int i = 0; i < sr.row_size(); i++)
 		{
 			Row r = sr.row(i);
 			google::protobuf::Map<string, string> results = r.results();
 			cout << setw(8) << left << results[string("index")];
-			cout << setw(32) << results[string("name")];
+			cout << setw(24) << results[string("name")];
+			cout << setw(24) << results[string("who")];
+			cout << setw(24) << results[string("what")];
+			cout << setw(10) << results[string("when")];
 			cout << right << endl;
 		}
 	}
@@ -292,17 +249,6 @@ void DacInfoCommand(int server_socket)
 		throw string("did not get select_result back");
 	}
 }
-
-/*
-   if (type == Type::ROW)
-   {
-   cout << "Yay! Got a ROW" << endl;
-   }
-   else
-   {
-   cout << "Did not get a ROW" << endl;
-   }
- */
 
 void TrackCountCommand(int server_socket)
 {
@@ -364,18 +310,19 @@ void ArtistCountCommand(int server_socket)
 	}
 }
 
-void WhatCommand(int server_socket)
+void DevCmdForOneString(Type type, int server_socket)
 {
 	int device_id = GetDeviceNumber();
 	if (device_id >= 0)
 	{
 		string s;
+		// Using a WhatCommand container - doesn't matter.
 		WhatDeviceCommand sc;
-		sc.set_type(Type::WHAT_DEVICE);
+		sc.set_type(type);
 		sc.set_device_id(device_id);
 		bool outcome = sc.SerializeToString(&s);
 		if (!outcome)
-			throw string("WhatCommand() bad serialize");
+			throw string("bad serialize");
 		SendPB(s, server_socket);
 		Type type;
 		s = GetResponse(server_socket, type);
@@ -388,46 +335,12 @@ void WhatCommand(int server_socket)
 			}
 			else
 			{
-				throw string("what parsefromstring failed");
+				throw string("parsefromstring failed");
 			}
 		}
 		else
 		{
-			throw string("what did not get a ONE_STRING back");
-		}
-	}
-}
-
-void WhoCommand(int server_socket)
-{
-	int device_id = GetDeviceNumber();
-	if (device_id >= 0)
-	{
-		string s;
-		WhoDeviceCommand sc;
-		sc.set_type(Type::WHO_DEVICE);
-		sc.set_device_id(device_id);
-		bool outcome = sc.SerializeToString(&s);
-		if (!outcome)
-			throw string("WhoCommand() bad serialize");
-		SendPB(s, server_socket);
-		Type type;
-		s = GetResponse(server_socket, type);
-		if (type == Type::ONE_STRING)
-		{
-			OneString o;
-			if (o.ParseFromString(s))
-			{
-				cout << o.value() << endl;
-			}
-			else
-			{
-				throw string("who parsefromstring failed");
-			}
-		}
-		else
-		{
-			throw string("who did not get a ONE_STRING back");
+			throw string("did not get a ONE_STRING back");
 		}
 	}
 }
@@ -444,25 +357,61 @@ void SelectCommand(int server_socket)
 	c.set_column(s);
 	cout << "Pattern: ";
 	getline(cin , s);
-	c.set_pattern(string("\"") + s + string("\""));
+	c.set_pattern(s);
 	bool outcome = c.SerializeToString(&s);
+	cout << c.DebugString() << endl;
 	if (!outcome)
-		throw string("ClearCommand() bad serialize");
+		throw string("bad serialize");
+	cout << LOG(to_string(s.size())) << endl;
 	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::SELECT_RESULT)
+	{
+		SelectResult sr;
+		if (!sr.ParseFromString(s))
+		{
+			throw string("parsefromstring failed");
+		}
+		cout << left << setw(8) << "id" << setw(24) << "artist" << setw(24) << "title" << setw(10) << "duration" << endl;
+		for (int i = 0; i < sr.row_size(); i++)
+		{
+			Row r = sr.row(i);
+			// r.results_size() tells how many are in map.
+			google::protobuf::Map<string, string> m = r.results();
+			cout << left << setw(8) << m["id"];
+			cout << setw(30) << m["artist"];
+			cout << setw(36) << m["title"];
+			cout << setw(10) << m["duration"];
+			cout << endl;
+/* KEEP THIS AROUND FOR REFERENCE
+			google::protobuf::Map<string, string>::iterator it = m.begin();
+			while (it != m.end())
+			{
+				cout << it->first << "		" << it->second << endl;
+				it++;
+			}
+*/
+		}	
+	}
+	else
+	{
+		throw string("did not get back a SELECT_RESULT");
+	}
 }
 
-void ClearCommand(int server_socket)
+void DevCmdNoReply(Type type, int server_socket)
 {
 	int device_id = GetDeviceNumber();
 	if (device_id >= 0)
 	{
 		string s;
 		ClearDeviceCommand c;
-		c.set_type(Type::CLEAR_DEVICE);
+		c.set_type(type);
 		c.set_device_id(device_id);
 		bool outcome = c.SerializeToString(&s);
 		if (!outcome)
-			throw string("ClearCommand() bad serialize");
+			throw string("bad serialize");
 		SendPB(s, server_socket);
 	}
 }
@@ -503,23 +452,25 @@ int main(int argc, char * argv[])
 			getline(cin, l);
 
 			if (l == "stop")
-				StopCommand(server_socket);
+				DevCmdNoReply(STOP_DEVICE, server_socket);
 			else if (l == "resume")
-				ResumeCommand(server_socket);
+				DevCmdNoReply(RESUME_DEVICE, server_socket);
 			else if (l == "pause")
-				PauseCommand(server_socket);
+				DevCmdNoReply(PAUSE_DEVICE, server_socket);
 			else if (l == "play")
 				PlayCommand(server_socket);
-			else if (l == "play_list")
+			else if (l == "playlist")
 				SimplePlayList(server_socket);
+			else if (l == "next")
+				DevCmdNoReply(NEXT_DEVICE, server_socket);
 			else if (l == "clear")
-				ClearCommand(server_socket);
+				DevCmdNoReply(CLEAR_DEVICE, server_socket);
 			else if (l == "select")
 				SelectCommand(server_socket);
 			else if (l == "what")
-				WhatCommand(server_socket);
+				DevCmdForOneString(WHAT_DEVICE, server_socket);
 			else if (l == "who")
-				WhoCommand(server_socket);
+				DevCmdForOneString(WHO_DEVICE, server_socket);
 			else if (l == "tracks")
 				TrackCountCommand(server_socket);
 			else if (l == "artists")
@@ -528,6 +479,8 @@ int main(int argc, char * argv[])
 				break;
 			else if (l == "dacs")
 				DacInfoCommand(server_socket);
+			else if (l == "timecode")
+				DevCmdForOneString(WHEN_DEVICE, server_socket);
 			else if (l == "rc")
 			{
 				if (!connected)

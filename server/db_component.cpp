@@ -18,10 +18,10 @@
  */
 
 #include "db_component.hpp"
-#include <json/json.h>
 #include "logger.hpp"
 
 using namespace std;
+using namespace pas;
 
 extern Logger _log_;
 
@@ -243,14 +243,14 @@ void DB::PrintMySQLException(sql::SQLException & e)
 	cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
 }
 
-void DB::MultiValuedQuery(string column, string pattern, string & results)
+void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
 {
 	assert(connection != nullptr);
 
 	sql::Statement * stmt = nullptr;
 	sql::ResultSet * res = nullptr;
-	results = string(" ");
 
+	LOG(_log_, nullptr);
 	if (IsAColumn(column))
 	{
 		try
@@ -265,36 +265,27 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 			sql += column + " like \"" + pattern + "\" order by " + column + ";";
 			//cout << sql << endl;
 			res = stmt->executeQuery(sql.c_str());
-			json_object * jobj = json_object_new_object();
-			if (jobj == nullptr)
-				throw LOG(_log_, "json_object_new_object() failed");
 
-			json_object * outer_array = json_object_new_array();
-
+			LOG(_log_, nullptr);
 			while (res->next())
 			{
 				//cout << LOG("") << endl;
-				// assumes path is zeroeth column`
-				//json_object * inner_array = json_object_new_array();
-				json_object * inner_obj = json_object_new_object();
+				Row * r = results.add_row();
+				r->set_type(ROW);
+				google::protobuf::Map<string, string> * m = r->mutable_results();
+
 				for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
 				{
+					// assumes path is zeroeth column and skips it.
 					string col = track_column_names[i];
 					if (i == 0)
 						col = "id";
 					string s;
 					s = res->getString(col);
-					//cout << __LINE__ << " " << track_column_names[i] << " " << s << endl;
-					json_object * jstring = json_object_new_string(s.c_str());
-					//json_object_array_add(inner_array, jstring);
-					json_object_object_add(inner_obj, col.c_str(), jstring);
+					(*m)[col] = s;
 				}
-				json_object_array_add(outer_array, inner_obj);
 			}
-			json_object_object_add(jobj, "rows", outer_array);
-			results = json_object_to_json_string(jobj);
-			json_object_put(jobj);
-			//cout << results << endl;
+			LOG(_log_, nullptr);
 		}
 		catch (LoggedException s)
 		{
@@ -303,6 +294,7 @@ void DB::MultiValuedQuery(string column, string pattern, string & results)
 		{
 			PrintMySQLException(e);
 		}
+		LOG(_log_, to_string(results.ByteSize()));
 	}
 
 	if (stmt != nullptr)

@@ -25,6 +25,7 @@ enum Type {
 	ONE_STRING = 17;
 	ONE_FLOAT = 18;
 	DAC_INFO_COMMAND = 19;
+	NEXT_DEVICE = 20;
 }
 
 // This is a return type
@@ -90,6 +91,7 @@ message StopDeviceCommand {
 
 // This is a send type.
 // A OneString is expected back.
+// Will combine all the device_id/one_strings together.
 message WhoDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
@@ -97,6 +99,7 @@ message WhoDeviceCommand {
 
 // This is a send type.
 // A OneString is expected back.
+// Will combine all the device_id/one_strings together.
 message WhatDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
@@ -128,6 +131,7 @@ message SelectQuery {
 
 // This is a send type.
 // A OneString is expected back.
+// Will combine all the device_id/one_strings together.
 message WhenDeviceCommand {
 	Type type = 1; 
     uint64 device_id = 2;
