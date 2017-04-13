@@ -4,7 +4,7 @@ CC	= g++
 CFLAGS	= -O3 -Wall -std=c++11 -fopenmp -pthread
 #CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
 
-LDFLAGS	= -ljson-c -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt -lprotobuf
+LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt -lprotobuf
 
 SRC		= server.cpp logger.cpp connection_manager.cpp network_component.cpp \
 		  db_component.cpp file_system_component.cpp track.cpp audio_component.cpp \
