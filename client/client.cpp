@@ -1,3 +1,22 @@
+/*  This file is part of pas.
+
+	pas is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	pas is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with pas.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*  pas is Copyright 2017 by Perry Kivolowitz
+ */
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -25,17 +44,28 @@
 using namespace std;
 using namespace pas;
 
+// Template function comment
+
+/*	FUNCTIONNAME() - This function
+
+	Parameters:
+
+	Returns:
+
+	Side Effects:
+
+	Expceptions:
+
+*/
+
 #define	LOG(s)		(string(__FILE__) + string(":") + string(__FUNCTION__) + string("() line: ") + to_string(__LINE__) + string(" msg: ") + string(s))
 
-const int BS = 2048;
+// NOTE:
+// NOTE: Assumtion about the number of DACS (for sanity checking of user input.
+// NOTE:
+const int MAX_DACS = 4;
 
 bool keep_going = true;
-
-/*
-   map<string, string> simple_commands;
-   map<string, string> one_arg_commands;
-   map<string, string> two_arg_commands;
- */
 
 void SIGHandler(int signal_number)
 {
@@ -43,6 +73,29 @@ void SIGHandler(int signal_number)
 	cout << endl;
 	throw string("");	
 }
+
+/*	InitializeNetworkConnection() - This function provides standard network
+	client initialization which does include accepting an alternate port
+	and IP address.
+
+	The default port and IP, BTW, are: 5077 and 127.0.0.1.
+
+	TODO: Calls to perror print directly to the console. These should
+	be folded into the LOG().
+
+	Parameters:
+	int argc		Taken from main - the usual meaning
+	char * argv[]	Taken from main - the usual meaning
+
+	Returns:
+	int				The file descriptor of the server socket
+
+	Side Effects:
+
+	Expceptions:
+	
+	Error conditions are thrown as strings.
+*/
 
 int InitializeNetworkConnection(int argc, char * argv[])
 {
@@ -94,6 +147,8 @@ int InitializeNetworkConnection(int argc, char * argv[])
 	return server_socket;
 }
 
+// Holdover from old version of code. Useful routine to remains here for
+// possible future reuse.
 inline bool BeginsWith(string const & fullString, string const & prefix)
 {
 	bool rv = false;
@@ -105,6 +160,8 @@ inline bool BeginsWith(string const & fullString, string const & prefix)
 	return rv;
 }
 
+// Holdover from old version of code. Useful routine to remains here for
+// possible future reuse.
 bool HasEnding (string const & fullString, string const & ending)
 {
 	bool rv = false;
@@ -116,17 +173,43 @@ bool HasEnding (string const & fullString, string const & ending)
 	return rv;
 }
 
+/*	GetResponse() - This function abstracts the network code and error checking
+	when a response is expected from the pas server. Examples of this include
+	sending a SELECT_QUERY command and then GetResponse() to receive back the
+	rows resulting from the DB query.
+
+	An important consequence of this function is not only to provide the
+	Protocol Buffer string but also to taste the buffer to determine its type.
+	The type field is required to be the first value in all messages.
+
+	Yes, this has the side effect of having to decode the string twice.
+
+	Parameters:
+	int server_socket	The incoming file descriptor for the server network connection
+	Type type			The OUTGOING type sniffed from the incoming message
+
+	Returns:
+	string				The binary (couched in a string) PB message.
+
+	Side Effects:
+
+	None
+
+	Expceptions:
+
+	Errors are thrown as strings.
+*/
 string GetResponse(int server_socket, Type & type)
 {
 	size_t length = 0;
 	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
 	if (bytes_read != sizeof(length))
 		throw LOG("bad recv getting length: " + to_string(bytes_read));
-	cout << LOG("recv of length: " + to_string(length)) << endl;
+	//cout << LOG("recv of length: " + to_string(length)) << endl;
 
 	string s;
 	s.resize(length);
-	cout << LOG("string is now: " + to_string(s.size())) << endl;
+	//cout << LOG("string is now: " + to_string(s.size())) << endl;
 	bytes_read = recv(server_socket, (void *) &s[0], length, MSG_WAITALL);
 	if (bytes_read != length)
 		throw LOG("bad recv getting pbuffer: " + to_string(bytes_read));
@@ -138,6 +221,25 @@ string GetResponse(int server_socket, Type & type)
 	return s;
 }
 
+/*	GetDeviceNumber() - This function abstracts asking the user for a device
+	number. This is done so many times, it is an appropriate abstraction.
+	Note that the device number is tested against MAX_DACS which contains
+	an arbitrary value. A useful change for the future would be to somehow
+	determine from actual hardware how many DACs there are.
+
+	Parameters:
+	None
+
+	Returns:
+	int				The user entered (and vetted) device number.
+
+	Side Effects:
+	None
+
+	Expceptions:
+	None
+*/
+
 int GetDeviceNumber()
 {
 	string l;
@@ -145,12 +247,33 @@ int GetDeviceNumber()
 	getline(cin, l);
 
 	int device_id = atoi(l.c_str());
-	if (device_id < 0 || device_id > 3)
+	if (device_id < 0 || device_id >= MAX_DACS)
 		device_id = -1;
 	return device_id;
 }
 
 void SendPB(string & s, int server_socket);
+
+/*	InnerPlayCommand() - This function abstracts the mechanics of sending
+	play commands. It is useful because both PLAY and PLAYLIST need
+	this function (so it is shared).
+
+	Parameters:
+	int device_id		Which DACS to queue up
+	int track			The database index of the track to queue
+	int server_socket	How to reach the server
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion could crash the program.
+
+	Expceptions:
+	SendPB can send exceptions on network issues.
+	This function can throw exceptions due to bad Protocol Buffer outcomes.
+	These exceptions are in the form of strings.
+*/
 
 /*	This is broken out to make the playlist feature easier.
  */
@@ -169,8 +292,30 @@ static void InnerPlayCommand(int device_id, int track, int server_socket)
 	SendPB(s, server_socket);
 }
 
+/*	FUNCTIONNAME() - This function executes as a consequence of the
+	user's selection of a PLAY command. It asks for a DAC number and
+	track number and uses InnerPlayCommand to actually queue up
+	the track. Note the "queue." If the play queue is empty, the
+	newly queued track is played immediately. Else it goes to the
+	back of the bus.
+
+	Parameters:
+	int server_socket	How to reach the server.
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+
+	Expceptions:
+	InnerPlayCommand can cause string-based exceptions.
+*/
+
 static void PlayCommand(int server_socket)
 {
+	assert(server_socket >= 0);
+
 	int device_id = GetDeviceNumber();
 	if (device_id >= 0)
 	{
@@ -182,8 +327,28 @@ static void PlayCommand(int server_socket)
 	}
 }
 
+/*	SimplePlayList() - This function asks for a file name which 
+	contains database track numbers. This is a simple playlist
+	in that track numbers are transitory. If the database is
+	rebuilt, track numbers change. This is for debugging.
+
+	Parameters:
+	int server_socket	How to reach the server
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+
+	Expceptions:
+	Network related errors can cause string-based exception.
+*/
+
 static void SimplePlayList(int server_socket)
 {
+	assert(server_socket >= 0);
+
 	int device_id = GetDeviceNumber();
 	if (device_id >= 0)
 	{
@@ -205,6 +370,25 @@ static void SimplePlayList(int server_socket)
 		f.close();
 	}
 }
+
+/*	DacInfoCommand() - This function implements the command of the
+	same name. It is not abstracted because the return from the pas
+	server is an array of rows which must be interpreted in a unique
+	way.
+
+	Parameters:
+	int server_socket	How to reach the server
+
+	Returns:
+	None
+
+	Side Effects:
+	None
+
+	Expceptions:
+	Both this function and the network functions it calls can 
+	throw string-based exceptions.
+*/
 
 void DacInfoCommand(int server_socket)
 {
@@ -250,6 +434,25 @@ void DacInfoCommand(int server_socket)
 	}
 }
 
+/*	TrackCountCommand() - This function SHOULD BE MERGED WITH ArtistCountCommand.
+	It sends a zero-arg message and receives back a one integer message. 
+	This is exactly the same as ArtistCount.
+
+	Parameters:
+	int server_socket	How to reach the server.
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+	Something is printed.
+
+	Expceptions:
+	Both this function and the network functions it calls can 
+	throw string-based exceptions.
+*/
+
 void TrackCountCommand(int server_socket)
 {
 	assert(server_socket >= 0);
@@ -280,6 +483,25 @@ void TrackCountCommand(int server_socket)
 	}
 }
 
+/*	ArtistCountCommand() - This function SHOULD BE MERGED WITH TrackCountCommand.
+	It sends a zero-arg message and receives back a one integer message. 
+	This is exactly the same as ArtistCount.
+
+	Parameters:
+	int server_socket	How to reach the server.
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+	Something is printed.
+
+	Expceptions:
+	Both this function and the network functions it calls can 
+	throw string-based exceptions.
+*/
+
 void ArtistCountCommand(int server_socket)
 {
 	assert(server_socket >= 0);
@@ -309,6 +531,26 @@ void ArtistCountCommand(int server_socket)
 		throw string("artist did not get a ONE_INTEGER back");
 	}
 }
+
+/*	DevCmdForOneString() - This function abstracts several commands
+	in the same what the ArtistCount and TrackCount should be. These
+	commands, such as Who, What, and When send a DAC number and
+	receive back a string.
+
+	Parameters:
+	Type type			The precise command to send
+	int server_socket	How to reach the server
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+	Something is printed.
+
+	Expceptions:
+	This and network functions can throw string-based exceptions.
+*/
 
 void DevCmdForOneString(Type type, int server_socket)
 {
@@ -344,6 +586,28 @@ void DevCmdForOneString(Type type, int server_socket)
 		}
 	}
 }
+
+/*	SelectCommand() - This function initiates a full blowed
+	SQL select statement inside pas. The mount of data returned
+	could be large (and will be deserialized twice). 
+
+	This function cannot be abstracted (well, in theory it can
+	be combined with DacInfo) due to custom parsing of the result
+	data.
+
+	Parameters:
+	int server_socket		The usual
+
+	Returns:
+	None
+
+	Side Effects:
+	A false assertion can crash the program.
+	A potentially large amount is printed.
+
+	Expceptions:
+	Lots of ways this comman can throw a atring-based exception,
+*/
 
 void SelectCommand(int server_socket)
 {
@@ -400,6 +664,18 @@ void SelectCommand(int server_socket)
 	}
 }
 
+/*	FUNCTIONNAME() - This function
+
+	Parameters:
+
+	Returns:
+
+	Side Effects:
+
+	Expceptions:
+
+*/
+
 void DevCmdNoReply(Type type, int server_socket)
 {
 	int device_id = GetDeviceNumber();
@@ -416,6 +692,18 @@ void DevCmdNoReply(Type type, int server_socket)
 	}
 }
 
+/*	FUNCTIONNAME() - This function
+
+	Parameters:
+
+	Returns:
+
+	Side Effects:
+
+	Expceptions:
+
+*/
+
 void SendPB(string & s, int server_socket)
 {
 	assert(server_socket >= 0);
@@ -429,6 +717,12 @@ void SendPB(string & s, int server_socket)
 	if (bytes_sent != length)
 		throw string("bad bytes_sent for message");
 }
+
+// NOTE:
+// NOTE: This code can be used to form the documentation for the supported
+// NOTE: pas server commands by what is sent an received. NOT the user 
+// NOTE: supplied strings.
+// NOTE:
 
 int main(int argc, char * argv[])
 {
