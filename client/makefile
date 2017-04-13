@@ -8,6 +8,9 @@ LDFLAGS	= -lprotobuf
 client.out	:	client.o commands.pb.o
 			$(CC) client.o commands.pb.o $(LDFLAGS) -o $@
 
+clean		:
+			rm client.out *.o
+
 commands.pb.o	:	../protos/cpp/commands.pb.cc
 			$(CC) -c $(CFLAGS) $< -o $@
 
