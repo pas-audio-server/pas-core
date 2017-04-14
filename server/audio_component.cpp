@@ -414,12 +414,12 @@ retry_command:		if (GoodCommand(ac.cmd))
 				// LIKELY TO HAPPEN.
 				pulse_error = 0;
 				bytes_read = bytes_read / 6 * 6;
-				cout << "rendr: " << me->BufferPrev(buffer_index) << " " << bytes_read << endl;
+				//cout << "rendr: " << me->BufferPrev(buffer_index) << " " << bytes_read << endl;
 				if (pa_simple_write(me->pas, (const void *) buffers[me->BufferPrev(buffer_index)], bytes_read, &pulse_error) < 0)
 				{
 					throw LOG(_log_, "lost my pulse: " + string(pa_strerror(pulse_error)));
 				}
-				cout << "wrote: " << me->BufferPrev(buffer_index) << " " << string(pa_strerror(pulse_error)) << endl;
+				//cout << "wrote: " << me->BufferPrev(buffer_index) << " " << string(pa_strerror(pulse_error)) << endl;
 			}
 		}
 		catch (LoggedException e)
