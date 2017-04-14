@@ -38,7 +38,6 @@
 #include <unordered_set>
 #include <time.h>
 #include <assert.h>
-#include <json/json.h>
 #include "../protos/cpp/commands.pb.h"
 
 using namespace std;
