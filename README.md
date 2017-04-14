@@ -74,22 +74,19 @@ I take pride in my work. I strive not to write shitty code. If you believe I hav
 
 ## Does pas contain much *cool* code?
 
-<del>No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented keylogger</a> back in the day I believed in cool code.
+Yes, there is some cool code in pas. The web server is written in go and it and the pas server use Google Protocol Buffers (version 3).
 
-Alas, I am now a gray-beard. 
+<del>No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented keylogger</a> back in the day I believed in cool code.</del>
 
-I no longer believe in cool code. 
+<del>Alas, I am now a gray-beard.</del>
+
+<del>I no longer believe in cool code.</del> 
 
 I believe in *working* code.
 
 I believe in *maintainable* code. 
 
 I believe cool code is for much younger people who are much smarter than me.
-
-Seriously, one might expect me to say something like "I've forgotten more than you'll ever know." The truth is, I've forgetten what I've forgotten so there is a *reasonable chance* you are smarter than me. Maybe you are better looking too. You bastard. I hate you.</del>
-
-Yes, there is some cool code in pas. The web server is written in go and it and the pas server use Google Protocol Buffers (version 3).
-
 
 ## When will pas be done?
 
