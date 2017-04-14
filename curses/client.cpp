@@ -64,13 +64,12 @@ string dac_name;
 bool keep_going = true;
 bool curses_is_active = false;
 int server_socket = -1;
-int left_width = 32;
-int right_width = 0;
 
 WINDOW * top_window = nullptr;
 WINDOW * mid_left = nullptr;
 WINDOW * mid_right = nullptr;
 WINDOW * bottom_window = nullptr;
+WINDOW * instruction_window = nullptr;
 
 struct Track
 {
@@ -82,7 +81,22 @@ struct Track
 vector<Track> tracks;
 int index_of_first_visible_track = 0;
 int index_of_high_lighted_line = 0;
+int number_of_dacs = 0;
+int number_of_lines_of_instructions = 1;
+int left_width = 32;
+int right_width = 0;
 int scroll_height = 0;
+int top_window_height = 3;
+
+inline int StartLineForBottomWindow()
+{
+	return LINES - (2 + number_of_dacs) - number_of_lines_of_instructions;
+}
+
+inline int MidWindowHeight()
+{
+	return LINES - number_of_dacs - 2 - top_window_height - number_of_lines_of_instructions;
+}
 
 void SIGHandler(int signal_number)
 {
@@ -195,15 +209,6 @@ string GetResponse(int server_socket, Type & type)
 	return s;
 }
 
-void Bar(WINDOW * w, int l)
-{
-	wmove(w, l, 0);
-	waddch(w, ACS_LTEE);
-	whline(w, ACS_HLINE, COLS-2);
-	wmove(w, l, COLS - 1);
-	waddch(w, ACS_RTEE);
-}
-
 void Sanitize(string & s)
 {
 	for (auto it = s.begin(); it < s.end(); it++)
@@ -274,6 +279,28 @@ void CurrentDACInfo()
 	wborder(top_window, 0,0,0,0,0,0,0,0);
 }
 
+int FindNumberOfDACs()
+{
+	int rv = -1;
+	string s;
+	DacInfo a;
+	a.set_type(DAC_INFO_COMMAND);
+	if (a.SerializeToString(&s))
+	{
+		SendPB(s, server_socket);
+		Type type;
+		s = GetResponse(server_socket, type);
+		if (type == Type::SELECT_RESULT)
+		{
+			SelectResult sr;
+
+			if (sr.ParseFromString(s))
+				rv = sr.row_size();
+		}
+	}
+	return rv;
+}
+
 void DACInfoCommand()
 {
 	assert(server_socket >= 0);
@@ -331,8 +358,10 @@ void DisplayTracks()
 	werase(mid_right);
 	for (int i = 0; i < scroll_height - 2; i++)
 	{
+		int index = i + index_of_first_visible_track;
+
 		if (i + index_of_first_visible_track >= (int) tracks.size())
-			break;
+			index = index % tracks.size();
 
 		if ((int) i == index_of_high_lighted_line)
 		{
@@ -346,13 +375,13 @@ void DisplayTracks()
 		}
 
 		wmove(mid_left, i + 1, 1);
-		string s = tracks.at(i + index_of_first_visible_track).artist;
+		string s = tracks.at(index).artist;
 		if ((int) s.size() > left_width - 2)
 			s.resize(left_width -2);
 		waddstr(mid_left, s.c_str());
 
 		wmove(mid_right, i + 1, 1);
-		s = tracks.at(i + index_of_first_visible_track).title;
+		s = tracks.at(index).title;
 		if ((int) s.size() > right_width - 2)
 			s.resize(right_width -2);
 		waddstr(mid_right, s.c_str());
@@ -394,15 +423,21 @@ int main(int argc, char * argv[])
 	cout << "Fetching tracks..." << endl;
 	FetchTracks();
 	cout << "Done." << endl;
+	cout << "Determining number of DACS..." << endl;
+	number_of_dacs = FindNumberOfDACs();
+	cout << "There is / are " << number_of_dacs << " DAC(s)" << endl;
 
 	initscr();
 	right_width = COLS - left_width;
 	noecho();
 	cbreak();
-	top_window = newwin(3, COLS, 0, 0);
-	mid_left = newwin((scroll_height = LINES - 3 - 2 - MAX_DACS), left_width, 3, 0);
-	mid_right = newwin(LINES - 3 - 2 - MAX_DACS, right_width, 3, left_width);
-	bottom_window = newwin(2 + MAX_DACS, COLS, LINES - (2 + MAX_DACS), 0);
+	scroll_height = MidWindowHeight();
+	top_window = newwin(top_window_height, COLS, 0, 0);
+	mid_left = newwin(scroll_height, left_width, top_window_height, 0);
+	mid_right = newwin(scroll_height, right_width, top_window_height, left_width);
+	bottom_window = newwin(2 + number_of_dacs, COLS, StartLineForBottomWindow(), 0);
+	instruction_window = newwin(number_of_lines_of_instructions, COLS, LINES - number_of_lines_of_instructions, 0);
+
 	nodelay(top_window, 1);
 	keypad(top_window, 1);
 	curs_set(0);
@@ -417,6 +452,11 @@ int main(int argc, char * argv[])
 		wborder(bottom_window, 0, 0, 0, 0, 0, 0, 0, 0);
 		wborder(mid_left, 0, 0, 0, 0, 0, 0, 0, 0);
 		wborder(mid_right, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		wmove(instruction_window, 0, 0);
+		wattron(instruction_window, A_STANDOUT);
+		waddstr(instruction_window, "DAC: -,+ PLAYER: <RET>/Q, ^X/STOP, ^P/PAUSE, ^R/RESUME, ^N/NEXT JUMP: A-Z SCROLL: UP, DN, ^F/PG, ^B/PG EXIT: ^C");
+		wattroff(instruction_window, A_STANDOUT);
 		wmove(top_window, 0, 2);
 
 		int index, track;
@@ -445,13 +485,23 @@ int main(int argc, char * argv[])
 					case KEY_UP:
 						index_of_high_lighted_line--;
 						if (index_of_high_lighted_line < 0)
-							index_of_high_lighted_line = scroll_height - 3;
+						{
+							index_of_high_lighted_line = 0;
+							index_of_first_visible_track--;
+							if (index_of_first_visible_track < 0)
+								index_of_first_visible_track = (int) tracks.size() - 1;
+						}
 						break;
 
 					case KEY_DOWN:
 						index_of_high_lighted_line++;
 						if (index_of_high_lighted_line >= scroll_height - 3 )
-							index_of_high_lighted_line = 0;
+						{
+							index_of_high_lighted_line = scroll_height - 3;
+							index_of_first_visible_track++;
+							if (index_of_first_visible_track >= (int) tracks.size())
+								index_of_first_visible_track = 0;
+						}
 						break;
 
 					case 14:
@@ -514,6 +564,7 @@ int main(int argc, char * argv[])
 			TrackCount();
 			DisplayTracks();
 			wmove(top_window, 1, 1);
+			wrefresh(instruction_window);
 			wrefresh(top_window);
 			wrefresh(bottom_window);
 			wrefresh(mid_left);
