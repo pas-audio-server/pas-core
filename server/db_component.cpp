@@ -97,7 +97,7 @@ bool DB::Initialize()
 	}
 	else
 	{
-		connection = driver->connect("tcp://127.0.0.1:3306", "pas", "pas");
+		connection = driver->connect("tcp://192.168.1.117:3306", "pas", "pas");
 		if (connection == nullptr)
 		{
 			LOG(_log_, "connect() failed");

@@ -95,6 +95,7 @@ public:
 	void Play(const PlayStruct & ps);
 	void Play(unsigned int id);
 	bool IsIdle() { return idle; }
+	bool QuiteDead() { return quite_dead; }
 	std::string HumanName() { return ad.device_name; }
 	std::string TimeCode();
 	std::string What() { return title; }
@@ -114,6 +115,7 @@ private:
 
 	// used when the audio thread is idle.
 	bool idle;
+	bool quite_dead;
 	std::queue<AudioCommand> commands;
 	sem_t sem;
 	std::mutex m;

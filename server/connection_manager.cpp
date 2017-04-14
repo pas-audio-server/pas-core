@@ -64,16 +64,16 @@ static void SendPB(string & s, int server_socket)
 	assert(server_socket >= 0);
 
 	size_t length = s.size();
-	LOG(_log_, to_string(length));
+	//LOG(_log_, to_string(length));
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
 		throw string("bad bytes_sent for length");
-	LOG(_log_, to_string(bytes_sent));
+	//LOG(_log_, to_string(bytes_sent));
 
 	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
 	if (bytes_sent != length)
 		throw string("bad bytes_sent for message");
-	LOG(_log_, to_string(bytes_sent));
+	//LOG(_log_, to_string(bytes_sent));
 }
 
 static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
@@ -117,6 +117,9 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				//LOG(_log_, nullptr);
 				for (int i = 0; i < ndacs; i++)
 				{
+					if (acs[i] == nullptr)
+						continue;
+
 					Row * r = sr.add_row();
 					//LOG(_log_, nullptr);
 					r->set_type(ROW);
@@ -176,7 +179,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 					OneString r;
 					r.set_type(ONE_STRING);
-					if ((int) w.device_id() < ndacs)
+					if ((int) w.device_id() < ndacs && acs[w.device_id()] != nullptr)
 					{
 						if (g.type() == Type::WHEN_DEVICE)	
 							r.set_value(acs[w.device_id()]->TimeCode());
@@ -202,7 +205,8 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					StopDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "next failed to parse");
-					AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
+					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+						AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
 				}
 				break;
 
@@ -212,7 +216,8 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					StopDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "stop failed to parse");
-					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+						AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
 				}
 				break;
 
@@ -222,7 +227,8 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					ResumeDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "resume failed to parse");
-					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+						AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
 				}
 				break;
 
@@ -232,7 +238,8 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					PauseDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "pause failed to parse");
-					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+						AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
 				}
 				break;
 
@@ -242,7 +249,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					PlayTrackCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "play failed to parse");
-					if ((int) c.device_id() < ndacs)
+					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 					{
 						acs[c.device_id()]->Play(c.track_id());
 					}
@@ -332,7 +339,7 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 			bytes_read = recv(socket, (void *) &length, sizeof(length), 0);
 			if (bytes_read != sizeof(length))
 				throw LOG(_log_, "bad recv getting length: " + to_string(bytes_read));
-			LOG(_log_, "recv of length: " + to_string(length));
+			//LOG(_log_, "recv of length: " + to_string(length));
 			string s;
 			s.resize(length);
 			bytes_read = recv(socket, (void *) &s[0], length, 0);

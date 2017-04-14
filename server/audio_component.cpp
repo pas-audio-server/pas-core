@@ -32,6 +32,7 @@ extern Logger _log_;
 
 AudioComponent::AudioComponent()
 {
+	quite_dead = true;
 	pas = nullptr;
 	t = nullptr;
 	// There are no commands waiting for the player so set initial count to 0.
@@ -177,7 +178,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 	// hand means the thread should terminate.
 	bool stop_flag = false;
 
-
+	me->quite_dead = false;
 	while (!terminate_flag)
 	{
 		LOG(_log_, nullptr);
@@ -195,44 +196,43 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 			// is not empty.
 			if (me->play_queue.empty() || stop_flag)
 			{
+				LOG(_log_, "waiting");
 				me->m_play_queue.unlock();
-				LOG(_log_, nullptr);
-
 				sem_wait(&me->sem);
+				LOG(_log_, "awakened");
 
-				// If we get here, there is a command waiting.
 				if (!me->GetCommand(ac, true))
 				{
-					LOG(_log_, "No command!");
+					// If there is no command, unlock and continue.
+					LOG(_log_, "no command");
 					continue;
 				}
-
-				LOG(_log_, string(1, ac.cmd));
-				if (!GoodCommand(ac.cmd))
+				else if (ac.cmd == QUIT)
 				{
-					LOG(_log_, "Bad command");
-					continue;
-				}
-				if (ac.cmd == QUIT)
-				{
+					// If the command is quit, unlock and terminate.
 					LOG(_log_, "QUIT");
 					terminate_flag = true;
 					break;
 				}
-				if (ac.cmd != NEXT && ac.cmd != PLAY)
+				else if (ac.cmd != NEXT && ac.cmd != PLAY)
 				{
+					// If the command is anything but NEXT or PLAY, unlock and continue.
 					LOG(_log_, nullptr);
 					continue;
 				}
 			}
-			me->m_play_queue.unlock();
+			else
+			{
+				me->m_play_queue.unlock();
+			}
 		}
+		LOG(_log_, nullptr);
+		// If we just received a QUIT, take this short circuit.
 		if (terminate_flag)
 			continue;
 
 		restarting = false;
 
-		// OK - It's playtime!
 		FILE * p = nullptr;
 		size_t bytes_read;
 		try
@@ -252,11 +252,12 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 				continue;
 			}
 			PlayStruct ps = me->play_queue.front();
+			me->read_offset = 0;
 			me->artist = ps.artist;
 			me->title = ps.title;
 			me->play_queue.pop();
 			me->m_play_queue.unlock();
-			//LOG(_log_, nullptr);
+			LOG(_log_, nullptr);
 			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
 			bool is_mp3 = HasEnding(ps.path, "mp3");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
@@ -359,7 +360,8 @@ retry_command:		if (GoodCommand(ac.cmd))
 						//LOG(_log_, nullptr);
 						if (ac.cmd == QUIT)
 						{
-							// This will break the outermost loop causing the thread to terminate.
+							// This will end the outermost loop causing the thread to terminate.
+							LOG(_log_, "QUIT");
 							terminate_flag = true;
 							break;
 						}
@@ -370,13 +372,13 @@ retry_command:		if (GoodCommand(ac.cmd))
 							stop_flag = true;
 							break;
 						}
-						if (ac.cmd == PLAY || ac.cmd == NEXT)
+						if (ac.cmd == NEXT)
 						{
-							// This will break the playing loop but the thread will not go to sleep.
+							// This will end the playing loop but the thread will not go to sleep.
 							// Instead, it starts playing a new track. Recall, when the play loop
 							// is broken, the pipe to ffmpeg is closed. This will cause ffmpeg
 							// to exit (writing on closed pipe is fatal).
-							LOG(_log_, nullptr);
+							LOG(_log_, "NEXT");
 							restarting = true;
 							break;
 						}
@@ -388,15 +390,15 @@ retry_command:		if (GoodCommand(ac.cmd))
 						 */
 						if (ac.cmd == PAUSE)
 						{
-							LOG(_log_, nullptr);
+							//LOG(_log_, "PAUSE+");
 							sem_wait(&me->sem);
 							me->GetCommand(ac, true);
-							LOG(_log_, "PAUSE");
+							//LOG(_log_, "PAUSE-");
 							goto retry_command;
 						}
 						if (ac.cmd == RESUME)
 						{
-							LOG(_log_, "RESUME");
+							//LOG(_log_, "RESUME");
 						}
 						//LOG(_log_, nullptr);
 					}
@@ -417,6 +419,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 				{
 					throw LOG(_log_, "lost my pulse: " + string(pa_strerror(pulse_error)));
 				}
+				//cout << "wrote: " << me->BufferPrev(buffer_index) << " " << string(pa_strerror(pulse_error)) << endl;
 			}
 		}
 		catch (LoggedException e)
@@ -427,6 +430,7 @@ retry_command:		if (GoodCommand(ac.cmd))
 		if (p != nullptr)
 			pclose(p);
 	}
+	me->quite_dead = true;
 	LOG(_log_, "Player thread exiting");
 
 	pa_simple_flush(me->pas, &pulse_error);
@@ -454,7 +458,8 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 
 	// Launch the thread associated with this DAC.
 	t = new thread(PlayerThread, this);
-	if (false)//t->joinable())
+	sleep(1);
+	if (quite_dead)//t->joinable())
 	{
 		LOG(_log_, "Initialize() failed");
 		rv = false;
@@ -528,11 +533,12 @@ void AudioComponent::Play(const PlayStruct & ps)
 	play_queue.push(ps);
 	if (was_idle)
 	{
-		//LOG(_log_, "sending PLAY");
+		LOG(_log_, "sending PLAY");
 		ac.cmd = PLAY;
 		AddCommand(ac);
 	}
 	m_play_queue.unlock();
+	LOG(_log_, nullptr);
 }
 
 void AudioComponent::Play(unsigned int id)
