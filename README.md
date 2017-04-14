@@ -3,7 +3,9 @@ Perry's audio server
 
 ## Latest Development Highlight
 
-The pas server is nearly all converted to Google Proto Buffers. This is how the pas server will converse with user facing servers / clients. This is an important milestone as real web clients can now be written.
+A curses-based client driving three DACs simultaneously.
+
+![Curses Client](https://scontent-atl3-1.xx.fbcdn.net/v/t31.0-8/17917132_1994665244097111_4372928553100760128_o.jpg?oh=4399322525776bc5fe9cdd3345cef5ce&oe=594F65FC)
 
 ## Sponsors
 
