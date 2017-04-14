@@ -86,7 +86,7 @@ I believe in *working* code.
 
 I believe in *maintainable* code. 
 
-I believe cool code is for much younger people who are much smarter than me.
+I believe cool code is for much younger people who are much smarter than me. Lozord is smarter than me.
 
 ## When will pas be done?
 
