@@ -46,37 +46,27 @@ int  port = 5077;
 int main(int argc, char * argv[])
 {
 	string path("/home/perryk/perryk/music");
-	AudioComponent * dacs[2];
-
-/*	DB * db = new DB();
-	db->Initialize();
-	cout << "\"" << db->PathFromID(19) << "\"" << endl;
-	cout << "\"" << db->PathFromID(99999) << "\"" << endl;
-	delete db;
-	return 0;
-*/
-
-	dacs[0] = dacs[1] = nullptr;
+	AudioComponent ** dacs = nullptr;
+	vector<AudioDevice> devices;
 
 	try
 	{
 		vector<string> valid_extensions;
-		vector<AudioDevice> devices;
 
 		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", (int) devices.size()));
 		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", (int) devices.size()));
+		devices.push_back(AudioDevice("alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo", "Fiio", (int) devices.size()));
+
+		dacs = (AudioComponent **) malloc(devices.size() * sizeof(AudioComponent **));	
 
 		for (size_t i = 0; i < devices.size(); i++)
 		{
 			LOG(_log_, devices[i].device_name + " index: " + to_string(devices[i].index));
+			if ((dacs[i] = new AudioComponent()) == nullptr)
+				throw LOG(_log_, "DAC " + to_string(i) + " failed to allocate");
 		}
 
-		if ((dacs[0] = new AudioComponent()) == nullptr)
-			throw LOG(_log_, "DAC 0 failed to allocate");
  
-		if ((dacs[1] = new AudioComponent()) == nullptr)
-			throw LOG(_log_, "DAC 1 failed to allocate");
-		
 		if (argc > 1)
 			path = string(argv[1]);
 
@@ -88,30 +78,32 @@ int main(int argc, char * argv[])
 		valid_extensions.push_back("m4a");
 		valid_extensions.push_back("ogg");
 
-		//Enumerate2(path, valid_extensions, false);
-		//return 0;
-	
-
 		for (size_t i = 0; i < devices.size(); i++)
 		{	
 			if (!dacs[i]->Initialize(devices[i]))
+			{
 				LOG(_log_, "DAC " + to_string((int) i) + " failed to Initialize()");
-			LOG(_log_, "DAC " + to_string((int) i) + " initialized");
+				delete dacs[i];
+				dacs[i] = nullptr;
+			}
+			else
+			{
+				LOG(_log_, "DAC " + to_string((int) i) + " initialized");
+			}
 		}	
-		//cout << "DACs 0 and 1 are allocated and initialized" << endl;
-		cout << "Entering network monitoring" << endl;
 
-		nw.AcceptConnections((void *) dacs, 2);
+		cout << "Entering network monitoring" << endl;
+		nw.AcceptConnections((void *) dacs, (int) devices.size());
 	}
 	catch (LoggedException s)
 	{
 	}
 
-	if (dacs[0] != nullptr)
-		delete dacs[0];
-
-	if (dacs[1] != nullptr)
-		delete dacs[1];
+	for (size_t i = 0; i < devices.size(); i++)
+	{
+		if (dacs[i] != nullptr)
+			delete dacs[i];
+	}
 
 	exit(0);
 }

@@ -121,6 +121,8 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		for (int i = 0; i < ndacs; i++)
 		{
 			AudioComponent * ac = (AudioComponent *) *(((AudioComponent **) dacs) + i);
+			if (ac == nullptr)
+				continue;
 			ac->AddCommand(cmd);
 			pthread_yield();
 			pthread_yield();

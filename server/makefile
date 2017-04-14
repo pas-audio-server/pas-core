@@ -1,8 +1,8 @@
 # handy command: git ls-files -d | xargs git checkout --
 
 CC	= g++
-CFLAGS	= -O3 -Wall -std=c++11 -fopenmp -pthread
-#CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
+#CFLAGS	= -O3 -Wall -std=c++11 -fopenmp -pthread
+CFLAGS	= -g -Wall -std=c++11 -fopenmp -pthread -D _DEBUG_
 
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt -lprotobuf
 
