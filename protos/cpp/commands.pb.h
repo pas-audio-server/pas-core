@@ -55,6 +55,7 @@ class SelectQuery;
 class SelectResult;
 class StopDeviceCommand;
 class TrackCountQuery;
+class TwoIntegers;
 class WhatDeviceCommand;
 class WhenDeviceCommand;
 class WhoDeviceCommand;
@@ -81,12 +82,15 @@ enum Type {
   ONE_FLOAT = 18,
   DAC_INFO_COMMAND = 19,
   NEXT_DEVICE = 20,
+  COPY_QUEUE = 21,
+  MOVE_QUEUE = 22,
+  APPEND_QUEUE = 23,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = NEXT_DEVICE;
+const Type Type_MAX = APPEND_QUEUE;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();
@@ -1817,6 +1821,102 @@ class OneFloat : public ::google::protobuf::Message /* @@protoc_insertion_point(
   void InitAsDefaultInstance();
   static OneFloat* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class TwoIntegers : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.TwoIntegers) */ {
+ public:
+  TwoIntegers();
+  virtual ~TwoIntegers();
+
+  TwoIntegers(const TwoIntegers& from);
+
+  inline TwoIntegers& operator=(const TwoIntegers& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TwoIntegers& default_instance();
+
+  void Swap(TwoIntegers* other);
+
+  // implements Message ----------------------------------------------
+
+  inline TwoIntegers* New() const { return New(NULL); }
+
+  TwoIntegers* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TwoIntegers& from);
+  void MergeFrom(const TwoIntegers& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(TwoIntegers* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // optional uint64 value_a = 2;
+  void clear_value_a();
+  static const int kValueAFieldNumber = 2;
+  ::google::protobuf::uint64 value_a() const;
+  void set_value_a(::google::protobuf::uint64 value);
+
+  // optional uint64 value_b = 3;
+  void clear_value_b();
+  static const int kValueBFieldNumber = 3;
+  ::google::protobuf::uint64 value_b() const;
+  void set_value_b(::google::protobuf::uint64 value);
+
+  // @@protoc_insertion_point(class_scope:pas.TwoIntegers)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::uint64 value_a_;
+  ::google::protobuf::uint64 value_b_;
+  int type_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_commands_2eproto();
+  friend void protobuf_AssignDesc_commands_2eproto();
+  friend void protobuf_ShutdownFile_commands_2eproto();
+
+  void InitAsDefaultInstance();
+  static TwoIntegers* default_instance_;
+};
 // ===================================================================
 
 
@@ -2527,7 +2627,55 @@ inline void OneFloat::set_value(float value) {
   // @@protoc_insertion_point(field_set:pas.OneFloat.value)
 }
 
+// -------------------------------------------------------------------
+
+// TwoIntegers
+
+// optional .pas.Type type = 1;
+inline void TwoIntegers::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type TwoIntegers::type() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void TwoIntegers::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.type)
+}
+
+// optional uint64 value_a = 2;
+inline void TwoIntegers::clear_value_a() {
+  value_a_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 TwoIntegers::value_a() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_a)
+  return value_a_;
+}
+inline void TwoIntegers::set_value_a(::google::protobuf::uint64 value) {
+  
+  value_a_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_a)
+}
+
+// optional uint64 value_b = 3;
+inline void TwoIntegers::clear_value_b() {
+  value_b_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 TwoIntegers::value_b() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_b)
+  return value_b_;
+}
+inline void TwoIntegers::set_value_b(::google::protobuf::uint64 value) {
+  
+  value_b_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_b)
+}
+
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

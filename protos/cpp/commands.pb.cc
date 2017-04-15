@@ -79,6 +79,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* OneFloat_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   OneFloat_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TwoIntegers_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  TwoIntegers_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* Type_descriptor_ = NULL;
 
 }  // namespace
@@ -394,6 +397,23 @@ void protobuf_AssignDesc_commands_2eproto() {
       sizeof(OneFloat),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneFloat, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(OneFloat, _is_default_instance_));
+  TwoIntegers_descriptor_ = file->message_type(19);
+  static const int TwoIntegers_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TwoIntegers, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TwoIntegers, value_a_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TwoIntegers, value_b_),
+  };
+  TwoIntegers_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      TwoIntegers_descriptor_,
+      TwoIntegers::default_instance_,
+      TwoIntegers_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(TwoIntegers),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TwoIntegers, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TwoIntegers, _is_default_instance_));
   Type_descriptor_ = file->enum_type(0);
 }
 
@@ -455,6 +475,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
       OneString_descriptor_, &OneString::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       OneFloat_descriptor_, &OneFloat::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      TwoIntegers_descriptor_, &TwoIntegers::default_instance());
 }
 
 }  // namespace
@@ -498,6 +520,8 @@ void protobuf_ShutdownFile_commands_2eproto() {
   delete OneString_reflection_;
   delete OneFloat::default_instance_;
   delete OneFloat_reflection_;
+  delete TwoIntegers::default_instance_;
+  delete TwoIntegers_reflection_;
 }
 
 void protobuf_AddDesc_commands_2eproto() GOOGLE_ATTRIBUTE_COLD;
@@ -538,16 +562,19 @@ void protobuf_AddDesc_commands_2eproto() {
     "pas.Type\022\r\n\005value\030\002 \001(\004\"3\n\tOneString\022\027\n\004"
     "type\030\001 \001(\0162\t.pas.Type\022\r\n\005value\030\002 \001(\t\"2\n\010"
     "OneFloat\022\027\n\004type\030\001 \001(\0162\t.pas.Type\022\r\n\005val"
-    "ue\030\002 \001(\002*\353\002\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_T"
-    "RACK_DEVICE\020\001\022\020\n\014PAUSE_DEVICE\020\002\022\021\n\rRESUM"
-    "E_DEVICE\020\003\022\017\n\013STOP_DEVICE\020\004\022\016\n\nWHO_DEVIC"
-    "E\020\005\022\017\n\013WHAT_DEVICE\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n"
-    "\014ARTIST_COUNT\020\010\022\020\n\014FOLDER_COUNT\020\t\022\020\n\014SEL"
-    "ECT_QUERY\020\n\022\017\n\013RESERVED_01\020\013\022\017\n\013WHEN_DEV"
-    "ICE\020\014\022\020\n\014CLEAR_DEVICE\020\r\022\021\n\rSELECT_RESULT"
-    "\020\016\022\007\n\003ROW\020\017\022\013\n\007ONE_INT\020\020\022\016\n\nONE_STRING\020\021"
-    "\022\r\n\tONE_FLOAT\020\022\022\024\n\020DAC_INFO_COMMAND\020\023\022\017\n"
-    "\013NEXT_DEVICE\020\024b\006proto3", 1582);
+    "ue\030\002 \001(\002\"H\n\013TwoIntegers\022\027\n\004type\030\001 \001(\0162\t."
+    "pas.Type\022\017\n\007value_a\030\002 \001(\004\022\017\n\007value_b\030\003 \001"
+    "(\004*\235\003\n\004Type\022\013\n\007GENERIC\020\000\022\025\n\021PLAY_TRACK_D"
+    "EVICE\020\001\022\020\n\014PAUSE_DEVICE\020\002\022\021\n\rRESUME_DEVI"
+    "CE\020\003\022\017\n\013STOP_DEVICE\020\004\022\016\n\nWHO_DEVICE\020\005\022\017\n"
+    "\013WHAT_DEVICE\020\006\022\017\n\013TRACK_COUNT\020\007\022\020\n\014ARTIS"
+    "T_COUNT\020\010\022\020\n\014FOLDER_COUNT\020\t\022\020\n\014SELECT_QU"
+    "ERY\020\n\022\017\n\013RESERVED_01\020\013\022\017\n\013WHEN_DEVICE\020\014\022"
+    "\020\n\014CLEAR_DEVICE\020\r\022\021\n\rSELECT_RESULT\020\016\022\007\n\003"
+    "ROW\020\017\022\013\n\007ONE_INT\020\020\022\016\n\nONE_STRING\020\021\022\r\n\tON"
+    "E_FLOAT\020\022\022\024\n\020DAC_INFO_COMMAND\020\023\022\017\n\013NEXT_"
+    "DEVICE\020\024\022\016\n\nCOPY_QUEUE\020\025\022\016\n\nMOVE_QUEUE\020\026"
+    "\022\020\n\014APPEND_QUEUE\020\027b\006proto3", 1706);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "commands.proto", &protobuf_RegisterTypes);
   Row::default_instance_ = new Row();
@@ -569,6 +596,7 @@ void protobuf_AddDesc_commands_2eproto() {
   OneInteger::default_instance_ = new OneInteger();
   OneString::default_instance_ = new OneString();
   OneFloat::default_instance_ = new OneFloat();
+  TwoIntegers::default_instance_ = new TwoIntegers();
   Row::default_instance_->InitAsDefaultInstance();
   DacInfo::default_instance_->InitAsDefaultInstance();
   SelectResult::default_instance_->InitAsDefaultInstance();
@@ -588,6 +616,7 @@ void protobuf_AddDesc_commands_2eproto() {
   OneInteger::default_instance_->InitAsDefaultInstance();
   OneString::default_instance_->InitAsDefaultInstance();
   OneFloat::default_instance_->InitAsDefaultInstance();
+  TwoIntegers::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_commands_2eproto);
 }
 
@@ -624,6 +653,9 @@ bool Type_IsValid(int value) {
     case 18:
     case 19:
     case 20:
+    case 21:
+    case 22:
+    case 23:
       return true;
     default:
       return false;
@@ -6578,6 +6610,370 @@ void OneFloat::clear_value() {
   
   value_ = value;
   // @@protoc_insertion_point(field_set:pas.OneFloat.value)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int TwoIntegers::kTypeFieldNumber;
+const int TwoIntegers::kValueAFieldNumber;
+const int TwoIntegers::kValueBFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+TwoIntegers::TwoIntegers()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:pas.TwoIntegers)
+}
+
+void TwoIntegers::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+TwoIntegers::TwoIntegers(const TwoIntegers& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:pas.TwoIntegers)
+}
+
+void TwoIntegers::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  type_ = 0;
+  value_a_ = GOOGLE_ULONGLONG(0);
+  value_b_ = GOOGLE_ULONGLONG(0);
+}
+
+TwoIntegers::~TwoIntegers() {
+  // @@protoc_insertion_point(destructor:pas.TwoIntegers)
+  SharedDtor();
+}
+
+void TwoIntegers::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void TwoIntegers::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* TwoIntegers::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return TwoIntegers_descriptor_;
+}
+
+const TwoIntegers& TwoIntegers::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_commands_2eproto();
+  return *default_instance_;
+}
+
+TwoIntegers* TwoIntegers::default_instance_ = NULL;
+
+TwoIntegers* TwoIntegers::New(::google::protobuf::Arena* arena) const {
+  TwoIntegers* n = new TwoIntegers;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void TwoIntegers::Clear() {
+// @@protoc_insertion_point(message_clear_start:pas.TwoIntegers)
+#if defined(__clang__)
+#define ZR_HELPER_(f) \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Winvalid-offsetof\"") \
+  __builtin_offsetof(TwoIntegers, f) \
+  _Pragma("clang diagnostic pop")
+#else
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<TwoIntegers*>(16)->f)
+#endif
+
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
+
+  ZR_(value_a_, type_);
+
+#undef ZR_HELPER_
+#undef ZR_
+
+}
+
+bool TwoIntegers::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:pas.TwoIntegers)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .pas.Type type = 1;
+      case 1: {
+        if (tag == 8) {
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_type(static_cast< ::pas::Type >(value));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_value_a;
+        break;
+      }
+
+      // optional uint64 value_a = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_value_a:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &value_a_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(24)) goto parse_value_b;
+        break;
+      }
+
+      // optional uint64 value_b = 3;
+      case 3: {
+        if (tag == 24) {
+         parse_value_b:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &value_b_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:pas.TwoIntegers)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:pas.TwoIntegers)
+  return false;
+#undef DO_
+}
+
+void TwoIntegers::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:pas.TwoIntegers)
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      1, this->type(), output);
+  }
+
+  // optional uint64 value_a = 2;
+  if (this->value_a() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(2, this->value_a(), output);
+  }
+
+  // optional uint64 value_b = 3;
+  if (this->value_b() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(3, this->value_b(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:pas.TwoIntegers)
+}
+
+::google::protobuf::uint8* TwoIntegers::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pas.TwoIntegers)
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      1, this->type(), target);
+  }
+
+  // optional uint64 value_a = 2;
+  if (this->value_a() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(2, this->value_a(), target);
+  }
+
+  // optional uint64 value_b = 3;
+  if (this->value_b() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(3, this->value_b(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:pas.TwoIntegers)
+  return target;
+}
+
+int TwoIntegers::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:pas.TwoIntegers)
+  int total_size = 0;
+
+  // optional .pas.Type type = 1;
+  if (this->type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+  }
+
+  // optional uint64 value_a = 2;
+  if (this->value_a() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt64Size(
+        this->value_a());
+  }
+
+  // optional uint64 value_b = 3;
+  if (this->value_b() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt64Size(
+        this->value_b());
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void TwoIntegers::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pas.TwoIntegers)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const TwoIntegers* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const TwoIntegers>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pas.TwoIntegers)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pas.TwoIntegers)
+    MergeFrom(*source);
+  }
+}
+
+void TwoIntegers::MergeFrom(const TwoIntegers& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pas.TwoIntegers)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.type() != 0) {
+    set_type(from.type());
+  }
+  if (from.value_a() != 0) {
+    set_value_a(from.value_a());
+  }
+  if (from.value_b() != 0) {
+    set_value_b(from.value_b());
+  }
+}
+
+void TwoIntegers::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pas.TwoIntegers)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void TwoIntegers::CopyFrom(const TwoIntegers& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pas.TwoIntegers)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool TwoIntegers::IsInitialized() const {
+
+  return true;
+}
+
+void TwoIntegers::Swap(TwoIntegers* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void TwoIntegers::InternalSwap(TwoIntegers* other) {
+  std::swap(type_, other->type_);
+  std::swap(value_a_, other->value_a_);
+  std::swap(value_b_, other->value_b_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata TwoIntegers::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = TwoIntegers_descriptor_;
+  metadata.reflection = TwoIntegers_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// TwoIntegers
+
+// optional .pas.Type type = 1;
+void TwoIntegers::clear_type() {
+  type_ = 0;
+}
+ ::pas::Type TwoIntegers::type() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.type)
+  return static_cast< ::pas::Type >(type_);
+}
+ void TwoIntegers::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.type)
+}
+
+// optional uint64 value_a = 2;
+void TwoIntegers::clear_value_a() {
+  value_a_ = GOOGLE_ULONGLONG(0);
+}
+ ::google::protobuf::uint64 TwoIntegers::value_a() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_a)
+  return value_a_;
+}
+ void TwoIntegers::set_value_a(::google::protobuf::uint64 value) {
+  
+  value_a_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_a)
+}
+
+// optional uint64 value_b = 3;
+void TwoIntegers::clear_value_b() {
+  value_b_ = GOOGLE_ULONGLONG(0);
+}
+ ::google::protobuf::uint64 TwoIntegers::value_b() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_b)
+  return value_b_;
+}
+ void TwoIntegers::set_value_b(::google::protobuf::uint64 value) {
+  
+  value_b_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_b)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
