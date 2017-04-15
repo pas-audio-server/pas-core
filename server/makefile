@@ -1,15 +1,43 @@
 # handy command: git ls-files -d | xargs git checkout --
 
 CC	= g++
-CFLAGS	= -O3 -Wall -std=c++11 -fopenmp -pthread
-#CFLAGS	= -g -Wall -std=c++11 -fopenmp -D _DEBUG_
+CFLAGS	= -O3 -Wall -std=c++11 -pthread
+#CFLAGS	= -g -Wall -std=c++11 -D _DEBUG_
 
-LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -fopenmp -lpulse-simple -lpulse -lrt -lprotobuf
+LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
 SRC		= server.cpp logger.cpp connection_manager.cpp network_component.cpp \
 		  db_component.cpp file_system_component.cpp track.cpp audio_component.cpp \
 		  ../protos/cpp/commands.pb.cc
- 
+
+# Now, add on platform-dependent flags.
+# Taken from http://stackoverflow.com/a/12099167
+ifeq ($(OS),Windows_NT)
+	# Nothing Windows-specific yet.
+    # ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+    # else
+    #     ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+    #     endif
+    #     ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+    #     endif
+    # endif
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+		CFLAGS += -fopenmp
+		LDFLAGS += -fopenmp
+    endif
+    ifeq ($(UNAME_S),Darwin)
+		# -fopenmp flag is on by default with clang.
+    endif
+    # UNAME_P := $(shell uname -p)
+    # ifeq ($(UNAME_P),x86_64)
+    # endif
+    # ifneq ($(filter %86,$(UNAME_P)),)
+    # endif
+    # ifneq ($(filter arm%,$(UNAME_P)),)
+    # endif
+endif
 
 all						: clear_screen server.out
 
