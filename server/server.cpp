@@ -37,8 +37,9 @@
 #include "logger.hpp"
 
 using namespace std;
+using namespace pas;
 
-Logger _log_("/tmp/paslog.txt");
+Logger _log_("/tmp/paslog.txt", LogLevel::MINIMAL);
 
 bool keep_going = true;
 int  port = 5077;
@@ -49,6 +50,18 @@ int main(int argc, char * argv[])
 	AudioComponent ** dacs = nullptr;
 	vector<AudioDevice> devices;
 
+/*
+	// TESTS LOGGING LEVELS
+	LOG2(_log_, "FATAL", LogLevel::FATAL);
+	LOG2(_log_, "MINIMAL", LogLevel::MINIMAL);
+	LOG2(_log_, "CONVERSATIONAL", LogLevel::CONVERSATIONAL);
+	LOG2(_log_, "VERBOSE", LogLevel::VERBOSE);
+	LOG2(_log_, string("FATAL"), LogLevel::FATAL);
+	LOG2(_log_, string("MINIMAL"), LogLevel::MINIMAL);
+	LOG2(_log_, string("CONVERSATIONAL"), LogLevel::CONVERSATIONAL);
+	LOG2(_log_, string("VERBOSE"), LogLevel::VERBOSE);
+*/
+	
 	try
 	{
 		vector<string> valid_extensions;
@@ -63,7 +76,7 @@ int main(int argc, char * argv[])
 		{
 			LOG(_log_, devices[i].device_name + " index: " + to_string(devices[i].index));
 			if ((dacs[i] = new AudioComponent()) == nullptr)
-				throw LOG(_log_, "DAC " + to_string(i) + " failed to allocate");
+				throw LOG2(_log_, "DAC " + to_string(i) + " failed to allocate", LogLevel::FATAL);
 		}
 
  
@@ -82,7 +95,7 @@ int main(int argc, char * argv[])
 		{	
 			if (!dacs[i]->Initialize(devices[i]))
 			{
-				LOG(_log_, "DAC " + to_string((int) i) + " failed to Initialize()");
+				LOG2(_log_, "DAC " + to_string((int) i) + " failed to Initialize()", LogLevel::MINIMAL);
 				delete dacs[i];
 				dacs[i] = nullptr;
 			}
@@ -107,4 +120,3 @@ int main(int argc, char * argv[])
 
 	exit(0);
 }
-

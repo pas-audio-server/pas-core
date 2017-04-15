@@ -2,12 +2,14 @@
 #include <exception>
 
 using namespace std;
+using namespace pas;
 
-Logger::Logger(string path)
+Logger::Logger(string path, LogLevel l)
 {
 	log.open(path);
 	if (!log.is_open())
 		throw std::runtime_error("failed to open log file");
+	level = l;
 }
 
 Logger::~Logger()
@@ -22,23 +24,24 @@ void Logger::Sync()
 		log.flush();
 }
 
-LoggedException Logger::Add(const char * file, const char * function, const int line, const string message)
+LoggedException Logger::Add(const char * file, const char * function, const int line, const string message, LogLevel ll)
 {
-	return Add(file, function, line, message.c_str());
+	return Add(file, function, line, message.c_str(), ll);
 }
 
-LoggedException Logger::Add(const char * file, const char * function, const int line, const char * message)
+LoggedException Logger::Add(const char * file, const char * function, const int line, const char * message, LogLevel ll)
 {
+
 	stringstream ss;
 	string s;
 
-	ss << setw(24) << left << file << " " << setw(16) << function << " " << setw(6) << line;
+	ss << setw(24) << left << file << " " << setw(24) << function << " " << setw(6) << line;
 	if (message != nullptr)
 		ss << " " << message;
 
 	s = ss.str();
 
-	if (log.is_open())
+	if (ll <= level && log.is_open())
 	{
 		m.lock();
 		log << s << endl;

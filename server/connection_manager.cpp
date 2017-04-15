@@ -36,10 +36,10 @@ static DB * InitDB()
 	DB * db = new DB();
 
 	if (db == nullptr)
-		throw LOG(_log_, "new of DB failed???");
+		throw LOG2(_log_, "new of DB failed???", LogLevel::FATAL);
 
 	if (!db->Initialize())
-		throw LOG(_log_, "DB failed to initialize: ");
+		throw LOG2(_log_, "DB failed to initialize: ", LogLevel::FATAL);
 
 	return db;
 }
@@ -64,16 +64,16 @@ static void SendPB(string & s, int server_socket)
 	assert(server_socket >= 0);
 
 	size_t length = s.size();
-	//LOG(_log_, to_string(length));
+	LOG(_log_, to_string(length));
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
 		throw string("bad bytes_sent for length");
-	//LOG(_log_, to_string(bytes_sent));
+	LOG(_log_, to_string(bytes_sent));
 
 	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
 	if (bytes_sent != length)
 		throw string("bad bytes_sent for message");
-	//LOG(_log_, to_string(bytes_sent));
+	LOG(_log_, to_string(bytes_sent));
 }
 
 static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
@@ -87,60 +87,46 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 	// end of processing this command.
 	DB * db = nullptr;
 
-/*
-		LOG(_log_, nullptr);
-					google::protobuf::Map<string, string> * result = r.mutable_results();
-		LOG(_log_, nullptr);
-		// LEFT OFF HERE
-					(*result)[string("happy")] = string("joy");
-		LOG(_log_, nullptr);
-					string s;
-					bool outcome = r.SerializeToString(&s);
-					if (!outcome)
-						throw string("WHO_DEVICE bad serialize");
-		LOG(_log_, nullptr);
-*/
-	
-	
 	try
 	{
 		GenericPB g;
-		//LOG(_log_, nullptr);
+		LOG(_log_, nullptr);
 		g.ParseFromString(s);
-		//LOG(_log_, nullptr);
+		LOG(_log_, nullptr);
 		switch (g.type())
 		{
 			case Type::DAC_INFO_COMMAND:
 			{
 				SelectResult sr;
 				sr.set_type(SELECT_RESULT);
-				//LOG(_log_, nullptr);
+				LOG2(_log_, "SELECT_RESULT", LogLevel::MINIMAL);
 				for (int i = 0; i < ndacs; i++)
 				{
 					if (acs[i] == nullptr)
 						continue;
 
 					Row * r = sr.add_row();
-					//LOG(_log_, nullptr);
+					LOG(_log_, nullptr);
 					r->set_type(ROW);
 					google::protobuf::Map<string, string> * result = r->mutable_results();
-					//LOG(_log_, nullptr);
+					LOG(_log_, nullptr);
 					(*result)[string("index")] = to_string(i);
 					(*result)[string("name")] = acs[i]->HumanName();
 					(*result)[string("who")] = acs[i]->Who();
 					(*result)[string("what")] = acs[i]->What();
 					(*result)[string("when")] = acs[i]->TimeCode();
-					//LOG(_log_, nullptr);
+					LOG(_log_, nullptr);
 				}
 				if (!sr.SerializeToString(&s))
-						throw LOG(_log_, "t_c could not serialize");
-				//LOG(_log_, nullptr);
+						throw LOG2(_log_, "t_c could not serialize", LogLevel::CONVERSATIONAL);
+				LOG(_log_, nullptr);
 				SendPB(s, socket);
 			}
 			break;
 
 			case Type::TRACK_COUNT:
 				{
+					LOG2(_log_, "TRACK_COUNT", LogLevel::MINIMAL);
 					db = InitDB();
 					if (db == nullptr)
 						throw LOG(_log_, "could not allocate a DB");
@@ -148,13 +134,14 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					r.set_type(ONE_INT);
 					r.set_value(db->GetTrackCount());
 					if (!r.SerializeToString(&s))
-						throw LOG(_log_, "t_c could not serialize");
+						throw LOG2(_log_, "t_c could not serialize", LogLevel::CONVERSATIONAL);
 					SendPB(s, socket);
 				}
 				break;
 
 			case Type::ARTIST_COUNT:
 				{
+					LOG2(_log_, "ARTIST_COUNT", LogLevel::MINIMAL);
 					db = InitDB();
 					if (db == nullptr)
 						throw LOG(_log_, "could not allocate a DB");
@@ -162,7 +149,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					r.set_type(ONE_INT);
 					r.set_value(db->GetArtistCount());
 					if (!r.SerializeToString(&s))
-						throw LOG(_log_, "a_c could not serialize");
+						throw LOG2(_log_, "a_c could not serialize", LogLevel::CONVERSATIONAL);
 					SendPB(s, socket);
 				}
 				break;
@@ -171,11 +158,11 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::WHO_DEVICE:
 			case Type::WHAT_DEVICE:
 				{
-					//LOG(_log_, nullptr);
+					LOG2(_log_, "WWW", LogLevel::MINIMAL);
 					// Who, What and When are all the same.
 					WhenDeviceCommand w;
 					if (!w.ParseFromString(s))
-						throw LOG(_log_, "what failed to parse");
+						throw LOG2(_log_, "what failed to parse", LogLevel::CONVERSATIONAL);
 
 					OneString r;
 					r.set_type(ONE_STRING);
@@ -188,11 +175,11 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 						else if (g.type() == Type::WHAT_DEVICE)	
 							r.set_value(acs[w.device_id()]->What());
 						else
-							throw LOG(_log_, "impossible else");
+							throw LOG2(_log_, "impossible else", LogLevel::FATAL);
 					}
 					if (!r.SerializeToString(&s))
 					{
-						throw LOG(_log_, "failed to serialize");
+						throw LOG2(_log_, "failed to serialize", LogLevel::CONVERSATIONAL);
 					}
 					SendPB(s, socket);
 				}
@@ -200,10 +187,10 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::CLEAR_DEVICE:
 				{
-					LOG(_log_, "CLEAR DEVICE");
+					LOG2(_log_, "CLEAR DEVICE", LogLevel::MINIMAL);
 					OneInteger o;
 					if (!o.ParseFromString(s))
-						throw LOG(_log_, "clear failed to parse");
+						throw LOG2(_log_, "clear failed to parse", LogLevel::CONVERSATIONAL);
 					if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
 						acs[o.value()]->ClearQueue();
 				}
@@ -212,10 +199,10 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::APPEND_QUEUE:
 				{
 					// Appends a copy of B's queue onto A.
-					LOG(_log_, "APPEND QUEUE");
+					LOG2(_log_, "APPEND QUEUE", LogLevel::MINIMAL);
 					TwoIntegers o;
 					if (!o.ParseFromString(s))
-						throw LOG(_log_, "append failed to parse");
+						throw LOG2(_log_, "append failed to parse", LogLevel::CONVERSATIONAL);
 					if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
 						(int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
 					{
@@ -226,7 +213,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::NEXT_DEVICE:
 				{
-					LOG(_log_, "NEXT_DEVICE");
+					LOG2(_log_, "NEXT_DEVICE", LogLevel::MINIMAL);
 					// Doesn't matter which command - clean this up someday.
 					StopDeviceCommand c;
 					if (!c.ParseFromString(s))
@@ -238,7 +225,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::STOP_DEVICE:
 				{
-					LOG(_log_, "STOP_DEVICE");
+					LOG2(_log_, "STOP_DEVICE", LogLevel::MINIMAL);
 					StopDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "stop failed to parse");
@@ -249,7 +236,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::RESUME_DEVICE:
 				{
-					LOG(_log_, "RESUME_DEVICE");
+					LOG2(_log_, "RESUME_DEVICE", LogLevel::MINIMAL);
 					ResumeDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "resume failed to parse");
@@ -260,7 +247,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::PAUSE_DEVICE:
 				{
-					LOG(_log_, "PAUSE_DEVICE");
+					LOG2(_log_, "PAUSE_DEVICE", LogLevel::MINIMAL);
 					PauseDeviceCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "pause failed to parse");
@@ -271,7 +258,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::PLAY_TRACK_DEVICE:
 				{
-					LOG(_log_, "PLAY_TRACK_DEVICE");
+					LOG2(_log_, "PLAY_TRACK_DEVICE", LogLevel::MINIMAL);
 					PlayTrackCommand c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "play failed to parse");
@@ -288,7 +275,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::SELECT_QUERY:
 				{
-					LOG(_log_, "SELECT_QUERY");
+					LOG2(_log_, "SELECT_QUERY", LogLevel::MINIMAL);
 					SelectQuery c;
 					if (!c.ParseFromString(s))
 						throw LOG(_log_, "select failed to parse");
@@ -311,23 +298,6 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				LOG(_log_, "switch received type: " + to_string((int) g.type()));
 				break;
 		}
-/*
-		else if (token == string("se"))
-		{	
-			// search on column col using pattern pat
-			db = InitDB();
-			string col, pat;
-			tss >> col >> pat;
-			string aq_results;
-			db->MultiValuedQuery(col, pat, aq_results);
-			//cout << __FUNCTION__ << " " << __LINE__ << " " << col << " " << pat << "\t" << aq_results << endl;
-			size_t t = aq_results.size();
-			if (send(socket, &t, sizeof(size_t), 0) != sizeof(size_t))
-				throw LOG(_log_, "bad send");
-			if (send(socket, aq_results.c_str(), aq_results.size(), 0) != (ssize_t) aq_results.size())
-				throw LOG(_log_, "send did not return the correct number of bytes written");
-		}
-*/
 	}
 	catch (LoggedException s)
 	{

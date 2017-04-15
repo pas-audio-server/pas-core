@@ -5,6 +5,13 @@ syntax = "proto3";
 
 package pas;
 
+enum LogLevel {
+	FATAL = 0;
+	MINIMAL = 1;
+	CONVERSATIONAL = 2;
+	VERBOSE = 3;
+}
+
 enum Type {
 	GENERIC = 0;
 	PLAY_TRACK_DEVICE = 1;
@@ -30,6 +37,8 @@ enum Type {
 	COPY_QUEUE = 21;
 	MOVE_QUEUE = 22;
 	APPEND_QUEUE = 23;
+	LOG_LEVEL = 24;
+	LOG_LEVEL_QUERY = 25;
 }
 
 // This is a return type
