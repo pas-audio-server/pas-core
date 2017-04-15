@@ -198,6 +198,32 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				}
 				break;
 
+			case Type::CLEAR_DEVICE:
+				{
+					LOG(_log_, "CLEAR DEVICE");
+					OneInteger o;
+					if (!o.ParseFromString(s))
+						throw LOG(_log_, "clear failed to parse");
+					if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
+						acs[o.value()]->ClearQueue();
+				}
+				break;
+
+			case Type::APPEND_QUEUE:
+				{
+					// Appends a copy of B's queue onto A.
+					LOG(_log_, "APPEND QUEUE");
+					TwoIntegers o;
+					if (!o.ParseFromString(s))
+						throw LOG(_log_, "append failed to parse");
+					if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
+						(int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
+					{
+						acs[o.value_b()]->AppendQueue(acs[o.value_a()]);
+					}
+				}
+				break;
+
 			case Type::NEXT_DEVICE:
 				{
 					LOG(_log_, "NEXT_DEVICE");

@@ -512,12 +512,45 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 	m.unlock();
 }
 
-void AudioComponent::Clear()
+void AudioComponent::ClearQueue()
 {
 	LOG(_log_, nullptr);
 	m_play_queue.lock();
 	std::queue<PlayStruct>().swap(play_queue);
 	m_play_queue.unlock();
+}
+
+void AudioComponent::AppendQueue(AudioComponent * other)
+{
+	if (other != this)
+	{
+		mutex * m1;
+		mutex * m2;
+		// By always locking in the same order, we avoid deadlocks.
+		// The AudioComponent with the higher address will always be
+		// locked first.
+		if (other > this)
+		{
+			m1 = &other->m_play_queue;
+			m2 = &this->m_play_queue;
+		}
+		else
+		{
+			m1 = &this->m_play_queue;
+			m2 = &other->m_play_queue;
+		}
+		m1->lock();
+		m2->lock();
+		queue<PlayStruct> temp = other->play_queue;
+		while (!temp.empty())
+		{
+			PlayStruct ps = temp.front();
+			this->play_queue.push(ps);
+			temp.pop();
+		}
+		m2->unlock();
+		m1->unlock();
+	}
 }
 
 /*	Called by the connection manager only.

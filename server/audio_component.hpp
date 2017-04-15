@@ -100,7 +100,8 @@ public:
 	std::string TimeCode();
 	std::string What() { return title; }
 	std::string Who() { return artist; }
-	void Clear();
+	void ClearQueue();
+	void AppendQueue(AudioComponent * other);
 
 private:
 	std::string title;
