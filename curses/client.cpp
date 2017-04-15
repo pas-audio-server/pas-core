@@ -455,7 +455,7 @@ int main(int argc, char * argv[])
 
 		wmove(instruction_window, 0, 0);
 		wattron(instruction_window, A_STANDOUT);
-		waddstr(instruction_window, "DAC: -,+ PLAYER: <RET>/Q, ^X/STOP, ^P/PAUSE, ^R/RESUME, ^N/NEXT JUMP: A-Z SCROLL: UP, DN, ^F/PG, ^B/PG EXIT: ^C");
+		waddstr(instruction_window, "-/D- +/D+ <RET>/Q ^X/STP ^P/PSE ^R/RSM ^N/NXT ^L/CLR A-Z  UP/T- DN/T+ ^F/PG+ ^B/PG- ^C/ESC/EXIT");
 		wattroff(instruction_window, A_STANDOUT);
 		wmove(top_window, 0, 2);
 
@@ -514,6 +514,11 @@ int main(int argc, char * argv[])
 						DevCmdNoReply(PAUSE_DEVICE, server_socket);
 						break;
 
+					case 12:
+						// ^L 
+						DevCmdNoReply(CLEAR_DEVICE, server_socket);
+						break;
+
 					case 18:
 						// ^R
 						DevCmdNoReply(RESUME_DEVICE, server_socket);
@@ -548,6 +553,10 @@ int main(int argc, char * argv[])
 							index_of_first_visible_track += tracks.size();
 						break;
 
+					case 27:
+						keep_going = false;
+						break;
+
 					default:
 						//wmove(top_window, 2, 2);
 						//waddstr(top_window, to_string(c).c_str());
@@ -559,6 +568,9 @@ int main(int argc, char * argv[])
 						index_of_first_visible_track = jump_marks[(char) c];
 				}
 			}
+			if (!keep_going)
+				break;
+
 			DACInfoCommand();
 			CurrentDACInfo();
 			TrackCount();
