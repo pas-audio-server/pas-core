@@ -84,12 +84,10 @@ The threading models are nice.
 
 ## When will pas be done?
 
-I am a busy person and easily lose interest in things. So ¯\_(ツ)_/¯.
+¯\_(ツ)_/¯.
 
 ## What's the best computer ever made?
 
 The Amiga.
 
-<pre>
-<mic drop>
-</pre>
+&lt;mic drop>
