@@ -5,7 +5,7 @@ Perry's audio server
 
 A curses-based client driving three DACs simultaneously.
 
-![Curses Client](https://scontent-atl3-1.xx.fbcdn.net/v/t31.0-8/17917132_1994665244097111_4372928553100760128_o.jpg?oh=4399322525776bc5fe9cdd3345cef5ce&oe=594F65FC)
+<img width="1920" alt="screen shot 2017-04-14 at 9 48 55 pm" src="https://cloud.githubusercontent.com/assets/4084547/25074619/49ac2e24-22c5-11e7-9845-b6fa99d5a3db.png">
 
 ## Sponsors
 
