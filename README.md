@@ -50,6 +50,12 @@ I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS
 
 Because. 'Murica.
 
+pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulseaudio.html">this</a> which sends audio as digital data via RTP connections.
+
+pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulseaudio.html">this</a> which, well, I have no idea what this does.
+
+These and others send digital data to remote digital devices. pas sits next to a rack of amplifiers.
+
 ## Is pas MPD-client compatible?
 
 I hope this is added someday. The pas API is likely a superset of what MPD is capable of, so it seems reasonable this may come to pass in pas.
