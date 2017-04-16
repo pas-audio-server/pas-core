@@ -53,6 +53,7 @@ inline bool HasEnding (string const & fullString, string const & ending)
 /*	HasAllowedExtension() returns true if the given path ends in
 	one of the blessed extensions such as mp3, flac, etc.
 */
+/*
 bool HasAllowedExtension(const char * file_name, const vector<string> & allowable_extensions)
 {
 	bool ok_extension = false;
@@ -77,6 +78,7 @@ bool CausesLoop(const char * path)
 	// Ignore . and .. to prevent (simple) loops
 	return (strcmp(path, ".") == 0 || strcmp(path, "..") == 0);
 }
+*/
 
 /*	Assumption: allowable_extensions has already been vetted by caller.
 	Assumption: db connection is not null.
@@ -104,6 +106,7 @@ bool CausesLoop(const char * path)
 	Note: tid is passed along for debugging purposes only.
 */
 
+/*
 static void AddFolders(string path, vector<string> & v)
 {
 	const string slash("/");
@@ -215,4 +218,4 @@ bool Enumerate2(string path, vector<string> & allowed_extensions, bool force)
 
 	return rv;
 }
-
+*/

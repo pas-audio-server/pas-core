@@ -129,6 +129,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::TRACK_COUNT:
 				{
+					// Will change due to namespaces.
 					LOG2(_log_, "TRACK_COUNT", LogLevel::MINIMAL);
 					db = InitDB();
 					if (db == nullptr)
@@ -144,6 +145,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::ARTIST_COUNT:
 				{
+					// Will change due to namespaces.
 					LOG2(_log_, "ARTIST_COUNT", LogLevel::MINIMAL);
 					db = InitDB();
 					if (db == nullptr)
@@ -201,7 +203,9 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::APPEND_QUEUE:
 				{
+					// Will change due to namespaces.
 					// Appends a copy of B's queue onto A.
+					// Not in use yet.
 					LOG2(_log_, "APPEND QUEUE", LogLevel::MINIMAL);
 					TwoIntegers o;
 					if (!o.ParseFromString(s))
@@ -261,6 +265,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::PLAY_TRACK_DEVICE:
 				{
+					// Will change due to namespaces.					
 					LOG2(_log_, "PLAY_TRACK_DEVICE", LogLevel::MINIMAL);
 					PlayTrackCommand c;
 					if (!c.ParseFromString(s))
@@ -278,6 +283,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::SELECT_QUERY:
 				{
+					// Will change due to namespaces.
 					LOG2(_log_, "SELECT_QUERY", LogLevel::MINIMAL);
 					SelectQuery c;
 					if (!c.ParseFromString(s))
