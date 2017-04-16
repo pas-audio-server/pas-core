@@ -36,16 +36,6 @@ Some information about pas:
 - pas is being developed on an odroid XU4.
 - pas is being developed using an audioengine D3 USB DAC and a DragonFly Black from AudioQuest.
 
-## Who is Perry?
-
-This is <a href="https://en.wikipedia.org/wiki/Perry_Kivolowitz">me</a>.
-
-You are already <a href="http://variety.com/1997/scene/vpage/acad-sci-tech-nods-1117433914/">familiar with my work</a>.
-
-I contribute to <a href="https://en.wikipedia.org/wiki/SilhouetteFX">this</a>.
-
-I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS <a href="https://www.carthage.edu/">here</a>.
-
 ## Why did I start pas when \*.\* is available?
 
 Because. 'Murica.
@@ -55,6 +45,17 @@ pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulse
 pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulseaudio.html">this</a> which, well, I have no idea what this does.
 
 These and others send digital data to remote digital devices. pas sits next to a rack of amplifiers.
+
+
+## Who is Perry?
+
+This is <a href="https://en.wikipedia.org/wiki/Perry_Kivolowitz">me</a>.
+
+You are already <a href="http://variety.com/1997/scene/vpage/acad-sci-tech-nods-1117433914/">familiar with my work</a>.
+
+I contribute to <a href="https://en.wikipedia.org/wiki/SilhouetteFX">this</a>.
+
+I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS <a href="https://www.carthage.edu/">here</a>.
 
 ## Is pas MPD-client compatible?
 
