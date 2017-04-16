@@ -105,7 +105,7 @@ bool DB::Initialize()
 		}
 		else
 		{
-			connection->setSchema("pas");
+			connection->setSchema("pas2");
 		}
 	}
 	return rv;
@@ -121,6 +121,7 @@ void DB::DeInitialize()
 	}
 }
 
+/*
 bool DB::AddMedia(std::string & path, bool force)
 {
 	bool rv = true;
@@ -189,6 +190,7 @@ bool DB::AddMedia(std::string & path, bool force)
 
 	return rv;
 }
+*/
 
 int DB::IntegerQuery(string & sql)
 {
@@ -228,9 +230,10 @@ int DB::IntegerQuery(string & sql)
 	return rv;
 }
 
-int DB::GetTrackCount()
+int DB::GetTrackCount(string nspace)
 {
-	string sql("select count(*) from tracks");
+	// Make this a prepared statement.
+	string sql("select count(*) from tracks where namespace like \'" + nspace + "\'");
 	return IntegerQuery(sql);
 }
 
@@ -322,9 +325,9 @@ bool DB::IsAColumn(std::string c)
 	return rv;
 }
 
-int DB::GetArtistCount()
+int DB::GetArtistCount(string nspace)
 {
-	string sql("select count(*) from (select distinct artist from tracks) as foo;");
+	string sql("select count(*) from (select distinct artist from tracks where namespace like \'" + nspace + "\') as foo;");
 	return IntegerQuery(sql);
 }
 
@@ -333,13 +336,15 @@ bool DB::Initialized()
 	return connection != nullptr;
 }
 
-string DB::PathFromID(unsigned int id, string * title, string * artist)
+string DB::PathFromID(unsigned int id, string * title, string * artist, string nspace)
 {
 	string rv;
 	assert(Initialized());
-	string sql("select path,title,artist from tracks where id = " + to_string(id) + ";");
+	string sql("select parent,title,artist,fname from tracks where id = " + to_string(id) + " and namespace = \'" + nspace + "\';");
+	cerr << sql << endl;
 	sql::Statement * stmt = connection->createStatement();
 	sql::ResultSet *res = nullptr;
+	int up;
 
 	try
 	{
@@ -347,22 +352,54 @@ string DB::PathFromID(unsigned int id, string * title, string * artist)
 			throw LOG(_log_, "createStatement() failed");
 
 		res = stmt->executeQuery(sql.c_str());
+
 		if (res->next())
 		{
-			rv = res->getString("path");
+			up = res->getInt("parent");
 			if (title != nullptr)
 				*title = res->getString("title");
 			if (artist != nullptr)
 				*artist = res->getString("artist");
+			rv = res->getString("fname");
 		}
+		cerr << *title << endl;
+		cerr << *artist << endl;
 	}
 	catch (LoggedException s)
 	{
+		throw s;
 	}
 	catch (sql::SQLException &e)
 	{
+		// MODIFY THIS TO CONVERT TO LOGGEDEXCEIPTION.
 		PrintMySQLException(e);
+		
+		if (res != nullptr)
+			delete res;
+
+		// THIS SHOULD BE REMOVED AS THE ABOVE WILL BE A THROW
+		return rv;
 	}
+	// Rebuild the path on up.
+
+	while (up >= 0)
+	{
+		sql = "select * from paths where me = " + to_string(up) + " and namespace = \'" + nspace + "\';";
+		res = stmt->executeQuery(sql.c_str());
+		if (res->next())
+		{
+			up = res->getInt("up");
+			rv = res->getString("name") + "/" + rv;
+		}
+		cerr << up << "\t" << rv << endl;
+	}
+
+	if (stmt != nullptr)
+		delete stmt;
+	if (res != nullptr)
+		delete res;
+
+	cerr << rv << endl;
 	return rv;
 }
 
