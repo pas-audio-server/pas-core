@@ -340,7 +340,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 {
 	string rv;
 	assert(Initialized());
-	string sql("select parent,title,artist from tracks where id = " + to_string(id) + " and namespace = \'" + nspace + "\';");
+	string sql("select parent,title,artist,fname from tracks where id = " + to_string(id) + " and namespace = \'" + nspace + "\';");
 	cerr << sql << endl;
 	sql::Statement * stmt = connection->createStatement();
 	sql::ResultSet *res = nullptr;
@@ -360,6 +360,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 				*title = res->getString("title");
 			if (artist != nullptr)
 				*artist = res->getString("artist");
+			rv = res->getString("fname");
 		}
 		cerr << *title << endl;
 		cerr << *artist << endl;
@@ -380,14 +381,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 		return rv;
 	}
 	// Rebuild the path on up.
-	sql = "select * from paths where me = " + to_string(id) + " and namespace = \'" + nspace + "\';";
-	res = stmt->executeQuery(sql.c_str());
-	if (res->next())
-	{
-		up = res->getInt("up");
-		rv = res->getString("name");
-	}
-	cerr << up << "\t" << rv << endl;
+
 	while (up >= 0)
 	{
 		sql = "select * from paths where me = " + to_string(up) + " and namespace = \'" + nspace + "\';";
