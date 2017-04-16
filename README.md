@@ -14,24 +14,24 @@ A curses-based client driving three DACs simultaneously.
 2. **Ceritification as being pas compatible (and pas will be YUGE!)**
 3. **Our thanks!**
 
-PLEASE CONTACT ME IF INTERESTED, USING MY LINKEDIN ACCOUNT (SEE "This is me" BELOW).
+PLEASE CONTACT ME IF INTERESTED, USING MY <a href="https://www.linkedin.com/in/perrykivolowitz/">LINKEDIN</a> ACCOUNT.
 
 ## What is pas?
 
-pas is an audio server capable of sending multiple **concurrent analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC will drive a separate audio zone in a multi-zone or multi-room installation. 
+pas is an audio server capable of sending multiple **concurrent analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC drives a separate audio zone in a multi-zone or multi-room installation. 
 
-A key feature of pas is that it is quite light weight, capable of running multiple concurrent streams from an ARM-based development board. See directly below for information about the sbc pas being being developed on.
+A key feature of pas is that it is quite light weight, capable of running multiple concurrent streams even from a $50 ARM-based dev-board. See directly below for information about the sbc pas being being developed on.
 
 **To repeat: pas does not stream digital data. It (via DACs) emits analog audio for injection into a means of analog audio distribution.**
 
 Some information about pas:
 - pas is Linux based.
 - pas is heavily multithreaded and likes multicore machines.
-- pas is written to be headless. A UI will be provided via a web server.
-- audio is emitted using pulseaudio via USB audio devices.
-- audio is decoded using ffmpeg so pas supports those formats supported by ffmpeg.
-- data is maintained using sqlite.
-- pas *may* expose a MPD-compatible interface.
+- pas is written to be headless. UI's are provided via ssh or other means such as a web server.
+- audio is emitted using <a href="https://www.freedesktop.org/wiki/Software/PulseAudio/">pulseaudio</a> via USB DACs.
+- audio is decoded using <a href="https://ffmpeg.org/">ffmpeg</a> so pas supports those formats supported by ffmpeg.
+- data is maintained using <a href="https://www.mysql.com/">MySQL</a>.
+- pas *may* expose a MPD-compatible interface as the pas API is quite robust.
 
 - pas is being developed on an odroid XU4.
 - pas is being developed using an audioengine D3 USB DAC and a DragonFly Black from AudioQuest.
@@ -40,17 +40,19 @@ Some information about pas:
 
 This is <a href="https://en.wikipedia.org/wiki/Perry_Kivolowitz">me</a>.
 
+You are already <a href="http://variety.com/1997/scene/vpage/acad-sci-tech-nods-1117433914/">familiar with my work</a>.
+
 I contribute to <a href="https://en.wikipedia.org/wiki/SilhouetteFX">this</a>.
 
 I used to teach CS <a href="http://www.cs.wisc.edu/">here</a> but now I teach CS <a href="https://www.carthage.edu/">here</a>.
 
 ## Why did I start pas when \*.\* is available?
 
-Because
+Because. 'Murica.
 
 ## Is pas MPD-client compatible?
 
-I hope this is added someday. As of this writing, pas is not yet ready for any UI beyond a text-based debugging tool.
+I hope this is added someday. The pas API is likely a superset of what MPD is capable of, so it seems reasonable this may come to pass in pas.
 
 ## What additional information is available about pas?
 
@@ -62,7 +64,7 @@ Yes. It is in the wiki.
 
 ## Are other contributors welcomed?
 
-Not yet but I am very hopeful pas becomes worthy of other developer's interest. It would be so cool if my kid or one of my former students were among those future contributors.
+*Yes*.
 
 ## How do computer programmers kill zombies?
 
@@ -70,23 +72,15 @@ Read <a href="https://www.amazon.com/Get-Off-My-Zombie-Novel-ebook/dp/B00DQ26J8G
 
 ## Is pas shitty code?
 
-I take pride in my work. I strive not to write shitty code. If you believe I have written shitty code, please let me know in a non-shitty way.
+I take pride in my work. I strive not to write shitty code. If you believe we have written shitty code, please let us know in a non-shitty way.
 
 ## Does pas contain much *cool* code?
 
-Yes, there is some cool code in pas. The web server is written in go and it and the pas server use Google Protocol Buffers (version 3).
+Yes, there is some cool code in pas. 
 
-<del>No. When I wrote the <a href="https://en.wikipedia.org/wiki/Keystroke_logging">first documented keylogger</a> back in the day I believed in cool code.</del>
+The web server is being written in go and it and the pas server use Google Protocol Buffers (version 3).
 
-<del>Alas, I am now a gray-beard.</del>
-
-<del>I no longer believe in cool code.</del> 
-
-I believe in *working* code.
-
-I believe in *maintainable* code. 
-
-I believe cool code is for much younger people who are much smarter than me. Lozord is smarter than me.
+The threading models are nice.
 
 ## When will pas be done?
 
@@ -96,4 +90,6 @@ I am a busy person and easily lose interest in things. So ¯\_(ツ)_/¯.
 
 The Amiga.
 
-\<mic drop>
+<pre>
+<mic drop>
+</pre>
