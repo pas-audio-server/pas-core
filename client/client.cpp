@@ -206,6 +206,7 @@ string GetResponse(int server_socket, Type & type)
 		throw LOG("bad recv getting length: " + to_string(bytes_read));
 	//cout << LOG("recv of length: " + to_string(length)) << endl;
 
+	length = ntohl(length);
 	string s;
 	s.resize(length);
 	//cout << LOG("string is now: " + to_string(s.size())) << endl;
@@ -708,12 +709,16 @@ void SendPB(string & s, int server_socket)
 	assert(server_socket >= 0);
 
 	size_t length = s.size();
+	size_t ll = length;
+
+	length = htonl(length);
+
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
 		throw string("bad bytes_sent for length");
 
-	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
-	if (bytes_sent != length)
+	bytes_sent = send(server_socket, (const void *) s.data(), ll, 0);
+	if (bytes_sent != ll)
 		throw string("bad bytes_sent for message");
 }
 

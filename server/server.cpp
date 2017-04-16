@@ -39,7 +39,7 @@
 using namespace std;
 using namespace pas;
 
-Logger _log_("/tmp/paslog.txt", LogLevel::MINIMAL);
+Logger _log_("/tmp/paslog.txt", LogLevel::CONVERSATIONAL);
 
 bool keep_going = true;
 int  port = 5077;

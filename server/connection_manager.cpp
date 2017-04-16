@@ -64,14 +64,17 @@ static void SendPB(string & s, int server_socket)
 	assert(server_socket >= 0);
 
 	size_t length = s.size();
+	size_t ll = length;
 	LOG(_log_, to_string(length));
+
+	length = htonl(length);
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
 		throw string("bad bytes_sent for length");
 	LOG(_log_, to_string(bytes_sent));
 
-	bytes_sent = send(server_socket, (const void *) s.data(), length, 0);
-	if (bytes_sent != length)
+	bytes_sent = send(server_socket, (const void *) s.data(), ll, 0);
+	if (bytes_sent != ll)
 		throw string("bad bytes_sent for message");
 	LOG(_log_, to_string(bytes_sent));
 }
@@ -337,6 +340,7 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 				throw LOG(_log_, "bad recv getting length: " + to_string(bytes_read));
 			//LOG(_log_, "recv of length: " + to_string(length));
 			string s;
+			length = ntohl(length);
 			s.resize(length);
 			bytes_read = recv(socket, (void *) &s[0], length, 0);
 			if (bytes_read != length)
