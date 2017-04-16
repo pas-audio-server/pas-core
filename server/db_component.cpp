@@ -105,7 +105,7 @@ bool DB::Initialize()
 		}
 		else
 		{
-			connection->setSchema("pas");
+			connection->setSchema("pas2");
 		}
 	}
 	return rv;
