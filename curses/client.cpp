@@ -572,6 +572,7 @@ int main(int argc, char * argv[])
 				}
 				if (isalnum(c))
 				{
+					display_needs_update = true;
 					if (jump_marks.find((char) c) != jump_marks.end())
 						index_of_first_visible_track = jump_marks[(char) c];
 				}
@@ -580,7 +581,7 @@ int main(int argc, char * argv[])
 				break;
 
 			// THESE ARE HAPPENING TOO FREQUENTLY.
-			if (display_needs_update || difftime(time(nullptr), last_update) > 0.5) {
+			if (display_needs_update || difftime(time(nullptr), last_update) > 0.2) {
 				DACInfoCommand();
 				CurrentDACInfo();
 				TrackCount();
@@ -593,7 +594,7 @@ int main(int argc, char * argv[])
 				wrefresh(mid_right);
 				last_update = time(nullptr);
 			}
-			usleep(2000);
+			usleep(1000);
 		}
 	}
 	catch (string s)
