@@ -415,6 +415,19 @@ void DevCmdNoReply(Type type, int server_socket)
 	SendPB(s, server_socket);
 }
 
+void UpdateAndRender()
+{
+	DACInfoCommand();
+	CurrentDACInfo();
+	TrackCount();
+	DisplayTracks();
+	wmove(top_window, 1, 1);
+	wrefresh(instruction_window);
+	wrefresh(top_window);
+	wrefresh(bottom_window);
+	wrefresh(mid_left);
+	wrefresh(mid_right);
+}
 
 int main(int argc, char * argv[])
 {
@@ -582,16 +595,7 @@ int main(int argc, char * argv[])
 
 			// THESE ARE HAPPENING TOO FREQUENTLY.
 			if (display_needs_update || difftime(time(nullptr), last_update) > 0.2) {
-				DACInfoCommand();
-				CurrentDACInfo();
-				TrackCount();
-				DisplayTracks();
-				wmove(top_window, 1, 1);
-				wrefresh(instruction_window);
-				wrefresh(top_window);
-				wrefresh(bottom_window);
-				wrefresh(mid_left);
-				wrefresh(mid_right);
+				UpdateAndRender();
 				last_update = time(nullptr);
 			}
 			usleep(1000);

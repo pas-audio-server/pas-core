@@ -155,10 +155,16 @@ bool InsertTrack(sql::Connection * connection, DIRENT * d, string & nspace, Logg
 		if (stmt == nullptr) {
 			throw LOG2(_log_, "prepareStatement() failed", LogLevel::FATAL);
 		}
+		// These three fields of the insert are data generated here in this
+		// program - they are the folder id of where this file lives, its
+		// file name within that folder and the namespace in which it is
+		// found.
 		stmt->setString(1, to_string(d->up));
 		stmt->setString(2, d->name);
 		stmt->setString(3, nspace);
 
+		// These fields come from ffprobe and are media related. The + 1
+		// to i is significant as mysql counts from 1, not zero.
 		for (size_t i = 3; i < n; i++) {
 			stmt->setString(i + 1, track.GetTag(track_column_names[i]));
 		}
