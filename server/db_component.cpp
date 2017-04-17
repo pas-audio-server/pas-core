@@ -197,7 +197,6 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results,
 			sql = "select " + select_columns + string(" from tracks where ");
 			sql += column + " like \"" + pattern + "\" and namespace like \"" + nspace + "\"";
 			sql += " order by " + column + ";";
-			
 			LOG2(_log_, sql, CONVERSATIONAL);
 
 			res = stmt->executeQuery(sql.c_str());
@@ -218,6 +217,7 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results,
 					s = res->getString(col);
 					(*m)[col] = s;
 				}
+				(*m)["id"] = res->getString("id");
 			}
 			LOG(_log_, nullptr);
 		}
