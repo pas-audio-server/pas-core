@@ -119,7 +119,7 @@ void AnalyzeChecksums(vector<DIRENT> & t, Logger & _log_)
 			string path = RebuildPath(t, i, directory_index);
 			if (path.size() == 0)
 				continue;
-			string command_line = "md5sum -b \'" + path + "\'";
+			string command_line = "md5sum -b \"" + path + "\"";
 			cerr << command_line << endl;
 			FILE * p = popen(command_line.c_str(), "r");
 			if (!p) {
