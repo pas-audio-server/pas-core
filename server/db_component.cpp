@@ -59,11 +59,12 @@ void DB::InitPreparedStatement()
 		if (i > 0) {
 			query_columns += ", ";
 			parameter_columns += ", ";
+			select_columns += ", ";
 		}
 		query_columns += track_column_names[i];
+		select_columns += track_column_names[i];
 		parameter_columns += "?";
 	}
-	select_columns = query_columns;
 	query_columns += ") ";
 	parameter_columns += ") ";
 }
