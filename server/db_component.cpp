@@ -67,6 +67,7 @@ void DB::InitPreparedStatement()
 	}
 	query_columns += ") ";
 	parameter_columns += ") ";
+	select_columns += ", id";
 }
 
 DB::DB()
