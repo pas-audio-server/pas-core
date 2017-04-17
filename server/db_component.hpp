@@ -1,4 +1,4 @@
- /*  This file is part of pas.
+/*  This file is part of pas.
 
     pas is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*	Copyright 2017 by Perr Kivolowitz
+/*	Copyright 2017 by Perry Kivolowitz
 */
 
 
@@ -27,6 +27,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 #include <omp.h>
 #include <assert.h>
 #include <cppconn/driver.h>
@@ -38,6 +39,7 @@
 #include "utility.hpp"
 #include "../protos/cpp/commands.pb.h"
 
+
 class DB
 {
 public:
@@ -46,14 +48,14 @@ public:
 	bool Initialize();
 	void DeInitialize();
 	bool Initialized();
-	int  GetTrackCount();
-	int  GetArtistCount();
-	bool AddMedia(std::string & path, bool force);
-	void MultiValuedQuery(std::string column, std::string pattern, pas::SelectResult & results);
+	int  GetTrackCount(std::string nspace = std::string("default"));
+	int  GetArtistCount(std::string nspace = std::string("default"));
+	void MultiValuedQuery(std::string column, std::string pattern, pas::SelectResult & results, std::string nspace = "default");
 	void FindIDs(std::string column, std::string pattern, std::vector<std::string> & results);
-	std::string PathFromID(unsigned int id, std::string * title, std::string * artist);
+	std::string PathFromID(unsigned int id, std::string * title, std::string * artist, std::string nspace = "default");
 
 private:
+	void InitPreparedStatement();
 	sql::Driver * driver;
 	sql::Connection * connection;
 
@@ -62,7 +64,7 @@ private:
 	int IntegerQuery(std::string & sql);
 	std::vector<std::string> supported_track_column_names;
 	std::string query_columns;
-	std::string query_columns_no_path;
 	std::string parameter_columns;
+	std::string select_columns;
 };
 

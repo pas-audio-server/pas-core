@@ -1,27 +1,12 @@
 #include "fs.h"
+#include "db.hpp"
+
 #include <sstream>
 
 using namespace std;
 using namespace pas;
 
-string track_column_names[] =
-{
-	// Order must match select / insert code
-	"parent",
-	"fname",
-	"namespace",
-	"artist",
-	"title",
-	"album",
-	"genre",
-	"source",
-	"duration",
-	"publisher",
-	"composer",
-	"track",
-	"copyright",
-	"disc"
-};
+const int BSIZE = 1024;
 
 string query_columns;
 string parameter_columns;
@@ -111,6 +96,9 @@ bool InsertDirectory(sql::Connection * connection, DIRENT * d, string & nspace, 
 			stmt->execute(s.c_str());
 			rv = true;
 		}
+		else { 
+			throw LOG2(_log_, "createStatement failed", LogLevel::FATAL);
+		}
 	}
 	catch (sql::SQLException & e)
 	{
@@ -143,38 +131,41 @@ bool InsertTrack(sql::Connection * connection, DIRENT * d, string & nspace, Logg
 		return rv;
 	}
 
-	const int bsize = 1024;
-	char buffer[bsize] = { 0 };
+	char buffer[BSIZE] = { 0 };
 
 	Track track;
 
-	while (fgets(buffer, bsize, p) != nullptr)
+	while (fgets(buffer, BSIZE, p) != nullptr)
 	{
 		string b(buffer);
 		track.SetTag(b);
-		memset(buffer, 0, bsize);
+		memset(buffer, 0, BSIZE);
 	}
 
 	pclose(p);
 
+	size_t n = sizeof(track_column_names) / sizeof(string);
+	sql::PreparedStatement * stmt = nullptr;	
+	string s = "insert into tracks " + query_columns + parameter_columns + ";";
+
 	try
 	{
-		size_t n = sizeof(track_column_names) / sizeof(string);
-		sql::PreparedStatement * stmt = nullptr;	
-		string s = "insert into tracks " + query_columns + parameter_columns + ";";
 
 		stmt = connection->prepareStatement(s.c_str());
-		if (stmt == nullptr)
-		{
-			cerr << "prepareStatement() failed" << endl;
-			return rv;
+		if (stmt == nullptr) {
+			throw LOG2(_log_, "prepareStatement() failed", LogLevel::FATAL);
 		}
+		// These three fields of the insert are data generated here in this
+		// program - they are the folder id of where this file lives, its
+		// file name within that folder and the namespace in which it is
+		// found.
 		stmt->setString(1, to_string(d->up));
 		stmt->setString(2, d->name);
 		stmt->setString(3, nspace);
 
-		for (size_t i = 3; i < n; i++)
-		{
+		// These fields come from ffprobe and are media related. The + 1
+		// to i is significant as mysql counts from 1, not zero.
+		for (size_t i = 3; i < n; i++) {
 			stmt->setString(i + 1, track.GetTag(track_column_names[i]));
 		}
 

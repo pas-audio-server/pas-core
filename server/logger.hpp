@@ -11,12 +11,14 @@
 class  LoggedException
 {
 public:
-
-	LoggedException(std::string s) { msg = s; }
+	LoggedException(std::string s) { msg = s; level = pas::LogLevel::VERBOSE; }
+	LoggedException(std::string s, pas::LogLevel ll) { msg = s; level = ll; }
 	std::string Msg() { return msg; }
-
+	pas::LogLevel Level() { return level; }
+	
 private:
 	std::string msg;
+	pas::LogLevel level;
 };
 
 #define	LOG(l, m)		l.Add(__FILE__, __FUNCTION__, __LINE__, (m))

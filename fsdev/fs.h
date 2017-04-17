@@ -37,3 +37,7 @@ struct DIRENT
 void DoTheDB(std::string & nspace, std::vector<DIRENT> & t, Logger & _log_);
 void Discover(std::string path, const std::vector<std::string> & allowable_extensions, std::vector<DIRENT> & t, int parent, int & c, bool is_root, Logger & _log_);
 
+// There's a buffer declared for reading the output of ffprobe.
+// Currently used only in db.cpp.
+
+extern const int BSIZE;

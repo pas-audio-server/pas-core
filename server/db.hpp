@@ -1,6 +1,7 @@
 #pragma once
+#include <string>
 
-/*	This file is part of pas.
+/*  This file is part of pas.
 
     pas is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,20 +17,33 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*	Copyright 2017 by Perry Kivolowitz
+*/
 
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <omp.h>
+// WARNING
+// WARNING
+// WARNING THIS ARRAY IS SHARED BETWEEN THE PAS SERVER AND THE MEDIA
+// WARNING DISCOVERY SYSTEM - FSMAIN.  IT  IS ALSO DEPENDENT UPON AN
+// WARNING EXTERN DATABASE  SCHEMA  (ALL COLUMN NAMES ARE PRESENT IN
+// WARNING IN THE DATABASE).
+// WARNING
+// WARNING
 
-#include "utility.hpp"
-#include "db_component.hpp"
-
-bool Enumerate2(std::string path, std::vector<std::string> & allowed_extensions, bool force = false);
-bool Enumerate(std::string path, std::vector<std::string> & allowed_extensions, bool force = false);
-
+std::string track_column_names[] =
+{
+	// Order must match select / insert code
+	"parent",
+	"fname",
+	"namespace",
+	"artist",
+	"title",
+	"album",
+	"genre",
+	"source",
+	"duration",
+	"publisher",
+	"composer",
+	"track",
+	"copyright",
+	"disc"
+};

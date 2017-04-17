@@ -43,8 +43,9 @@
 #include <unordered_set>
 #include <time.h>
 #include <assert.h>
-#include "../protos/cpp/commands.pb.h"
 #include <curses.h>
+
+#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
 using namespace pas;
@@ -414,6 +415,19 @@ void DevCmdNoReply(Type type, int server_socket)
 	SendPB(s, server_socket);
 }
 
+void UpdateAndRender()
+{
+	DACInfoCommand();
+	CurrentDACInfo();
+	TrackCount();
+	DisplayTracks();
+	wmove(top_window, 1, 1);
+	wrefresh(instruction_window);
+	wrefresh(top_window);
+	wrefresh(bottom_window);
+	wrefresh(mid_left);
+	wrefresh(mid_right);
+}
 
 int main(int argc, char * argv[])
 {
@@ -448,6 +462,7 @@ int main(int argc, char * argv[])
 	curses_is_active = true;
 
 	string e_string;
+	time_t last_update = time(nullptr);
 
 	try
 	{
@@ -468,9 +483,11 @@ int main(int argc, char * argv[])
 		string s;
 		while (keep_going && curses_is_active)
 		{
+			bool display_needs_update = false;
 			int c = wgetch(top_window);
 			if (c != ERR)
 			{
+				display_needs_update = true;
 				switch (c)
 				{
 					case '+':
@@ -561,12 +578,14 @@ int main(int argc, char * argv[])
 						break;
 
 					default:
+						display_needs_update = false;
 						//wmove(top_window, 2, 2);
 						//waddstr(top_window, to_string(c).c_str());
 						break;
 				}
 				if (isalnum(c))
 				{
+					display_needs_update = true;
 					if (jump_marks.find((char) c) != jump_marks.end())
 						index_of_first_visible_track = jump_marks[(char) c];
 				}
@@ -574,16 +593,11 @@ int main(int argc, char * argv[])
 			if (!keep_going)
 				break;
 
-			DACInfoCommand();
-			CurrentDACInfo();
-			TrackCount();
-			DisplayTracks();
-			wmove(top_window, 1, 1);
-			wrefresh(instruction_window);
-			wrefresh(top_window);
-			wrefresh(bottom_window);
-			wrefresh(mid_left);
-			wrefresh(mid_right);
+			// THESE ARE HAPPENING TOO FREQUENTLY.
+			if (display_needs_update || difftime(time(nullptr), last_update) > 0.2) {
+				UpdateAndRender();
+				last_update = time(nullptr);
+			}
 			usleep(1000);
 		}
 	}

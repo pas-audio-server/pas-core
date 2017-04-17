@@ -67,16 +67,27 @@ struct AudioCommand
 
 	AudioCommand(const AudioCommand & other)
 	{
-//		argument = other.argument;
 		cmd = other.cmd;
 		filler = other.filler;
 	}
 
-//	std::string argument;
 	unsigned char cmd;
 	unsigned char filler;
 };
 
+/*	A PlayStruct() - eat it Paul Montgomery - is the thing that is
+	passed to the Player thread. 
+
+	It contains the full path of the track to be played. The work
+	of deriving the full path (they are all relative now) is done
+	by the caller - at this time only:
+
+		AudioComponent::Play(unsigned int id)
+
+	The artist and title are here so that the DAC can report
+	precisely what and who it's playing right now. This information
+	is passed back to clients in the DACINFO command.
+*/
 struct PlayStruct
 {
 	std::string path;
