@@ -19,6 +19,7 @@
 
 #include "db_component.hpp"
 #include "logger.hpp"
+#include "db.hpp"
 
 using namespace std;
 using namespace pas;
@@ -37,6 +38,17 @@ extern Logger _log_;
 	For example:
 		insert into tracks <query_columns> <parameter columns> ...
 */
+
+
+void ReformatSQLException(sql::SQLException &e) {
+	stringstream ss;
+	ss << "# ERR: SQLException in " << __FILE__;
+	ss << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+	ss << "# ERR: " << e.what();
+	ss << " (MySQL error code: " << e.getErrorCode();
+	ss << ", SQLState: " << e.getSQLState() << " )" << endl;
+	throw LOG2(_log_, ss.str(), LogLevel::FATAL);
+}
 
 void DB::InitPreparedStatement()
 {
@@ -71,6 +83,10 @@ DB::~DB()
 	}
 }
 
+/*	Initialize() can throw LoggedExceptions now. It is called from
+	audio_component and connection_manager. Check now to see the
+	side effects of being able to throw exceptions now.
+*/
 bool DB::Initialize()
 {
 	bool rv = true;
@@ -92,13 +108,7 @@ bool DB::Initialize()
 		}
 	}
 	catch (sql::SQLException & e) {
-		stringstream ss;
-		ss << "# ERR: SQLException in " << __FILE__;
-		ss << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-		ss << "# ERR: " << e.what();
-		ss << " (MySQL error code: " << e.getErrorCode();
-		ss << ", SQLState: " << e.getSQLState() << " )" << endl;
-		throw LOG2(_log_, ss.str(), LogLevel::FATAL);
+		ReformatSQLException(e);
 	}
 	return rv;
 }
@@ -125,7 +135,7 @@ int DB::IntegerQuery(string & sql)
 	stmt = connection->createStatement();
 	if (stmt == nullptr)
 	{
-		LOG(_log_, "createStatement() failed");
+		LOG2(_log_, "createStatement() failed", FATAL);
 	}
 	else
 	{
@@ -137,9 +147,8 @@ int DB::IntegerQuery(string & sql)
 				rv = res->getInt(1);
 			}
 		}
-		catch (sql::SQLException &e)
-		{
-			PrintMySQLException(e);
+		catch (sql::SQLException &e) {
+			ReformatSQLException(e);
 		}
 	}
 	if (stmt != nullptr)
@@ -151,6 +160,8 @@ int DB::IntegerQuery(string & sql)
 	return rv;
 }
 
+/*	NOTE: nspace defaults to "default"
+*/
 int DB::GetTrackCount(string nspace)
 {
 	// Make this a prepared statement.
@@ -158,23 +169,17 @@ int DB::GetTrackCount(string nspace)
 	return IntegerQuery(sql);
 }
 
-void DB::PrintMySQLException(sql::SQLException & e)
-{
-	cerr << "# ERR: SQLException in " << __FILE__;
-	cerr << " on line " << __LINE__ << endl;
-	cerr << "# ERR: " << e.what();
-	cerr << " (MySQL error code: " << e.getErrorCode();
-	cerr << ", SQLState: " << e.getSQLState() << " )" << endl;
-}
-
-void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
+/*	NOTE: nspace defaults to "default"
+*/
+void DB::MultiValuedQuery(string column, string pattern, SelectResult & results, string nspace)
 {
 	assert(connection != nullptr);
 
 	sql::Statement * stmt = nullptr;
 	sql::ResultSet * res = nullptr;
 
-	LOG(_log_, nullptr);
+	LOG2(_log_, nullptr, REDICULOUS);
+
 	if (IsAColumn(column))
 	{
 		try
@@ -183,11 +188,15 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
 			// NOTE: SQL Injection vulnerability here.
 			// NOTE:
 			if ((stmt = connection->createStatement()) == nullptr)
-				throw LOG(_log_, "createStatement() failed");
+				throw LOG2(_log_, "createStatement() failed", FATAL);
 
-			string sql("select " + query_columns_no_path + string(" from tracks where "));
-			sql += column + " like \"" + pattern + "\" order by " + column + ";";
-			//cout << sql << endl;
+			string sql;
+			sql = "select " + query_columns + string(" from tracks where ");
+			sql += column + " like \"" + pattern + "\" and namespace like \"" + nspace + "\"";
+			sql += " order by " + column + ";";
+			
+			LOG2(_log_, sql, CONVERSATIONAL);
+
 			res = stmt->executeQuery(sql.c_str());
 
 			LOG(_log_, nullptr);
@@ -196,14 +205,12 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
 				//cout << LOG("") << endl;
 				Row * r = results.add_row();
 				r->set_type(ROW);
+			
 				google::protobuf::Map<string, string> * m = r->mutable_results();
 
 				for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
 				{
-					// assumes path is zeroeth column and skips it.
 					string col = track_column_names[i];
-					if (i == 0)
-						col = "id";
 					string s;
 					s = res->getString(col);
 					(*m)[col] = s;
@@ -213,14 +220,18 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
 		}
 		catch (LoggedException s)
 		{
+			if (s.Level() == FATAL)
+				throw s;
 		}
 		catch (sql::SQLException &e)
 		{
-			PrintMySQLException(e);
+			// This is a throw.
+			ReformatSQLException(e);
 		}
-		LOG(_log_, to_string(results.ByteSize()));
+		//LOG(_log_, to_string(results.ByteSize()));
 	}
 
+	// SAME NOTE ABOUT MEMORY LEAK ON FATAL EXCEPTIONS.
 	if (stmt != nullptr)
 		delete stmt;
 
@@ -231,21 +242,23 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results)
 bool DB::IsAColumn(std::string c)
 {
 	bool rv = false;
-	for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
-	{
-		if (c == track_column_names[i])
-		{
-			rv = true;
-			break;
+	if (c == "id") {
+		rv = true;
+	}
+	else {
+		for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++) {
+			if (c == track_column_names[i]) {
+				rv = true;
+				break;
+			}
 		}
 	}
-
-	if (!rv && c == "id")
-		rv = true;
 
 	return rv;
 }
 
+/*	NOTE: nspace defaults to "default"
+*/
 int DB::GetArtistCount(string nspace)
 {
 	string sql("select count(*) from (select distinct artist from tracks where namespace like \'" + nspace + "\') as foo;");
@@ -257,6 +270,8 @@ bool DB::Initialized()
 	return connection != nullptr;
 }
 
+/*	NOTE: nspace defaults to "default"
+*/
 string DB::PathFromID(unsigned int id, string * title, string * artist, string nspace)
 {
 	string rv;
@@ -269,7 +284,7 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 	try
 	{
 		if (stmt == nullptr)
-			throw LOG(_log_, "createStatement() failed");
+			throw LOG2(_log_, "createStatement() failed", FATAL);
 
 		res = stmt->executeQuery(sql.c_str());
 
@@ -282,35 +297,43 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 				*artist = res->getString("artist");
 			rv = res->getString("fname");
 		}
+
+		// Rebuild the path on up. The idea is simple and yes, I read that it could be done
+		// in one SQL statement. I saw several versions of it and didn't understand any of
+		// them. So...
+		//
+		// Keep climbing up the file system path, prepending the current level's name at
+		// each step. The file name itself is the initial value of rv. It is captured when
+		// title and artist are captured, above.
+		//
+		// All the output of this function will be assembled into a PlayStruct.
+		while (up >= 0)
+		{
+			sql = "select * from paths where me = " + to_string(up) + " and namespace = \'" + nspace + "\';";
+			res = stmt->executeQuery(sql.c_str());
+			if (res->next())
+			{
+				up = res->getInt("up");
+				rv = res->getString("name") + "/" + rv;
+			}
+		}
+
 	}
 	catch (LoggedException s)
 	{
-		throw s;
+		if (s.Level() == FATAL)
+			throw s;
 	}
 	catch (sql::SQLException &e)
 	{
-		// MODIFY THIS TO CONVERT TO LOGGEDEXCEIPTION.
-		PrintMySQLException(e);
-		
+		// These are always fatal.
 		if (res != nullptr)
 			delete res;
-
-		// THIS SHOULD BE REMOVED AS THE ABOVE WILL BE A THROW
-		return rv;
-	}
-	// Rebuild the path on up.
-
-	while (up >= 0)
-	{
-		sql = "select * from paths where me = " + to_string(up) + " and namespace = \'" + nspace + "\';";
-		res = stmt->executeQuery(sql.c_str());
-		if (res->next())
-		{
-			up = res->getInt("up");
-			rv = res->getString("name") + "/" + rv;
-		}
+		ReformatSQLException(e);
 	}
 
+	// NOTE:
+	// NOTE: THERE ARE SOME MEMORY LEAKS HERE - THESE WILL NOT BE FREED IF THERE ARE FATAL EXCEPTIONS.
 	if (stmt != nullptr)
 		delete stmt;
 	if (res != nullptr)

@@ -10,6 +10,7 @@ enum LogLevel {
 	MINIMAL = 1;
 	CONVERSATIONAL = 2;
 	VERBOSE = 3;
+	REDICULOUS = 4;
 }
 
 enum Type {

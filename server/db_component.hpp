@@ -38,7 +38,7 @@
 #include "track.hpp"
 #include "utility.hpp"
 #include "../protos/cpp/commands.pb.h"
-#include "db.hpp"
+
 
 class DB
 {
@@ -50,7 +50,7 @@ public:
 	bool Initialized();
 	int  GetTrackCount(std::string nspace = std::string("default"));
 	int  GetArtistCount(std::string nspace = std::string("default"));
-	void MultiValuedQuery(std::string column, std::string pattern, pas::SelectResult & results);
+	void MultiValuedQuery(std::string column, std::string pattern, pas::SelectResult & results, std::string nspace = "default");
 	void FindIDs(std::string column, std::string pattern, std::vector<std::string> & results);
 	std::string PathFromID(unsigned int id, std::string * title, std::string * artist, std::string nspace = "default");
 

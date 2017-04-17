@@ -31,15 +31,22 @@ using namespace pas;
 
 extern Logger _log_;
 
+/*	APPROACH TO EXCEPTIONS / LOGGING
+
+	LoggedExceptions now remember their logging level. If a FATAL is caught, it must be
+	rethrown up the chain until it causes the ConnectionHandler() to exit. All others
+	can be swallowed at the appropriate place.
+*/
+
 static DB * InitDB()
 {
 	DB * db = new DB();
 
 	if (db == nullptr)
-		throw LOG2(_log_, "new of DB failed???", LogLevel::FATAL);
+		throw LOG2(_log_, "new of DB failed", FATAL);
 
 	if (!db->Initialize())
-		throw LOG2(_log_, "DB failed to initialize: ", LogLevel::FATAL);
+		throw LOG2(_log_, "DB failed to initialize: ", FATAL);
 
 	return db;
 }
@@ -55,7 +62,7 @@ static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int 
 	}
 	else
 	{	
-		LOG(_log_, "bad device number");
+		LOG2(_log_, "bad device number", VERBOSE);
 	}
 }
 
@@ -65,18 +72,18 @@ static void SendPB(string & s, int server_socket)
 
 	size_t length = s.size();
 	size_t ll = length;
-	LOG(_log_, to_string(length));
+	LOG2(_log_, to_string(length), VERBOSE);
 
 	length = htonl(length);
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
-		throw string("bad bytes_sent for length");
+		throw LOG2(_log_, "bad bytes_sent for length", FATAL);
 	LOG(_log_, to_string(bytes_sent));
 
 	bytes_sent = send(server_socket, (const void *) s.data(), ll, 0);
 	if (bytes_sent != ll)
-		throw string("bad bytes_sent for message");
-	LOG(_log_, to_string(bytes_sent));
+		throw LOG2(_log_, "bad bytes_sent for message", FATAL);
+	LOG2(_log_, to_string(bytes_sent), VERBOSE);
 }
 
 static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
@@ -102,214 +109,218 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			{
 				SelectResult sr;
 				sr.set_type(SELECT_RESULT);
-				LOG2(_log_, "SELECT_RESULT", LogLevel::MINIMAL);
+				LOG2(_log_, "SELECT_RESULT", CONVERSATIONAL);
 				for (int i = 0; i < ndacs; i++)
 				{
 					if (acs[i] == nullptr)
 						continue;
 
 					Row * r = sr.add_row();
-					LOG(_log_, nullptr);
+					LOG2(_log_, nullptr, VERBOSE);
 					r->set_type(ROW);
 					google::protobuf::Map<string, string> * result = r->mutable_results();
-					LOG(_log_, nullptr);
+					LOG2(_log_, nullptr, VERBOSE);
 					(*result)[string("index")] = to_string(i);
 					(*result)[string("name")] = acs[i]->HumanName();
 					(*result)[string("who")] = acs[i]->Who();
 					(*result)[string("what")] = acs[i]->What();
 					(*result)[string("when")] = acs[i]->TimeCode();
-					LOG(_log_, nullptr);
+					LOG2(_log_, nullptr, VERBOSE);
 				}
 				if (!sr.SerializeToString(&s))
-						throw LOG2(_log_, "t_c could not serialize", LogLevel::CONVERSATIONAL);
-				LOG(_log_, nullptr);
+						throw LOG2(_log_, "t_c could not serialize", FATAL);
+				LOG2(_log_, nullptr, VERBOSE);
 				SendPB(s, socket);
 			}
 			break;
 
 			case Type::TRACK_COUNT:
-				{
-					// Will change due to namespaces.
-					LOG2(_log_, "TRACK_COUNT", LogLevel::MINIMAL);
-					db = InitDB();
-					if (db == nullptr)
-						throw LOG(_log_, "could not allocate a DB");
-					OneInteger r;
-					r.set_type(ONE_INT);
-					r.set_value(db->GetTrackCount());
-					if (!r.SerializeToString(&s))
-						throw LOG2(_log_, "t_c could not serialize", LogLevel::CONVERSATIONAL);
-					SendPB(s, socket);
-				}
-				break;
+			{
+				// Will change due to namespaces.
+				LOG2(_log_, "TRACK_COUNT", CONVERSATIONAL);
+				db = InitDB();
+				if (db == nullptr)
+					throw LOG2(_log_, "could not allocate a DB", FATAL);
+				OneInteger r;
+				r.set_type(ONE_INT);
+				r.set_value(db->GetTrackCount());
+				if (!r.SerializeToString(&s))
+					throw LOG2(_log_, "t_c could not serialize", FATAL);
+				SendPB(s, socket);
+			}
+			break;
 
 			case Type::ARTIST_COUNT:
-				{
-					// Will change due to namespaces.
-					LOG2(_log_, "ARTIST_COUNT", LogLevel::MINIMAL);
-					db = InitDB();
-					if (db == nullptr)
-						throw LOG(_log_, "could not allocate a DB");
-					OneInteger r;
-					r.set_type(ONE_INT);
-					r.set_value(db->GetArtistCount());
-					if (!r.SerializeToString(&s))
-						throw LOG2(_log_, "a_c could not serialize", LogLevel::CONVERSATIONAL);
-					SendPB(s, socket);
-				}
-				break;
+			{
+				// Will change due to namespaces.
+				LOG2(_log_, "ARTIST_COUNT", CONVERSATIONAL);
+				db = InitDB();
+				if (db == nullptr)
+					throw LOG2(_log_, "could not allocate a DB", FATAL);
+				OneInteger r;
+				r.set_type(ONE_INT);
+				r.set_value(db->GetArtistCount());
+				if (!r.SerializeToString(&s))
+					throw LOG2(_log_, "a_c could not serialize", FATAL);
+				SendPB(s, socket);
+			}
+			break;
 
 			case Type::WHEN_DEVICE:
 			case Type::WHO_DEVICE:
 			case Type::WHAT_DEVICE:
-				{
-					LOG2(_log_, "WWW", LogLevel::MINIMAL);
-					// Who, What and When are all the same.
-					WhenDeviceCommand w;
-					if (!w.ParseFromString(s))
-						throw LOG2(_log_, "what failed to parse", LogLevel::CONVERSATIONAL);
+			{
+				LOG2(_log_, "WWW", CONVERSATIONAL);
+				// Who, What and When are all the same.
+				WhenDeviceCommand w;
+				if (!w.ParseFromString(s))
+					throw LOG2(_log_, "failed to parse", FATAL);
 
-					OneString r;
-					r.set_type(ONE_STRING);
-					if ((int) w.device_id() < ndacs && acs[w.device_id()] != nullptr)
-					{
-						if (g.type() == Type::WHEN_DEVICE)	
-							r.set_value(acs[w.device_id()]->TimeCode());
-						else if (g.type() == Type::WHO_DEVICE)	
-							r.set_value(acs[w.device_id()]->Who());
-						else if (g.type() == Type::WHAT_DEVICE)	
-							r.set_value(acs[w.device_id()]->What());
-						else
-							throw LOG2(_log_, "impossible else", LogLevel::FATAL);
-					}
-					if (!r.SerializeToString(&s))
-					{
-						throw LOG2(_log_, "failed to serialize", LogLevel::CONVERSATIONAL);
-					}
-					SendPB(s, socket);
+				OneString r;
+				r.set_type(ONE_STRING);
+				if ((int) w.device_id() < ndacs && acs[w.device_id()] != nullptr)
+				{
+					if (g.type() == Type::WHEN_DEVICE)	
+						r.set_value(acs[w.device_id()]->TimeCode());
+					else if (g.type() == Type::WHO_DEVICE)	
+						r.set_value(acs[w.device_id()]->Who());
+					else if (g.type() == Type::WHAT_DEVICE)	
+						r.set_value(acs[w.device_id()]->What());
+					else
+						throw LOG2(_log_, "impossible else", FATAL);
 				}
-				break;
+				if (!r.SerializeToString(&s))
+				{
+					throw LOG2(_log_, "failed to serialize", FATAL);
+				}
+				SendPB(s, socket);
+			}
+			break;
 
 			case Type::CLEAR_DEVICE:
-				{
-					LOG2(_log_, "CLEAR DEVICE", LogLevel::MINIMAL);
-					OneInteger o;
-					if (!o.ParseFromString(s))
-						throw LOG2(_log_, "clear failed to parse", LogLevel::CONVERSATIONAL);
-					if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
-						acs[o.value()]->ClearQueue();
-				}
-				break;
+			{
+				LOG2(_log_, "CLEAR DEVICE", CONVERSATIONAL);
+				OneInteger o;
+				if (!o.ParseFromString(s))
+					throw LOG2(_log_, "clear failed to parse", FATAL);
+				if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
+					acs[o.value()]->ClearQueue();
+			}
+			break;
 
 			case Type::APPEND_QUEUE:
+			{
+				// Will change due to namespaces.
+				// Appends a copy of B's queue onto A.
+				// Not in use yet.
+				LOG2(_log_, "APPEND QUEUE", CONVERSATIONAL);
+				TwoIntegers o;
+				if (!o.ParseFromString(s))
+					throw LOG2(_log_, "append failed to parse", FATAL);
+
+				if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
+					(int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
 				{
-					// Will change due to namespaces.
-					// Appends a copy of B's queue onto A.
-					// Not in use yet.
-					LOG2(_log_, "APPEND QUEUE", LogLevel::MINIMAL);
-					TwoIntegers o;
-					if (!o.ParseFromString(s))
-						throw LOG2(_log_, "append failed to parse", LogLevel::CONVERSATIONAL);
-					if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
-						(int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
-					{
-						acs[o.value_b()]->AppendQueue(acs[o.value_a()]);
-					}
+					acs[o.value_b()]->AppendQueue(acs[o.value_a()]);
 				}
-				break;
+			}
+			break;
 
 			case Type::NEXT_DEVICE:
-				{
-					LOG2(_log_, "NEXT_DEVICE", LogLevel::MINIMAL);
-					// Doesn't matter which command - clean this up someday.
-					StopDeviceCommand c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "next failed to parse");
-					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-						AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
-				}
-				break;
+			{
+				LOG2(_log_, "NEXT_DEVICE", CONVERSATIONAL);
+				// Doesn't matter which command - clean this up someday.
+				StopDeviceCommand c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "next failed to parse", FATAL);
+				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+					AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
+			}
+			break;
 
 			case Type::STOP_DEVICE:
-				{
-					LOG2(_log_, "STOP_DEVICE", LogLevel::MINIMAL);
-					StopDeviceCommand c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "stop failed to parse");
-					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-						AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
-				}
-				break;
+			{
+				LOG2(_log_, "STOP_DEVICE", CONVERSATIONAL);
+				StopDeviceCommand c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "stop failed to parse", FATAL);
+				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+			}
+			break;
 
 			case Type::RESUME_DEVICE:
-				{
-					LOG2(_log_, "RESUME_DEVICE", LogLevel::MINIMAL);
-					ResumeDeviceCommand c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "resume failed to parse");
-					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-						AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
-				}
-				break;
+			{
+				LOG2(_log_, "RESUME_DEVICE", CONVERSATIONAL);
+				ResumeDeviceCommand c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "resume failed to parse", FATAL);
+				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+			}
+			break;
 
 			case Type::PAUSE_DEVICE:
-				{
-					LOG2(_log_, "PAUSE_DEVICE", LogLevel::MINIMAL);
-					PauseDeviceCommand c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "pause failed to parse");
-					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-						AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
-				}
-				break;
+			{
+				LOG2(_log_, "PAUSE_DEVICE", CONVERSATIONAL);
+				PauseDeviceCommand c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "pause failed to parse", FATAL);
+				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
+					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+			}
+			break;
 
 			case Type::PLAY_TRACK_DEVICE:
+			{
+				// Will change due to namespaces.					
+				LOG2(_log_, "PLAY_TRACK_DEVICE", CONVERSATIONAL);
+				PlayTrackCommand c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "play failed to parse", FATAL);
+				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 				{
-					// Will change due to namespaces.					
-					LOG2(_log_, "PLAY_TRACK_DEVICE", LogLevel::MINIMAL);
-					PlayTrackCommand c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "play failed to parse");
-					if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-					{
-						acs[c.device_id()]->Play(c.track_id());
-					}
-					else
-					{
-						LOG(_log_, "PLAY_TRACK_DEVICE: bad device number: " + to_string(c.device_id()));
-					}
+					acs[c.device_id()]->Play(c.track_id());
 				}
-				break;
+				else
+				{
+					LOG2(_log_, "PLAY_TRACK_DEVICE: bad device number: " + to_string(c.device_id()), CONVERSATIONAL);
+				}
+			}
+			break;
 
 			case Type::SELECT_QUERY:
+			{
+				// Will change due to namespaces.
+				LOG2(_log_, "SELECT_QUERY", CONVERSATIONAL);
+				SelectQuery c;
+				if (!c.ParseFromString(s))
+					throw LOG2(_log_, "select failed to parse", FATAL);
+				db = InitDB();
+				if (db == nullptr)
+					throw LOG2(_log_, "db failed to initialize", FATAL);
+				SelectResult r;
+				r.set_type(SELECT_RESULT);
+				db->MultiValuedQuery(c.column(), c.pattern(), r);
+				if (!r.SerializeToString(&s))
 				{
-					// Will change due to namespaces.
-					LOG2(_log_, "SELECT_QUERY", LogLevel::MINIMAL);
-					SelectQuery c;
-					if (!c.ParseFromString(s))
-						throw LOG(_log_, "select failed to parse");
-					db = InitDB();
-					if (db == nullptr)
-						throw LOG(_log_, "db failed to initialize");
-					SelectResult r;
-					r.set_type(SELECT_RESULT);
-					db->MultiValuedQuery(c.column(), c.pattern(), r);
-					if (!r.SerializeToString(&s))
-					{
-						throw LOG(_log_, "failed to serialize");
-					}
-					LOG(_log_, to_string(s.size()));
-					SendPB(s, socket);
+					throw LOG2(_log_, "failed to serialize", FATAL);
 				}
-				break;
+				LOG(_log_, to_string(s.size()));
+				SendPB(s, socket);
+			}
+			break;
 
 			default:
-				LOG(_log_, "switch received type: " + to_string((int) g.type()));
-				break;
+			LOG2(_log_, "switch received type: " + to_string((int) g.type()), CONVERSATIONAL);
+			break;
 		}
 	}
 	catch (LoggedException s)
 	{
+		if (s.Level() == FATAL) {
+			throw s;
+		}
 	}
 	
 	if (db != nullptr)
@@ -337,26 +348,35 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 	{
 		size_t bytes_read;
 	
-		LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client");
+		LOG2(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client", MINIMAL);
 		while (true)
 		{
 			size_t length = 0;
 			bytes_read = recv(socket, (void *) &length, sizeof(length), 0);
 			if (bytes_read != sizeof(length))
-				throw LOG(_log_, "bad recv getting length: " + to_string(bytes_read));
-			//LOG(_log_, "recv of length: " + to_string(length));
+				throw LOG2(_log_, "bad recv getting length: " + to_string(bytes_read), FATAL);
+			LOG2(_log_, "recv of length: " + to_string(length), VERBOSE);
 			string s;
 			length = ntohl(length);
 			s.resize(length);
 			bytes_read = recv(socket, (void *) &s[0], length, 0);
 			if (bytes_read != length)
-				throw LOG(_log_, "bad recv getting pbuffer: " + to_string(bytes_read));
+				throw LOG2(_log_, "bad recv getting pbuffer: " + to_string(bytes_read), LogLevel::FATAL);
 			if (!CommandProcessor(socket, s, dacs, ndacs))
 				break;
 		}
 	}
 	catch (LoggedException s)
 	{
+		// We've got an unhandled exception from lower down. In a perfect world
+		// this would include only FATAL exceptions but this feature is being added
+		// after the fact. Therefore we better check for mistakes here and scream
+		// about them!
+		if (s.Level() != LogLevel::FATAL) {
+			LOG2(_log_, "ERROR", LogLevel::FATAL);
+			LOG2(_log_, "ERROR - NON FATAL EXCEPTION CAUGHT BY CONNECTIONHANDLER()", LogLevel::FATAL);
+			LOG2(_log_, "ERROR", LogLevel::FATAL);
+		}
 	}
-	LOG(_log_, "ConnectionHandler(" + to_string(connection_number) + ") exiting!");
+	LOG2(_log_, "ConnectionHandler(" + to_string(connection_number) + ") exiting!", MINIMAL);
 }

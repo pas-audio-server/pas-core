@@ -113,12 +113,13 @@ enum LogLevel {
   MINIMAL = 1,
   CONVERSATIONAL = 2,
   VERBOSE = 3,
+  REDICULOUS = 4,
   LogLevel_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   LogLevel_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool LogLevel_IsValid(int value);
 const LogLevel LogLevel_MIN = FATAL;
-const LogLevel LogLevel_MAX = VERBOSE;
+const LogLevel LogLevel_MAX = REDICULOUS;
 const int LogLevel_ARRAYSIZE = LogLevel_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* LogLevel_descriptor();

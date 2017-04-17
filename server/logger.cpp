@@ -31,6 +31,11 @@ LoggedException Logger::Add(const char * file, const char * function, const int 
 
 LoggedException Logger::Add(const char * file, const char * function, const int line, const char * message, LogLevel ll)
 {
+	// Reject rediculous messages if we're not on that setting.
+	// Reject verbose messages if the log is closed.
+	if ((ll == REDICULOUS && ll != level) || (ll == VERBOSE && !log.is_open())) {
+		return LoggedException("");
+	}
 
 	stringstream ss;
 	string s;

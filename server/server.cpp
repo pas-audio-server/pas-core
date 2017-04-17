@@ -31,7 +31,6 @@
 #include <arpa/inet.h>
 
 #include "network_component.hpp"
-#include "file_system_component.hpp"
 #include "audio_component.hpp"
 #include "audio_device.hpp"
 #include "logger.hpp"
@@ -74,7 +73,7 @@ int main(int argc, char * argv[])
 
 		for (size_t i = 0; i < devices.size(); i++)
 		{
-			LOG(_log_, devices[i].device_name + " index: " + to_string(devices[i].index));
+			LOG2(_log_, devices[i].device_name + " index: " + to_string(devices[i].index), CONVERSATIONAL);
 			if ((dacs[i] = new AudioComponent()) == nullptr)
 				throw LOG2(_log_, "DAC " + to_string(i) + " failed to allocate", LogLevel::FATAL);
 		}
@@ -95,21 +94,24 @@ int main(int argc, char * argv[])
 		{	
 			if (!dacs[i]->Initialize(devices[i]))
 			{
-				LOG2(_log_, "DAC " + to_string((int) i) + " failed to Initialize()", LogLevel::MINIMAL);
+				LOG2(_log_, "DAC " + to_string((int) i) + " failed to Initialize()", MINIMAL);
 				delete dacs[i];
 				dacs[i] = nullptr;
 			}
 			else
 			{
-				LOG(_log_, "DAC " + to_string((int) i) + " initialized");
+				LOG2(_log_, "DAC " + to_string((int) i) + " initialized", MINIMAL);
 			}
 		}	
 
-		cout << "Entering network monitoring" << endl;
+		cout << "Monitoring network..." << endl;
 		nw.AcceptConnections((void *) dacs, (int) devices.size());
 	}
 	catch (LoggedException s)
 	{
+		LOG2(_log_, "LoggedException has made it all the up to main().", FATAL);
+		LOG2(_log_, "Its type is: " + to_string(s.Level()), FATAL);
+		LOG2(_log_, "Its payload is: " + s.Msg(), FATAL);
 	}
 
 	for (size_t i = 0; i < devices.size(); i++)
@@ -118,5 +120,6 @@ int main(int argc, char * argv[])
 			delete dacs[i];
 	}
 
+	LOG2(_log_, "pas server exiting", FATAL);
 	exit(0);
 }

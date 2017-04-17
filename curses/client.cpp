@@ -43,8 +43,9 @@
 #include <unordered_set>
 #include <time.h>
 #include <assert.h>
-#include "../protos/cpp/commands.pb.h"
 #include <curses.h>
+
+#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
 using namespace pas;
