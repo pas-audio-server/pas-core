@@ -489,10 +489,10 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 {
 	bool rv = false;
-	LOG2(_log_, nullptr, CONVERSATIONAL);
+	LOG2(_log_, nullptr, REDICULOUS);
 	if (m.try_lock())
 	{
-		LOG2(_log_, nullptr, CONVERSATIONAL);
+		LOG2(_log_, nullptr, REDICULOUS);
 		if (commands.size() > 0)
 		{
 			// If the commands queue is non-empty, someone must have done an
@@ -503,16 +503,16 @@ bool AudioComponent::GetCommand(AudioCommand & ac, bool was_idle)
 			// for something to do.
 			ac = commands.front();
 			commands.pop();
-			LOG2(_log_, nullptr, CONVERSATIONAL);
+			LOG2(_log_, nullptr, VERBOSE);
 			if (!was_idle)
 				sem_wait(&sem);
-			LOG2(_log_, nullptr, CONVERSATIONAL);
+			LOG2(_log_, nullptr, REDICULOUS);
 			rv = true;
 		}
 		m.unlock();
-		LOG2(_log_, nullptr, CONVERSATIONAL);
+		LOG2(_log_, nullptr, REDICULOUS);
 	}
-	LOG2(_log_, nullptr, CONVERSATIONAL);
+	LOG2(_log_, nullptr, REDICULOUS);
 	return rv;
 }
 
