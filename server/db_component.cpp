@@ -341,7 +341,6 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 	string rv;
 	assert(Initialized());
 	string sql("select parent,title,artist,fname from tracks where id = " + to_string(id) + " and namespace = \'" + nspace + "\';");
-	cerr << sql << endl;
 	sql::Statement * stmt = connection->createStatement();
 	sql::ResultSet *res = nullptr;
 	int up;
@@ -362,8 +361,6 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 				*artist = res->getString("artist");
 			rv = res->getString("fname");
 		}
-		cerr << *title << endl;
-		cerr << *artist << endl;
 	}
 	catch (LoggedException s)
 	{
@@ -391,7 +388,6 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 			up = res->getInt("up");
 			rv = res->getString("name") + "/" + rv;
 		}
-		cerr << up << "\t" << rv << endl;
 	}
 
 	if (stmt != nullptr)
@@ -399,7 +395,6 @@ string DB::PathFromID(unsigned int id, string * title, string * artist, string n
 	if (res != nullptr)
 		delete res;
 
-	cerr << rv << endl;
 	return rv;
 }
 
