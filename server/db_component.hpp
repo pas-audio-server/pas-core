@@ -65,5 +65,6 @@ private:
 	std::vector<std::string> supported_track_column_names;
 	std::string query_columns;
 	std::string parameter_columns;
+	std::string select_columns;
 };
 

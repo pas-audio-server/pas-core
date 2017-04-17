@@ -63,6 +63,7 @@ void DB::InitPreparedStatement()
 		query_columns += track_column_names[i];
 		parameter_columns += "?";
 	}
+	select_columns = query_columns;
 	query_columns += ") ";
 	parameter_columns += ") ";
 }
@@ -191,7 +192,7 @@ void DB::MultiValuedQuery(string column, string pattern, SelectResult & results,
 				throw LOG2(_log_, "createStatement() failed", FATAL);
 
 			string sql;
-			sql = "select " + query_columns + string(" from tracks where ");
+			sql = "select " + select_columns + string(" from tracks where ");
 			sql += column + " like \"" + pattern + "\" and namespace like \"" + nspace + "\"";
 			sql += " order by " + column + ";";
 			
