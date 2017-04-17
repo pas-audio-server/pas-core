@@ -47,5 +47,5 @@ LoggedException Logger::Add(const char * file, const char * function, const int 
 		log << s << endl;
 		m.unlock();
 	}
-	return LoggedException(s);
+	return LoggedException(s, ll);
 }

@@ -25,55 +25,41 @@ using namespace pas;
 
 extern Logger _log_;
 
-string track_column_names[] =
-{
-	// Order must match select / insert code
-	"path",
-	"artist",
-	"title",
-	"album",
-	"genre",
-	"source",
-	"duration",
-	"publisher",
-	"composer",
-	"track",
-	"copyright",
-	"disc"
-};
+/*	InitPreparedStatements() Prepared statements in a DB system
+	remove the possibility of SQL injection attacks by encapsulating
+	all user provided data. They are rigidly controlled in terms of
+	column names and order, etc.
 
-DB::DB()
+	This function creates two strings that will be used in prepared
+	statements for writing to the tracks table as well as reading from
+	it. 
+
+	For example:
+		insert into tracks <query_columns> <parameter columns> ...
+*/
+
+void DB::InitPreparedStatement()
 {
-	driver = nullptr;
-	connection = nullptr;
-	// I did not want to make this a static on purpose to avoid race conditions on init.
 	query_columns = "(";
 	parameter_columns = " values (";
-	query_columns_no_path = "id, ";
 	size_t n = sizeof(track_column_names) / sizeof(string);
-	for (size_t i = 0; i < n; i++)
-	{
-		if (i > 0)
-		{
+	for (size_t i = 0; i < n; i++) {
+		if (i > 0) {
 			query_columns += ", ";
 			parameter_columns += ", ";
-			query_columns_no_path += track_column_names[i];
-			if (i >= 1 && i < n - 1)
-			{
-				query_columns_no_path += ", ";
-			}
 		}
-		supported_track_column_names.push_back(track_column_names[i]);
 		query_columns += track_column_names[i];
 		parameter_columns += "?";
 	}
 	query_columns += ") ";
 	parameter_columns += ") ";
-	//cout << query_columns_no_path << endl;
-	/*
-	cout << query_columns << endl;
-	cout << parameter_columns << endl;
-	*/
+}
+
+DB::DB()
+{
+	driver = nullptr;
+	connection = nullptr;
+	InitPreparedStatement();
 }
 
 DB::~DB()
@@ -89,24 +75,31 @@ bool DB::Initialize()
 {
 	bool rv = true;
 
-	driver = get_driver_instance();
-	if (driver == nullptr)
-	{
-		LOG(_log_, "get_driver_instance() failed");
-		rv = false;
-	}
-	else
-	{
-		connection = driver->connect("tcp://192.168.1.117:3306", "pas", "pas");
-		if (connection == nullptr)
-		{
-			LOG(_log_, "connect() failed");
+	try {
+		driver = get_driver_instance();
+		if (driver == nullptr) {
+			throw LOG2(_log_, "get_driver_instance() failed", LogLevel::FATAL);
 			rv = false;
 		}
-		else
-		{
-			connection->setSchema("pas");
+		else {
+			connection = driver->connect("tcp://192.168.1.117:3306", "pas", "pas");
+			if (connection == nullptr) {
+				throw LOG2(_log_, "connect() failed", LogLevel::FATAL);
+				rv = false;
+			}
+			else {
+				connection->setSchema("pas2");
+			}
 		}
+	}
+	catch (sql::SQLException & e) {
+		stringstream ss;
+		ss << "# ERR: SQLException in " << __FILE__;
+		ss << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+		ss << "# ERR: " << e.what();
+		ss << " (MySQL error code: " << e.getErrorCode();
+		ss << ", SQLState: " << e.getSQLState() << " )" << endl;
+		throw LOG2(_log_, ss.str(), LogLevel::FATAL);
 	}
 	return rv;
 }
@@ -120,77 +113,6 @@ void DB::DeInitialize()
 		connection = nullptr;
 	}
 }
-
-/*
-bool DB::AddMedia(std::string & path, bool force)
-{
-	bool rv = true;
-	FILE * p = nullptr;
-	sql::PreparedStatement * stmt = nullptr;
-
-	assert(Initialized());
-	try
-	{
-		if (access(path.c_str(), R_OK) < 0)
-			throw string("cannot access: ") + path;
-
-		// adding -show_entries format=duration -sexagesimal
-		// will get the duration but it isn't in the same format.
-		// instead it looks like this:
-		// duration=0:04:19.213061
-		string cmdline = string("ffprobe -loglevel quiet -show_entries stream_tags:format_tags -show_entries format=duration -sexagesimal \"") + path + string("\"");
-
-		if ((p = popen(cmdline.c_str(), "r")) == nullptr)
-			throw LOG(_log_, path);
-
-		const int bsize = 1024;
-		char buffer[bsize];
-
-		Track track;
-		track.SetPath(path);
-
-		while (fgets(buffer, bsize, p) != nullptr)
-		{
-			string b(buffer);
-			track.SetTag(b);
-		}
-
-		// NOTE:
-		// NOTE: It is a map of tags to values. As more columns are added, change track_column_names.
-		// NOTE:
-
-		string sql = string("insert into tracks ") + query_columns + parameter_columns;
-		stmt = connection->prepareStatement(sql.c_str());
-		if (stmt == nullptr)
-			throw LOG(_log_, "prepareStatement() failed");
-
-		int i = 1;
-		for (auto it = supported_track_column_names.begin(); it < supported_track_column_names.end(); it++, i++)
-		{
-			string v = track.GetTag(*it);
-			stmt->setString(i, v.c_str());
-		}
-
-		stmt->execute();
-	}
-	catch (LoggedException s)
-	{
-		rv = false;
-	}
-	catch (sql::SQLException &e)
-	{
-		PrintMySQLException(e);
-	}
-
-	if (stmt != nullptr)
-		delete stmt;
-
-	if (p != nullptr)
-		pclose(p);
-
-	return rv;
-}
-*/
 
 int DB::IntegerQuery(string & sql)
 {

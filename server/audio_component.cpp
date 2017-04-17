@@ -581,10 +581,10 @@ void AudioComponent::Play(unsigned int id)
 	try
 	{
 		if (db == nullptr)
-			throw LOG(_log_, "allocating db failed");
+			throw LOG2(_log_, "allocating db failed", LogLevel::FATAL);
 
 		if (!db->Initialize())
-			throw LOG(_log_, "db->Initialize() failed");
+			throw LOG2(_log_, "db->Initialize() failed", LogLevel::FATAL);
 
 		PlayStruct ps;
 		ps.path = db->PathFromID(id, &ps.title, &ps.artist);
