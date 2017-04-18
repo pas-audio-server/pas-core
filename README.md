@@ -1,7 +1,9 @@
 # pas
 Perry's audio server
 
-## Latest Development Highlight
+## Latest Development Highlights
+
+A client API specification document has been started on the wiki.
 
 A curses-based client driving three DACs simultaneously.
 
