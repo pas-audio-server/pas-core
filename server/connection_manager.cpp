@@ -312,7 +312,15 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			break;
 
 			default:
-			LOG2(_log_, "switch received type: " + to_string((int) g.type()), CONVERSATIONAL);
+			{
+				GenericPB pb;
+				pb.set_type(UNKNOWN_MESSAGE);
+				if (!pb.SerializeToString(&s)) {
+					throw LOG2(_log_, "failed to serialize", FATAL);					
+				}
+				SendPB(s, socket);
+				LOG2(_log_, "switch received type: " + to_string((int) g.type()), CONVERSATIONAL);
+			}
 			break;
 		}
 	}

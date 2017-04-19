@@ -6,170 +6,211 @@ syntax = "proto3";
 package pas;
 
 enum LogLevel {
+	option allow_alias = true;
+	
 	FATAL = 0;
 	MINIMAL = 1;
 	CONVERSATIONAL = 2;
 	VERBOSE = 3;
 	REDICULOUS = 4;
+	RIDICULOUS = 4;
 }
 
 enum Type {
-	GENERIC = 0;
-	PLAY_TRACK_DEVICE = 1;
-	PAUSE_DEVICE = 2;
-	RESUME_DEVICE = 3;
-	STOP_DEVICE = 4;
-	WHO_DEVICE = 5;
-	WHAT_DEVICE = 6;
-	TRACK_COUNT = 7;
-	ARTIST_COUNT = 8;
-	FOLDER_COUNT = 9;
-	SELECT_QUERY = 10;
-	RESERVED_01 = 11;
-	WHEN_DEVICE = 12;
-	CLEAR_DEVICE = 13;
-	SELECT_RESULT = 14;
-	ROW = 15;
-	ONE_INT = 16;
-	ONE_STRING = 17;
-	ONE_FLOAT = 18;
-	DAC_INFO_COMMAND = 19;
-	NEXT_DEVICE = 20;
-	COPY_QUEUE = 21;
-	MOVE_QUEUE = 22;
-	APPEND_QUEUE = 23;
-	LOG_LEVEL = 24;
-	LOG_LEVEL_QUERY = 25;
+	//
+	// ENUM value 					CAN BE IMPLEMENTED BY:
+	//
+
+	GENERIC = 0;					//	-na-
+	PLAY_TRACK_DEVICE = 1;			//	TwoIntegers
+	PAUSE_DEVICE = 2;				//	OneInteger
+	RESUME_DEVICE = 3;				//	OneInteger
+	STOP_DEVICE = 4;				//	OneInteger
+	WHO_DEVICE = 5;					//	OneInteger
+	WHAT_DEVICE = 6;				//	OneInteger
+	TRACK_COUNT = 7;				//	GenericPB
+	ARTIST_COUNT = 8;				//	GenericPB
+	FOLDER_COUNT = 9;				//	not implemented
+	SELECT_QUERY = 10;				//	TwoStrings
+	RESERVED_01 = 11;				//	-na-
+	WHEN_DEVICE = 12;				//	OneInteger
+	CLEAR_DEVICE = 13;				//	OneInteger
+	SELECT_RESULT = 14;				// -na-
+	ROW = 15;						// -na-
+	ONE_INT = 16;					// -na-
+	ONE_STRING = 17;				// -na-
+	ONE_FLOAT = 18;					// -na-
+	DAC_INFO_COMMAND = 19;			//	OneInteger
+	NEXT_DEVICE = 20;				//	OneInteger
+	COPY_QUEUE = 21;				//	TwoIntegers - future
+	MOVE_QUEUE = 22;				//	TwoIntegers - future
+	APPEND_QUEUE = 23;				//	TwoIntegers - future
+	LOG_LEVEL = 24;					//	OneInteger - future
+	LOG_LEVEL_QUERY = 25;			//	GenericPB - future
+	TWO_INTEGERS = 26;				// -na-
+	TWO_STRINGS = 27;				// -na-
+	UNKNOWN_MESSAGE = 28;			//	GenericPB
 }
 
-// This is a return type
-message Row {
-	Type type = 1;
-	map <string, string> results = 2;
-}
+//-----------------------------------------------------------------
 
-// This is a command type
-// It expects a SelectResult in response.
-message DacInfo {
-	Type type = 1;
-	repeated Row row = 2;
-}
-
-// This is a return type
-message SelectResult {
-	Type type = 1;
-	repeated Row row = 2;
-}
+// This message can stand in place of any other message possessing
+// only a type field such as "ArtistCountQuery". Just make sure the
+// type is set correctly. This message can also be used for sniff
+// testing in determining what an unknown message is.
 
 message GenericPB {
 	Type type = 1; 
 }
 
-// This is a send type.
-// No respnse is expected.
-message PlayTrackCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-    uint64 track_id = 3;
-}
+//-----------------------------------------------------------------
 
-// This is a send type.
-// No respnse is expected.
-message PauseDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
+// These are also generics. They can stand in place of the dedicated
+// message types that have the same signature. In the future, messages
+// will be added by adding to the enum Type if they match the 
+// signature of one of these.
 
-// This is a send type.
-// No respnse is expected.
-message ResumeDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a send type.
-// No respnse is expected.
-message ClearDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a send type.
-// No respnse is expected.
-message StopDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-message WhoDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-message WhatDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a send type.
-// A OneInteger is expected back.
-message TrackCountQuery {
-	Type type = 1; 
-}
-
-// This is a send type.
-// A OneInteger is expected back.
-message ArtistCountQuery {
-	Type type = 1; 
-}
-
-message FolderCountQuery {
-	Type type = 1; 
-}
-
-// This is a send type.
-// A SelectResult is expected back.
-message SelectQuery {
-	Type type = 1; 
-    string column = 2;
-    string pattern = 3;
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-message WhenDeviceCommand {
-	Type type = 1; 
-    uint64 device_id = 2;
-}
-
-// This is a return type.
 message OneInteger {
 	Type type = 1; 
-    uint64 value = 2;
+	uint64 value = 2;
 }
 
-// This is a return type.
 message OneString {
 	Type type = 1; 
-    string value = 2;
+	string value = 2;
 }
 
-// This is a return type.
 message OneFloat {
 	Type type = 1; 
-    float value = 2;
+	float value = 2;
 }
 
 message TwoIntegers {
 	Type type = 1;
 	uint64 value_a = 2;
 	uint64 value_b = 3;
+}
+
+message TwoStrings {
+	Type type = 1; 
+	string column = 2;
+	string pattern = 3;
+}
+
+//-----------------------------------------------------------------
+// These two messages define a reusable / flexible means of
+// passing structured data such as database results, DAC
+// information etc.
+
+message Row {
+	Type type = 1;
+	map <string, string> results = 2;
+}
+
+message SelectResult {
+	Type type = 1;
+	repeated Row row = 2;
+}
+
+// Duplicates structure of SelectResult. They are therefore
+// interchangeable - just set "type" correctly.
+message DacInfo {
+	Type type = 1;
+	repeated Row row = 2;
+}
+
+//-----------------------------------------------------------------
+
+
+// No respnse is expected.
+// Can be replaced with TwoIntegers
+
+message PlayTrackCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+	uint64 track_id = 3;
+}
+
+// No respnse is expected.
+// Can be replaced with OneInteger
+message PauseDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// No respnse is expected.
+// Can be replaced with OneInteger
+
+message ResumeDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// No respnse is expected.
+// Can be replaced with OneInteger
+
+message ClearDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// No respnse is expected.
+// Can be replaced with OneInteger
+
+message StopDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// A OneString is expected back.
+// Can be replaced with OneInteger
+
+message WhoDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// A OneString is expected back.
+// Can be replaced with OneInteger
+
+message WhatDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
+}
+
+// A OneInteger is expected back.
+// Can be replaced by GenericPB
+
+message TrackCountQuery {
+	Type type = 1; 
+}
+
+// A OneInteger is expected back.
+// Can be replaced by GenericPB
+
+message ArtistCountQuery {
+	Type type = 1; 
+}
+
+// Can be replaced by GenericPB
+// NOT IMPLEMENTENDED IN PAS, YET
+
+message FolderCountQuery {
+	Type type = 1; 
+}
+
+// A SelectResult is expected back.
+// Can be replaced by TwoStrings
+
+message SelectQuery {
+	Type type = 1; 
+	string column = 2;
+	string pattern = 3;
+}
+
+// A OneString is expected back.
+message WhenDeviceCommand {
+	Type type = 1; 
+	uint64 device_id = 2;
 }
 
