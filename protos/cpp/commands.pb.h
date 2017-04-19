@@ -84,6 +84,9 @@ extern TrackCountQueryDefaultTypeInternal _TrackCountQuery_default_instance_;
 class TwoIntegers;
 class TwoIntegersDefaultTypeInternal;
 extern TwoIntegersDefaultTypeInternal _TwoIntegers_default_instance_;
+class TwoStrings;
+class TwoStringsDefaultTypeInternal;
+extern TwoStringsDefaultTypeInternal _TwoStrings_default_instance_;
 class WhatDeviceCommand;
 class WhatDeviceCommandDefaultTypeInternal;
 extern WhatDeviceCommandDefaultTypeInternal _WhatDeviceCommand_default_instance_;
@@ -114,6 +117,7 @@ enum LogLevel {
   CONVERSATIONAL = 2,
   VERBOSE = 3,
   REDICULOUS = 4,
+  RIDICULOUS = 4,
   LogLevel_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   LogLevel_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
@@ -159,12 +163,15 @@ enum Type {
   APPEND_QUEUE = 23,
   LOG_LEVEL = 24,
   LOG_LEVEL_QUERY = 25,
+  TWO_INTEGERS = 26,
+  TWO_STRINGS = 27,
+  UNKNOWN_MESSAGE = 28,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Type_IsValid(int value);
 const Type Type_MIN = GENERIC;
-const Type Type_MAX = LOG_LEVEL_QUERY;
+const Type Type_MAX = UNKNOWN_MESSAGE;
 const int Type_ARRAYSIZE = Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Type_descriptor();
@@ -178,6 +185,577 @@ inline bool Type_Parse(
     Type_descriptor(), name, value);
 }
 // ===================================================================
+
+class GenericPB : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.GenericPB) */ {
+ public:
+  GenericPB();
+  virtual ~GenericPB();
+
+  GenericPB(const GenericPB& from);
+
+  inline GenericPB& operator=(const GenericPB& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GenericPB& default_instance();
+
+  static inline const GenericPB* internal_default_instance() {
+    return reinterpret_cast<const GenericPB*>(
+               &_GenericPB_default_instance_);
+  }
+
+  void Swap(GenericPB* other);
+
+  // implements Message ----------------------------------------------
+
+  inline GenericPB* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  GenericPB* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const GenericPB& from);
+  void MergeFrom(const GenericPB& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(GenericPB* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // @@protoc_insertion_point(class_scope:pas.GenericPB)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  int type_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class OneInteger : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneInteger) */ {
+ public:
+  OneInteger();
+  virtual ~OneInteger();
+
+  OneInteger(const OneInteger& from);
+
+  inline OneInteger& operator=(const OneInteger& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const OneInteger& default_instance();
+
+  static inline const OneInteger* internal_default_instance() {
+    return reinterpret_cast<const OneInteger*>(
+               &_OneInteger_default_instance_);
+  }
+
+  void Swap(OneInteger* other);
+
+  // implements Message ----------------------------------------------
+
+  inline OneInteger* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  OneInteger* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const OneInteger& from);
+  void MergeFrom(const OneInteger& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(OneInteger* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // uint64 value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  ::google::protobuf::uint64 value() const;
+  void set_value(::google::protobuf::uint64 value);
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // @@protoc_insertion_point(class_scope:pas.OneInteger)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::uint64 value_;
+  int type_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class OneString : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneString) */ {
+ public:
+  OneString();
+  virtual ~OneString();
+
+  OneString(const OneString& from);
+
+  inline OneString& operator=(const OneString& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const OneString& default_instance();
+
+  static inline const OneString* internal_default_instance() {
+    return reinterpret_cast<const OneString*>(
+               &_OneString_default_instance_);
+  }
+
+  void Swap(OneString* other);
+
+  // implements Message ----------------------------------------------
+
+  inline OneString* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  OneString* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const OneString& from);
+  void MergeFrom(const OneString& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(OneString* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // string value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  const ::std::string& value() const;
+  void set_value(const ::std::string& value);
+  #if LANG_CXX11
+  void set_value(::std::string&& value);
+  #endif
+  void set_value(const char* value);
+  void set_value(const char* value, size_t size);
+  ::std::string* mutable_value();
+  ::std::string* release_value();
+  void set_allocated_value(::std::string* value);
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // @@protoc_insertion_point(class_scope:pas.OneString)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::internal::ArenaStringPtr value_;
+  int type_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class OneFloat : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneFloat) */ {
+ public:
+  OneFloat();
+  virtual ~OneFloat();
+
+  OneFloat(const OneFloat& from);
+
+  inline OneFloat& operator=(const OneFloat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const OneFloat& default_instance();
+
+  static inline const OneFloat* internal_default_instance() {
+    return reinterpret_cast<const OneFloat*>(
+               &_OneFloat_default_instance_);
+  }
+
+  void Swap(OneFloat* other);
+
+  // implements Message ----------------------------------------------
+
+  inline OneFloat* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  OneFloat* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const OneFloat& from);
+  void MergeFrom(const OneFloat& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(OneFloat* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // float value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  float value() const;
+  void set_value(float value);
+
+  // @@protoc_insertion_point(class_scope:pas.OneFloat)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  int type_;
+  float value_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class TwoIntegers : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.TwoIntegers) */ {
+ public:
+  TwoIntegers();
+  virtual ~TwoIntegers();
+
+  TwoIntegers(const TwoIntegers& from);
+
+  inline TwoIntegers& operator=(const TwoIntegers& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TwoIntegers& default_instance();
+
+  static inline const TwoIntegers* internal_default_instance() {
+    return reinterpret_cast<const TwoIntegers*>(
+               &_TwoIntegers_default_instance_);
+  }
+
+  void Swap(TwoIntegers* other);
+
+  // implements Message ----------------------------------------------
+
+  inline TwoIntegers* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  TwoIntegers* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const TwoIntegers& from);
+  void MergeFrom(const TwoIntegers& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(TwoIntegers* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // uint64 value_a = 2;
+  void clear_value_a();
+  static const int kValueAFieldNumber = 2;
+  ::google::protobuf::uint64 value_a() const;
+  void set_value_a(::google::protobuf::uint64 value);
+
+  // uint64 value_b = 3;
+  void clear_value_b();
+  static const int kValueBFieldNumber = 3;
+  ::google::protobuf::uint64 value_b() const;
+  void set_value_b(::google::protobuf::uint64 value);
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // @@protoc_insertion_point(class_scope:pas.TwoIntegers)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::uint64 value_a_;
+  ::google::protobuf::uint64 value_b_;
+  int type_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class TwoStrings : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.TwoStrings) */ {
+ public:
+  TwoStrings();
+  virtual ~TwoStrings();
+
+  TwoStrings(const TwoStrings& from);
+
+  inline TwoStrings& operator=(const TwoStrings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TwoStrings& default_instance();
+
+  static inline const TwoStrings* internal_default_instance() {
+    return reinterpret_cast<const TwoStrings*>(
+               &_TwoStrings_default_instance_);
+  }
+
+  void Swap(TwoStrings* other);
+
+  // implements Message ----------------------------------------------
+
+  inline TwoStrings* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  TwoStrings* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const TwoStrings& from);
+  void MergeFrom(const TwoStrings& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
+      const PROTOBUF_FINAL {
+    return InternalSerializeWithCachedSizesToArray(
+        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
+  }
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(TwoStrings* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // string column = 2;
+  void clear_column();
+  static const int kColumnFieldNumber = 2;
+  const ::std::string& column() const;
+  void set_column(const ::std::string& value);
+  #if LANG_CXX11
+  void set_column(::std::string&& value);
+  #endif
+  void set_column(const char* value);
+  void set_column(const char* value, size_t size);
+  ::std::string* mutable_column();
+  ::std::string* release_column();
+  void set_allocated_column(::std::string* column);
+
+  // string pattern = 3;
+  void clear_pattern();
+  static const int kPatternFieldNumber = 3;
+  const ::std::string& pattern() const;
+  void set_pattern(const ::std::string& value);
+  #if LANG_CXX11
+  void set_pattern(::std::string&& value);
+  #endif
+  void set_pattern(const char* value);
+  void set_pattern(const char* value, size_t size);
+  ::std::string* mutable_pattern();
+  ::std::string* release_pattern();
+  void set_allocated_pattern(::std::string* pattern);
+
+  // .pas.Type type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::pas::Type type() const;
+  void set_type(::pas::Type value);
+
+  // @@protoc_insertion_point(class_scope:pas.TwoStrings)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::internal::ArenaStringPtr column_;
+  ::google::protobuf::internal::ArenaStringPtr pattern_;
+  int type_;
+  mutable int _cached_size_;
+  friend struct protobuf_commands_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
 
 
 // -------------------------------------------------------------------
@@ -286,102 +864,6 @@ class Row : public ::google::protobuf::Message /* @@protoc_insertion_point(class
 };
 // -------------------------------------------------------------------
 
-class DacInfo : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.DacInfo) */ {
- public:
-  DacInfo();
-  virtual ~DacInfo();
-
-  DacInfo(const DacInfo& from);
-
-  inline DacInfo& operator=(const DacInfo& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const DacInfo& default_instance();
-
-  static inline const DacInfo* internal_default_instance() {
-    return reinterpret_cast<const DacInfo*>(
-               &_DacInfo_default_instance_);
-  }
-
-  void Swap(DacInfo* other);
-
-  // implements Message ----------------------------------------------
-
-  inline DacInfo* New() const PROTOBUF_FINAL { return New(NULL); }
-
-  DacInfo* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
-  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const DacInfo& from);
-  void MergeFrom(const DacInfo& from);
-  void Clear() PROTOBUF_FINAL;
-  bool IsInitialized() const PROTOBUF_FINAL;
-
-  size_t ByteSizeLong() const PROTOBUF_FINAL;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
-      const PROTOBUF_FINAL {
-    return InternalSerializeWithCachedSizesToArray(
-        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
-  }
-  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(DacInfo* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return NULL;
-  }
-  inline void* MaybeArenaPtr() const {
-    return NULL;
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // repeated .pas.Row row = 2;
-  int row_size() const;
-  void clear_row();
-  static const int kRowFieldNumber = 2;
-  const ::pas::Row& row(int index) const;
-  ::pas::Row* mutable_row(int index);
-  ::pas::Row* add_row();
-  ::google::protobuf::RepeatedPtrField< ::pas::Row >*
-      mutable_row();
-  const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
-      row() const;
-
-  // .pas.Type type = 1;
-  void clear_type();
-  static const int kTypeFieldNumber = 1;
-  ::pas::Type type() const;
-  void set_type(::pas::Type value);
-
-  // @@protoc_insertion_point(class_scope:pas.DacInfo)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::RepeatedPtrField< ::pas::Row > row_;
-  int type_;
-  mutable int _cached_size_;
-  friend struct protobuf_commands_2eproto::TableStruct;
-};
-// -------------------------------------------------------------------
-
 class SelectResult : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.SelectResult) */ {
  public:
   SelectResult();
@@ -478,37 +960,37 @@ class SelectResult : public ::google::protobuf::Message /* @@protoc_insertion_po
 };
 // -------------------------------------------------------------------
 
-class GenericPB : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.GenericPB) */ {
+class DacInfo : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.DacInfo) */ {
  public:
-  GenericPB();
-  virtual ~GenericPB();
+  DacInfo();
+  virtual ~DacInfo();
 
-  GenericPB(const GenericPB& from);
+  DacInfo(const DacInfo& from);
 
-  inline GenericPB& operator=(const GenericPB& from) {
+  inline DacInfo& operator=(const DacInfo& from) {
     CopyFrom(from);
     return *this;
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GenericPB& default_instance();
+  static const DacInfo& default_instance();
 
-  static inline const GenericPB* internal_default_instance() {
-    return reinterpret_cast<const GenericPB*>(
-               &_GenericPB_default_instance_);
+  static inline const DacInfo* internal_default_instance() {
+    return reinterpret_cast<const DacInfo*>(
+               &_DacInfo_default_instance_);
   }
 
-  void Swap(GenericPB* other);
+  void Swap(DacInfo* other);
 
   // implements Message ----------------------------------------------
 
-  inline GenericPB* New() const PROTOBUF_FINAL { return New(NULL); }
+  inline DacInfo* New() const PROTOBUF_FINAL { return New(NULL); }
 
-  GenericPB* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  DacInfo* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
   void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
   void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const GenericPB& from);
-  void MergeFrom(const GenericPB& from);
+  void CopyFrom(const DacInfo& from);
+  void MergeFrom(const DacInfo& from);
   void Clear() PROTOBUF_FINAL;
   bool IsInitialized() const PROTOBUF_FINAL;
 
@@ -529,7 +1011,7 @@ class GenericPB : public ::google::protobuf::Message /* @@protoc_insertion_point
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(GenericPB* other);
+  void InternalSwap(DacInfo* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return NULL;
@@ -545,16 +1027,29 @@ class GenericPB : public ::google::protobuf::Message /* @@protoc_insertion_point
 
   // accessors -------------------------------------------------------
 
+  // repeated .pas.Row row = 2;
+  int row_size() const;
+  void clear_row();
+  static const int kRowFieldNumber = 2;
+  const ::pas::Row& row(int index) const;
+  ::pas::Row* mutable_row(int index);
+  ::pas::Row* add_row();
+  ::google::protobuf::RepeatedPtrField< ::pas::Row >*
+      mutable_row();
+  const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
+      row() const;
+
   // .pas.Type type = 1;
   void clear_type();
   static const int kTypeFieldNumber = 1;
   ::pas::Type type() const;
   void set_type(::pas::Type value);
 
-  // @@protoc_insertion_point(class_scope:pas.GenericPB)
+  // @@protoc_insertion_point(class_scope:pas.DacInfo)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::RepeatedPtrField< ::pas::Row > row_;
   int type_;
   mutable int _cached_size_;
   friend struct protobuf_commands_2eproto::TableStruct;
@@ -1648,387 +2143,332 @@ class WhenDeviceCommand : public ::google::protobuf::Message /* @@protoc_inserti
   mutable int _cached_size_;
   friend struct protobuf_commands_2eproto::TableStruct;
 };
-// -------------------------------------------------------------------
-
-class OneInteger : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneInteger) */ {
- public:
-  OneInteger();
-  virtual ~OneInteger();
-
-  OneInteger(const OneInteger& from);
-
-  inline OneInteger& operator=(const OneInteger& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const OneInteger& default_instance();
-
-  static inline const OneInteger* internal_default_instance() {
-    return reinterpret_cast<const OneInteger*>(
-               &_OneInteger_default_instance_);
-  }
-
-  void Swap(OneInteger* other);
-
-  // implements Message ----------------------------------------------
-
-  inline OneInteger* New() const PROTOBUF_FINAL { return New(NULL); }
-
-  OneInteger* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
-  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const OneInteger& from);
-  void MergeFrom(const OneInteger& from);
-  void Clear() PROTOBUF_FINAL;
-  bool IsInitialized() const PROTOBUF_FINAL;
-
-  size_t ByteSizeLong() const PROTOBUF_FINAL;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
-      const PROTOBUF_FINAL {
-    return InternalSerializeWithCachedSizesToArray(
-        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
-  }
-  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(OneInteger* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return NULL;
-  }
-  inline void* MaybeArenaPtr() const {
-    return NULL;
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // uint64 value = 2;
-  void clear_value();
-  static const int kValueFieldNumber = 2;
-  ::google::protobuf::uint64 value() const;
-  void set_value(::google::protobuf::uint64 value);
-
-  // .pas.Type type = 1;
-  void clear_type();
-  static const int kTypeFieldNumber = 1;
-  ::pas::Type type() const;
-  void set_type(::pas::Type value);
-
-  // @@protoc_insertion_point(class_scope:pas.OneInteger)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::uint64 value_;
-  int type_;
-  mutable int _cached_size_;
-  friend struct protobuf_commands_2eproto::TableStruct;
-};
-// -------------------------------------------------------------------
-
-class OneString : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneString) */ {
- public:
-  OneString();
-  virtual ~OneString();
-
-  OneString(const OneString& from);
-
-  inline OneString& operator=(const OneString& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const OneString& default_instance();
-
-  static inline const OneString* internal_default_instance() {
-    return reinterpret_cast<const OneString*>(
-               &_OneString_default_instance_);
-  }
-
-  void Swap(OneString* other);
-
-  // implements Message ----------------------------------------------
-
-  inline OneString* New() const PROTOBUF_FINAL { return New(NULL); }
-
-  OneString* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
-  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const OneString& from);
-  void MergeFrom(const OneString& from);
-  void Clear() PROTOBUF_FINAL;
-  bool IsInitialized() const PROTOBUF_FINAL;
-
-  size_t ByteSizeLong() const PROTOBUF_FINAL;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
-      const PROTOBUF_FINAL {
-    return InternalSerializeWithCachedSizesToArray(
-        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
-  }
-  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(OneString* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return NULL;
-  }
-  inline void* MaybeArenaPtr() const {
-    return NULL;
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // string value = 2;
-  void clear_value();
-  static const int kValueFieldNumber = 2;
-  const ::std::string& value() const;
-  void set_value(const ::std::string& value);
-  #if LANG_CXX11
-  void set_value(::std::string&& value);
-  #endif
-  void set_value(const char* value);
-  void set_value(const char* value, size_t size);
-  ::std::string* mutable_value();
-  ::std::string* release_value();
-  void set_allocated_value(::std::string* value);
-
-  // .pas.Type type = 1;
-  void clear_type();
-  static const int kTypeFieldNumber = 1;
-  ::pas::Type type() const;
-  void set_type(::pas::Type value);
-
-  // @@protoc_insertion_point(class_scope:pas.OneString)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::internal::ArenaStringPtr value_;
-  int type_;
-  mutable int _cached_size_;
-  friend struct protobuf_commands_2eproto::TableStruct;
-};
-// -------------------------------------------------------------------
-
-class OneFloat : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.OneFloat) */ {
- public:
-  OneFloat();
-  virtual ~OneFloat();
-
-  OneFloat(const OneFloat& from);
-
-  inline OneFloat& operator=(const OneFloat& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const OneFloat& default_instance();
-
-  static inline const OneFloat* internal_default_instance() {
-    return reinterpret_cast<const OneFloat*>(
-               &_OneFloat_default_instance_);
-  }
-
-  void Swap(OneFloat* other);
-
-  // implements Message ----------------------------------------------
-
-  inline OneFloat* New() const PROTOBUF_FINAL { return New(NULL); }
-
-  OneFloat* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
-  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const OneFloat& from);
-  void MergeFrom(const OneFloat& from);
-  void Clear() PROTOBUF_FINAL;
-  bool IsInitialized() const PROTOBUF_FINAL;
-
-  size_t ByteSizeLong() const PROTOBUF_FINAL;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
-      const PROTOBUF_FINAL {
-    return InternalSerializeWithCachedSizesToArray(
-        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
-  }
-  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(OneFloat* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return NULL;
-  }
-  inline void* MaybeArenaPtr() const {
-    return NULL;
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // .pas.Type type = 1;
-  void clear_type();
-  static const int kTypeFieldNumber = 1;
-  ::pas::Type type() const;
-  void set_type(::pas::Type value);
-
-  // float value = 2;
-  void clear_value();
-  static const int kValueFieldNumber = 2;
-  float value() const;
-  void set_value(float value);
-
-  // @@protoc_insertion_point(class_scope:pas.OneFloat)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  int type_;
-  float value_;
-  mutable int _cached_size_;
-  friend struct protobuf_commands_2eproto::TableStruct;
-};
-// -------------------------------------------------------------------
-
-class TwoIntegers : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:pas.TwoIntegers) */ {
- public:
-  TwoIntegers();
-  virtual ~TwoIntegers();
-
-  TwoIntegers(const TwoIntegers& from);
-
-  inline TwoIntegers& operator=(const TwoIntegers& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const TwoIntegers& default_instance();
-
-  static inline const TwoIntegers* internal_default_instance() {
-    return reinterpret_cast<const TwoIntegers*>(
-               &_TwoIntegers_default_instance_);
-  }
-
-  void Swap(TwoIntegers* other);
-
-  // implements Message ----------------------------------------------
-
-  inline TwoIntegers* New() const PROTOBUF_FINAL { return New(NULL); }
-
-  TwoIntegers* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
-  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const TwoIntegers& from);
-  void MergeFrom(const TwoIntegers& from);
-  void Clear() PROTOBUF_FINAL;
-  bool IsInitialized() const PROTOBUF_FINAL;
-
-  size_t ByteSizeLong() const PROTOBUF_FINAL;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output)
-      const PROTOBUF_FINAL {
-    return InternalSerializeWithCachedSizesToArray(
-        ::google::protobuf::io::CodedOutputStream::IsDefaultSerializationDeterministic(), output);
-  }
-  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(TwoIntegers* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return NULL;
-  }
-  inline void* MaybeArenaPtr() const {
-    return NULL;
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // uint64 value_a = 2;
-  void clear_value_a();
-  static const int kValueAFieldNumber = 2;
-  ::google::protobuf::uint64 value_a() const;
-  void set_value_a(::google::protobuf::uint64 value);
-
-  // uint64 value_b = 3;
-  void clear_value_b();
-  static const int kValueBFieldNumber = 3;
-  ::google::protobuf::uint64 value_b() const;
-  void set_value_b(::google::protobuf::uint64 value);
-
-  // .pas.Type type = 1;
-  void clear_type();
-  static const int kTypeFieldNumber = 1;
-  ::pas::Type type() const;
-  void set_type(::pas::Type value);
-
-  // @@protoc_insertion_point(class_scope:pas.TwoIntegers)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::uint64 value_a_;
-  ::google::protobuf::uint64 value_b_;
-  int type_;
-  mutable int _cached_size_;
-  friend struct protobuf_commands_2eproto::TableStruct;
-};
 // ===================================================================
 
 
 // ===================================================================
 
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
+// GenericPB
+
+// .pas.Type type = 1;
+inline void GenericPB::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type GenericPB::type() const {
+  // @@protoc_insertion_point(field_get:pas.GenericPB.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void GenericPB::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.GenericPB.type)
+}
+
+// -------------------------------------------------------------------
+
+// OneInteger
+
+// .pas.Type type = 1;
+inline void OneInteger::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type OneInteger::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneInteger.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void OneInteger::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneInteger.type)
+}
+
+// uint64 value = 2;
+inline void OneInteger::clear_value() {
+  value_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 OneInteger::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneInteger.value)
+  return value_;
+}
+inline void OneInteger::set_value(::google::protobuf::uint64 value) {
+  
+  value_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneInteger.value)
+}
+
+// -------------------------------------------------------------------
+
+// OneString
+
+// .pas.Type type = 1;
+inline void OneString::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type OneString::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneString.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void OneString::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneString.type)
+}
+
+// string value = 2;
+inline void OneString::clear_value() {
+  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& OneString::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneString.value)
+  return value_.GetNoArena();
+}
+inline void OneString::set_value(const ::std::string& value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:pas.OneString.value)
+}
+#if LANG_CXX11
+inline void OneString::set_value(::std::string&& value) {
+  
+  value_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:pas.OneString.value)
+}
+#endif
+inline void OneString::set_value(const char* value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:pas.OneString.value)
+}
+inline void OneString::set_value(const char* value, size_t size) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:pas.OneString.value)
+}
+inline ::std::string* OneString::mutable_value() {
+  
+  // @@protoc_insertion_point(field_mutable:pas.OneString.value)
+  return value_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* OneString::release_value() {
+  // @@protoc_insertion_point(field_release:pas.OneString.value)
+  
+  return value_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void OneString::set_allocated_value(::std::string* value) {
+  if (value != NULL) {
+    
+  } else {
+    
+  }
+  value_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set_allocated:pas.OneString.value)
+}
+
+// -------------------------------------------------------------------
+
+// OneFloat
+
+// .pas.Type type = 1;
+inline void OneFloat::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type OneFloat::type() const {
+  // @@protoc_insertion_point(field_get:pas.OneFloat.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void OneFloat::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneFloat.type)
+}
+
+// float value = 2;
+inline void OneFloat::clear_value() {
+  value_ = 0;
+}
+inline float OneFloat::value() const {
+  // @@protoc_insertion_point(field_get:pas.OneFloat.value)
+  return value_;
+}
+inline void OneFloat::set_value(float value) {
+  
+  value_ = value;
+  // @@protoc_insertion_point(field_set:pas.OneFloat.value)
+}
+
+// -------------------------------------------------------------------
+
+// TwoIntegers
+
+// .pas.Type type = 1;
+inline void TwoIntegers::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type TwoIntegers::type() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void TwoIntegers::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.type)
+}
+
+// uint64 value_a = 2;
+inline void TwoIntegers::clear_value_a() {
+  value_a_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 TwoIntegers::value_a() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_a)
+  return value_a_;
+}
+inline void TwoIntegers::set_value_a(::google::protobuf::uint64 value) {
+  
+  value_a_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_a)
+}
+
+// uint64 value_b = 3;
+inline void TwoIntegers::clear_value_b() {
+  value_b_ = GOOGLE_ULONGLONG(0);
+}
+inline ::google::protobuf::uint64 TwoIntegers::value_b() const {
+  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_b)
+  return value_b_;
+}
+inline void TwoIntegers::set_value_b(::google::protobuf::uint64 value) {
+  
+  value_b_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_b)
+}
+
+// -------------------------------------------------------------------
+
+// TwoStrings
+
+// .pas.Type type = 1;
+inline void TwoStrings::clear_type() {
+  type_ = 0;
+}
+inline ::pas::Type TwoStrings::type() const {
+  // @@protoc_insertion_point(field_get:pas.TwoStrings.type)
+  return static_cast< ::pas::Type >(type_);
+}
+inline void TwoStrings::set_type(::pas::Type value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:pas.TwoStrings.type)
+}
+
+// string column = 2;
+inline void TwoStrings::clear_column() {
+  column_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& TwoStrings::column() const {
+  // @@protoc_insertion_point(field_get:pas.TwoStrings.column)
+  return column_.GetNoArena();
+}
+inline void TwoStrings::set_column(const ::std::string& value) {
+  
+  column_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:pas.TwoStrings.column)
+}
+#if LANG_CXX11
+inline void TwoStrings::set_column(::std::string&& value) {
+  
+  column_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:pas.TwoStrings.column)
+}
+#endif
+inline void TwoStrings::set_column(const char* value) {
+  
+  column_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:pas.TwoStrings.column)
+}
+inline void TwoStrings::set_column(const char* value, size_t size) {
+  
+  column_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:pas.TwoStrings.column)
+}
+inline ::std::string* TwoStrings::mutable_column() {
+  
+  // @@protoc_insertion_point(field_mutable:pas.TwoStrings.column)
+  return column_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* TwoStrings::release_column() {
+  // @@protoc_insertion_point(field_release:pas.TwoStrings.column)
+  
+  return column_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void TwoStrings::set_allocated_column(::std::string* column) {
+  if (column != NULL) {
+    
+  } else {
+    
+  }
+  column_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), column);
+  // @@protoc_insertion_point(field_set_allocated:pas.TwoStrings.column)
+}
+
+// string pattern = 3;
+inline void TwoStrings::clear_pattern() {
+  pattern_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& TwoStrings::pattern() const {
+  // @@protoc_insertion_point(field_get:pas.TwoStrings.pattern)
+  return pattern_.GetNoArena();
+}
+inline void TwoStrings::set_pattern(const ::std::string& value) {
+  
+  pattern_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:pas.TwoStrings.pattern)
+}
+#if LANG_CXX11
+inline void TwoStrings::set_pattern(::std::string&& value) {
+  
+  pattern_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:pas.TwoStrings.pattern)
+}
+#endif
+inline void TwoStrings::set_pattern(const char* value) {
+  
+  pattern_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:pas.TwoStrings.pattern)
+}
+inline void TwoStrings::set_pattern(const char* value, size_t size) {
+  
+  pattern_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:pas.TwoStrings.pattern)
+}
+inline ::std::string* TwoStrings::mutable_pattern() {
+  
+  // @@protoc_insertion_point(field_mutable:pas.TwoStrings.pattern)
+  return pattern_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* TwoStrings::release_pattern() {
+  // @@protoc_insertion_point(field_release:pas.TwoStrings.pattern)
+  
+  return pattern_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void TwoStrings::set_allocated_pattern(::std::string* pattern) {
+  if (pattern != NULL) {
+    
+  } else {
+    
+  }
+  pattern_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), pattern);
+  // @@protoc_insertion_point(field_set_allocated:pas.TwoStrings.pattern)
+}
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // Row
@@ -2063,54 +2503,6 @@ inline ::google::protobuf::Map< ::std::string, ::std::string >*
 Row::mutable_results() {
   // @@protoc_insertion_point(field_mutable_map:pas.Row.results)
   return results_.MutableMap();
-}
-
-// -------------------------------------------------------------------
-
-// DacInfo
-
-// .pas.Type type = 1;
-inline void DacInfo::clear_type() {
-  type_ = 0;
-}
-inline ::pas::Type DacInfo::type() const {
-  // @@protoc_insertion_point(field_get:pas.DacInfo.type)
-  return static_cast< ::pas::Type >(type_);
-}
-inline void DacInfo::set_type(::pas::Type value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:pas.DacInfo.type)
-}
-
-// repeated .pas.Row row = 2;
-inline int DacInfo::row_size() const {
-  return row_.size();
-}
-inline void DacInfo::clear_row() {
-  row_.Clear();
-}
-inline const ::pas::Row& DacInfo::row(int index) const {
-  // @@protoc_insertion_point(field_get:pas.DacInfo.row)
-  return row_.Get(index);
-}
-inline ::pas::Row* DacInfo::mutable_row(int index) {
-  // @@protoc_insertion_point(field_mutable:pas.DacInfo.row)
-  return row_.Mutable(index);
-}
-inline ::pas::Row* DacInfo::add_row() {
-  // @@protoc_insertion_point(field_add:pas.DacInfo.row)
-  return row_.Add();
-}
-inline ::google::protobuf::RepeatedPtrField< ::pas::Row >*
-DacInfo::mutable_row() {
-  // @@protoc_insertion_point(field_mutable_list:pas.DacInfo.row)
-  return &row_;
-}
-inline const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
-DacInfo::row() const {
-  // @@protoc_insertion_point(field_list:pas.DacInfo.row)
-  return row_;
 }
 
 // -------------------------------------------------------------------
@@ -2163,20 +2555,50 @@ SelectResult::row() const {
 
 // -------------------------------------------------------------------
 
-// GenericPB
+// DacInfo
 
 // .pas.Type type = 1;
-inline void GenericPB::clear_type() {
+inline void DacInfo::clear_type() {
   type_ = 0;
 }
-inline ::pas::Type GenericPB::type() const {
-  // @@protoc_insertion_point(field_get:pas.GenericPB.type)
+inline ::pas::Type DacInfo::type() const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.type)
   return static_cast< ::pas::Type >(type_);
 }
-inline void GenericPB::set_type(::pas::Type value) {
+inline void DacInfo::set_type(::pas::Type value) {
   
   type_ = value;
-  // @@protoc_insertion_point(field_set:pas.GenericPB.type)
+  // @@protoc_insertion_point(field_set:pas.DacInfo.type)
+}
+
+// repeated .pas.Row row = 2;
+inline int DacInfo::row_size() const {
+  return row_.size();
+}
+inline void DacInfo::clear_row() {
+  row_.Clear();
+}
+inline const ::pas::Row& DacInfo::row(int index) const {
+  // @@protoc_insertion_point(field_get:pas.DacInfo.row)
+  return row_.Get(index);
+}
+inline ::pas::Row* DacInfo::mutable_row(int index) {
+  // @@protoc_insertion_point(field_mutable:pas.DacInfo.row)
+  return row_.Mutable(index);
+}
+inline ::pas::Row* DacInfo::add_row() {
+  // @@protoc_insertion_point(field_add:pas.DacInfo.row)
+  return row_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::pas::Row >*
+DacInfo::mutable_row() {
+  // @@protoc_insertion_point(field_mutable_list:pas.DacInfo.row)
+  return &row_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::pas::Row >&
+DacInfo::row() const {
+  // @@protoc_insertion_point(field_list:pas.DacInfo.row)
+  return row_;
 }
 
 // -------------------------------------------------------------------
@@ -2625,187 +3047,9 @@ inline void WhenDeviceCommand::set_device_id(::google::protobuf::uint64 value) {
   // @@protoc_insertion_point(field_set:pas.WhenDeviceCommand.device_id)
 }
 
-// -------------------------------------------------------------------
-
-// OneInteger
-
-// .pas.Type type = 1;
-inline void OneInteger::clear_type() {
-  type_ = 0;
-}
-inline ::pas::Type OneInteger::type() const {
-  // @@protoc_insertion_point(field_get:pas.OneInteger.type)
-  return static_cast< ::pas::Type >(type_);
-}
-inline void OneInteger::set_type(::pas::Type value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:pas.OneInteger.type)
-}
-
-// uint64 value = 2;
-inline void OneInteger::clear_value() {
-  value_ = GOOGLE_ULONGLONG(0);
-}
-inline ::google::protobuf::uint64 OneInteger::value() const {
-  // @@protoc_insertion_point(field_get:pas.OneInteger.value)
-  return value_;
-}
-inline void OneInteger::set_value(::google::protobuf::uint64 value) {
-  
-  value_ = value;
-  // @@protoc_insertion_point(field_set:pas.OneInteger.value)
-}
-
-// -------------------------------------------------------------------
-
-// OneString
-
-// .pas.Type type = 1;
-inline void OneString::clear_type() {
-  type_ = 0;
-}
-inline ::pas::Type OneString::type() const {
-  // @@protoc_insertion_point(field_get:pas.OneString.type)
-  return static_cast< ::pas::Type >(type_);
-}
-inline void OneString::set_type(::pas::Type value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:pas.OneString.type)
-}
-
-// string value = 2;
-inline void OneString::clear_value() {
-  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline const ::std::string& OneString::value() const {
-  // @@protoc_insertion_point(field_get:pas.OneString.value)
-  return value_.GetNoArena();
-}
-inline void OneString::set_value(const ::std::string& value) {
-  
-  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:pas.OneString.value)
-}
-#if LANG_CXX11
-inline void OneString::set_value(::std::string&& value) {
-  
-  value_.SetNoArena(
-    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:pas.OneString.value)
-}
-#endif
-inline void OneString::set_value(const char* value) {
-  
-  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:pas.OneString.value)
-}
-inline void OneString::set_value(const char* value, size_t size) {
-  
-  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:pas.OneString.value)
-}
-inline ::std::string* OneString::mutable_value() {
-  
-  // @@protoc_insertion_point(field_mutable:pas.OneString.value)
-  return value_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* OneString::release_value() {
-  // @@protoc_insertion_point(field_release:pas.OneString.value)
-  
-  return value_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void OneString::set_allocated_value(::std::string* value) {
-  if (value != NULL) {
-    
-  } else {
-    
-  }
-  value_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set_allocated:pas.OneString.value)
-}
-
-// -------------------------------------------------------------------
-
-// OneFloat
-
-// .pas.Type type = 1;
-inline void OneFloat::clear_type() {
-  type_ = 0;
-}
-inline ::pas::Type OneFloat::type() const {
-  // @@protoc_insertion_point(field_get:pas.OneFloat.type)
-  return static_cast< ::pas::Type >(type_);
-}
-inline void OneFloat::set_type(::pas::Type value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:pas.OneFloat.type)
-}
-
-// float value = 2;
-inline void OneFloat::clear_value() {
-  value_ = 0;
-}
-inline float OneFloat::value() const {
-  // @@protoc_insertion_point(field_get:pas.OneFloat.value)
-  return value_;
-}
-inline void OneFloat::set_value(float value) {
-  
-  value_ = value;
-  // @@protoc_insertion_point(field_set:pas.OneFloat.value)
-}
-
-// -------------------------------------------------------------------
-
-// TwoIntegers
-
-// .pas.Type type = 1;
-inline void TwoIntegers::clear_type() {
-  type_ = 0;
-}
-inline ::pas::Type TwoIntegers::type() const {
-  // @@protoc_insertion_point(field_get:pas.TwoIntegers.type)
-  return static_cast< ::pas::Type >(type_);
-}
-inline void TwoIntegers::set_type(::pas::Type value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:pas.TwoIntegers.type)
-}
-
-// uint64 value_a = 2;
-inline void TwoIntegers::clear_value_a() {
-  value_a_ = GOOGLE_ULONGLONG(0);
-}
-inline ::google::protobuf::uint64 TwoIntegers::value_a() const {
-  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_a)
-  return value_a_;
-}
-inline void TwoIntegers::set_value_a(::google::protobuf::uint64 value) {
-  
-  value_a_ = value;
-  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_a)
-}
-
-// uint64 value_b = 3;
-inline void TwoIntegers::clear_value_b() {
-  value_b_ = GOOGLE_ULONGLONG(0);
-}
-inline ::google::protobuf::uint64 TwoIntegers::value_b() const {
-  // @@protoc_insertion_point(field_get:pas.TwoIntegers.value_b)
-  return value_b_;
-}
-inline void TwoIntegers::set_value_b(::google::protobuf::uint64 value) {
-  
-  value_b_ = value;
-  // @@protoc_insertion_point(field_set:pas.TwoIntegers.value_b)
-}
-
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

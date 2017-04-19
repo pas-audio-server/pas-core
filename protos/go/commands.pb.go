@@ -9,10 +9,15 @@ It is generated from these files:
 	commands.proto
 
 It has these top-level messages:
-	Row
-	DacInfo
-	SelectResult
 	GenericPB
+	OneInteger
+	OneString
+	OneFloat
+	TwoIntegers
+	TwoStrings
+	Row
+	SelectResult
+	DacInfo
 	PlayTrackCommand
 	PauseDeviceCommand
 	ResumeDeviceCommand
@@ -25,10 +30,6 @@ It has these top-level messages:
 	FolderCountQuery
 	SelectQuery
 	WhenDeviceCommand
-	OneInteger
-	OneString
-	OneFloat
-	TwoIntegers
 */
 package pas
 
@@ -55,6 +56,7 @@ const (
 	LogLevel_CONVERSATIONAL LogLevel = 2
 	LogLevel_VERBOSE        LogLevel = 3
 	LogLevel_REDICULOUS     LogLevel = 4
+	LogLevel_RIDICULOUS     LogLevel = 4
 )
 
 var LogLevel_name = map[int32]string{
@@ -63,6 +65,7 @@ var LogLevel_name = map[int32]string{
 	2: "CONVERSATIONAL",
 	3: "VERBOSE",
 	4: "REDICULOUS",
+	// Duplicate value: 4: "RIDICULOUS",
 }
 var LogLevel_value = map[string]int32{
 	"FATAL":          0,
@@ -70,6 +73,7 @@ var LogLevel_value = map[string]int32{
 	"CONVERSATIONAL": 2,
 	"VERBOSE":        3,
 	"REDICULOUS":     4,
+	"RIDICULOUS":     4,
 }
 
 func (x LogLevel) String() string {
@@ -106,6 +110,9 @@ const (
 	Type_APPEND_QUEUE      Type = 23
 	Type_LOG_LEVEL         Type = 24
 	Type_LOG_LEVEL_QUERY   Type = 25
+	Type_TWO_INTEGERS      Type = 26
+	Type_TWO_STRINGS       Type = 27
+	Type_UNKNOWN_MESSAGE   Type = 28
 )
 
 var Type_name = map[int32]string{
@@ -135,6 +142,9 @@ var Type_name = map[int32]string{
 	23: "APPEND_QUEUE",
 	24: "LOG_LEVEL",
 	25: "LOG_LEVEL_QUERY",
+	26: "TWO_INTEGERS",
+	27: "TWO_STRINGS",
+	28: "UNKNOWN_MESSAGE",
 }
 var Type_value = map[string]int32{
 	"GENERIC":           0,
@@ -163,88 +173,15 @@ var Type_value = map[string]int32{
 	"APPEND_QUEUE":      23,
 	"LOG_LEVEL":         24,
 	"LOG_LEVEL_QUERY":   25,
+	"TWO_INTEGERS":      26,
+	"TWO_STRINGS":       27,
+	"UNKNOWN_MESSAGE":   28,
 }
 
 func (x Type) String() string {
 	return proto.EnumName(Type_name, int32(x))
 }
 func (Type) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-// This is a return type
-type Row struct {
-	Type    Type              `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	Results map[string]string `protobuf:"bytes,2,rep,name=results" json:"results,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-}
-
-func (m *Row) Reset()                    { *m = Row{} }
-func (m *Row) String() string            { return proto.CompactTextString(m) }
-func (*Row) ProtoMessage()               {}
-func (*Row) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
-
-func (m *Row) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *Row) GetResults() map[string]string {
-	if m != nil {
-		return m.Results
-	}
-	return nil
-}
-
-// This is a command type
-// It expects a SelectResult in response.
-type DacInfo struct {
-	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	Row  []*Row `protobuf:"bytes,2,rep,name=row" json:"row,omitempty"`
-}
-
-func (m *DacInfo) Reset()                    { *m = DacInfo{} }
-func (m *DacInfo) String() string            { return proto.CompactTextString(m) }
-func (*DacInfo) ProtoMessage()               {}
-func (*DacInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-func (m *DacInfo) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *DacInfo) GetRow() []*Row {
-	if m != nil {
-		return m.Row
-	}
-	return nil
-}
-
-// This is a return type
-type SelectResult struct {
-	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	Row  []*Row `protobuf:"bytes,2,rep,name=row" json:"row,omitempty"`
-}
-
-func (m *SelectResult) Reset()                    { *m = SelectResult{} }
-func (m *SelectResult) String() string            { return proto.CompactTextString(m) }
-func (*SelectResult) ProtoMessage()               {}
-func (*SelectResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
-
-func (m *SelectResult) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *SelectResult) GetRow() []*Row {
-	if m != nil {
-		return m.Row
-	}
-	return nil
-}
 
 type GenericPB struct {
 	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
@@ -253,7 +190,7 @@ type GenericPB struct {
 func (m *GenericPB) Reset()                    { *m = GenericPB{} }
 func (m *GenericPB) String() string            { return proto.CompactTextString(m) }
 func (*GenericPB) ProtoMessage()               {}
-func (*GenericPB) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*GenericPB) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 func (m *GenericPB) GetType() Type {
 	if m != nil {
@@ -262,312 +199,6 @@ func (m *GenericPB) GetType() Type {
 	return Type_GENERIC
 }
 
-// This is a send type.
-// No respnse is expected.
-type PlayTrackCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-	TrackId  uint64 `protobuf:"varint,3,opt,name=track_id,json=trackId" json:"track_id,omitempty"`
-}
-
-func (m *PlayTrackCommand) Reset()                    { *m = PlayTrackCommand{} }
-func (m *PlayTrackCommand) String() string            { return proto.CompactTextString(m) }
-func (*PlayTrackCommand) ProtoMessage()               {}
-func (*PlayTrackCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
-
-func (m *PlayTrackCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *PlayTrackCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-func (m *PlayTrackCommand) GetTrackId() uint64 {
-	if m != nil {
-		return m.TrackId
-	}
-	return 0
-}
-
-// This is a send type.
-// No respnse is expected.
-type PauseDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *PauseDeviceCommand) Reset()                    { *m = PauseDeviceCommand{} }
-func (m *PauseDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*PauseDeviceCommand) ProtoMessage()               {}
-func (*PauseDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
-
-func (m *PauseDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *PauseDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// No respnse is expected.
-type ResumeDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *ResumeDeviceCommand) Reset()                    { *m = ResumeDeviceCommand{} }
-func (m *ResumeDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*ResumeDeviceCommand) ProtoMessage()               {}
-func (*ResumeDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
-
-func (m *ResumeDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *ResumeDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// No respnse is expected.
-type ClearDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *ClearDeviceCommand) Reset()                    { *m = ClearDeviceCommand{} }
-func (m *ClearDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*ClearDeviceCommand) ProtoMessage()               {}
-func (*ClearDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
-
-func (m *ClearDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *ClearDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// No respnse is expected.
-type StopDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *StopDeviceCommand) Reset()                    { *m = StopDeviceCommand{} }
-func (m *StopDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*StopDeviceCommand) ProtoMessage()               {}
-func (*StopDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
-
-func (m *StopDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *StopDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-type WhoDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *WhoDeviceCommand) Reset()                    { *m = WhoDeviceCommand{} }
-func (m *WhoDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*WhoDeviceCommand) ProtoMessage()               {}
-func (*WhoDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
-
-func (m *WhoDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *WhoDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-type WhatDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *WhatDeviceCommand) Reset()                    { *m = WhatDeviceCommand{} }
-func (m *WhatDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*WhatDeviceCommand) ProtoMessage()               {}
-func (*WhatDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
-
-func (m *WhatDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *WhatDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a send type.
-// A OneInteger is expected back.
-type TrackCountQuery struct {
-	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-}
-
-func (m *TrackCountQuery) Reset()                    { *m = TrackCountQuery{} }
-func (m *TrackCountQuery) String() string            { return proto.CompactTextString(m) }
-func (*TrackCountQuery) ProtoMessage()               {}
-func (*TrackCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
-
-func (m *TrackCountQuery) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-// This is a send type.
-// A OneInteger is expected back.
-type ArtistCountQuery struct {
-	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-}
-
-func (m *ArtistCountQuery) Reset()                    { *m = ArtistCountQuery{} }
-func (m *ArtistCountQuery) String() string            { return proto.CompactTextString(m) }
-func (*ArtistCountQuery) ProtoMessage()               {}
-func (*ArtistCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
-
-func (m *ArtistCountQuery) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-type FolderCountQuery struct {
-	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-}
-
-func (m *FolderCountQuery) Reset()                    { *m = FolderCountQuery{} }
-func (m *FolderCountQuery) String() string            { return proto.CompactTextString(m) }
-func (*FolderCountQuery) ProtoMessage()               {}
-func (*FolderCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
-
-func (m *FolderCountQuery) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-// This is a send type.
-// A SelectResult is expected back.
-type SelectQuery struct {
-	Type    Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	Column  string `protobuf:"bytes,2,opt,name=column" json:"column,omitempty"`
-	Pattern string `protobuf:"bytes,3,opt,name=pattern" json:"pattern,omitempty"`
-}
-
-func (m *SelectQuery) Reset()                    { *m = SelectQuery{} }
-func (m *SelectQuery) String() string            { return proto.CompactTextString(m) }
-func (*SelectQuery) ProtoMessage()               {}
-func (*SelectQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
-
-func (m *SelectQuery) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *SelectQuery) GetColumn() string {
-	if m != nil {
-		return m.Column
-	}
-	return ""
-}
-
-func (m *SelectQuery) GetPattern() string {
-	if m != nil {
-		return m.Pattern
-	}
-	return ""
-}
-
-// This is a send type.
-// A OneString is expected back.
-// Will combine all the device_id/one_strings together.
-type WhenDeviceCommand struct {
-	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
-	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
-}
-
-func (m *WhenDeviceCommand) Reset()                    { *m = WhenDeviceCommand{} }
-func (m *WhenDeviceCommand) String() string            { return proto.CompactTextString(m) }
-func (*WhenDeviceCommand) ProtoMessage()               {}
-func (*WhenDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
-
-func (m *WhenDeviceCommand) GetType() Type {
-	if m != nil {
-		return m.Type
-	}
-	return Type_GENERIC
-}
-
-func (m *WhenDeviceCommand) GetDeviceId() uint64 {
-	if m != nil {
-		return m.DeviceId
-	}
-	return 0
-}
-
-// This is a return type.
 type OneInteger struct {
 	Type  Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
 	Value uint64 `protobuf:"varint,2,opt,name=value" json:"value,omitempty"`
@@ -576,7 +207,7 @@ type OneInteger struct {
 func (m *OneInteger) Reset()                    { *m = OneInteger{} }
 func (m *OneInteger) String() string            { return proto.CompactTextString(m) }
 func (*OneInteger) ProtoMessage()               {}
-func (*OneInteger) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+func (*OneInteger) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *OneInteger) GetType() Type {
 	if m != nil {
@@ -592,7 +223,6 @@ func (m *OneInteger) GetValue() uint64 {
 	return 0
 }
 
-// This is a return type.
 type OneString struct {
 	Type  Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
 	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
@@ -601,7 +231,7 @@ type OneString struct {
 func (m *OneString) Reset()                    { *m = OneString{} }
 func (m *OneString) String() string            { return proto.CompactTextString(m) }
 func (*OneString) ProtoMessage()               {}
-func (*OneString) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (*OneString) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *OneString) GetType() Type {
 	if m != nil {
@@ -617,7 +247,6 @@ func (m *OneString) GetValue() string {
 	return ""
 }
 
-// This is a return type.
 type OneFloat struct {
 	Type  Type    `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
 	Value float32 `protobuf:"fixed32,2,opt,name=value" json:"value,omitempty"`
@@ -626,7 +255,7 @@ type OneFloat struct {
 func (m *OneFloat) Reset()                    { *m = OneFloat{} }
 func (m *OneFloat) String() string            { return proto.CompactTextString(m) }
 func (*OneFloat) ProtoMessage()               {}
-func (*OneFloat) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (*OneFloat) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *OneFloat) GetType() Type {
 	if m != nil {
@@ -651,7 +280,7 @@ type TwoIntegers struct {
 func (m *TwoIntegers) Reset()                    { *m = TwoIntegers{} }
 func (m *TwoIntegers) String() string            { return proto.CompactTextString(m) }
 func (*TwoIntegers) ProtoMessage()               {}
-func (*TwoIntegers) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (*TwoIntegers) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *TwoIntegers) GetType() Type {
 	if m != nil {
@@ -674,11 +303,405 @@ func (m *TwoIntegers) GetValueB() uint64 {
 	return 0
 }
 
+type TwoStrings struct {
+	Type    Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Column  string `protobuf:"bytes,2,opt,name=column" json:"column,omitempty"`
+	Pattern string `protobuf:"bytes,3,opt,name=pattern" json:"pattern,omitempty"`
+}
+
+func (m *TwoStrings) Reset()                    { *m = TwoStrings{} }
+func (m *TwoStrings) String() string            { return proto.CompactTextString(m) }
+func (*TwoStrings) ProtoMessage()               {}
+func (*TwoStrings) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *TwoStrings) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *TwoStrings) GetColumn() string {
+	if m != nil {
+		return m.Column
+	}
+	return ""
+}
+
+func (m *TwoStrings) GetPattern() string {
+	if m != nil {
+		return m.Pattern
+	}
+	return ""
+}
+
+type Row struct {
+	Type    Type              `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Results map[string]string `protobuf:"bytes,2,rep,name=results" json:"results,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *Row) Reset()                    { *m = Row{} }
+func (m *Row) String() string            { return proto.CompactTextString(m) }
+func (*Row) ProtoMessage()               {}
+func (*Row) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *Row) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *Row) GetResults() map[string]string {
+	if m != nil {
+		return m.Results
+	}
+	return nil
+}
+
+type SelectResult struct {
+	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Row  []*Row `protobuf:"bytes,2,rep,name=row" json:"row,omitempty"`
+}
+
+func (m *SelectResult) Reset()                    { *m = SelectResult{} }
+func (m *SelectResult) String() string            { return proto.CompactTextString(m) }
+func (*SelectResult) ProtoMessage()               {}
+func (*SelectResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func (m *SelectResult) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *SelectResult) GetRow() []*Row {
+	if m != nil {
+		return m.Row
+	}
+	return nil
+}
+
+// Duplicates structure of SelectResult. They are therefore
+// interchangeable - just set "type" correctly.
+type DacInfo struct {
+	Type Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Row  []*Row `protobuf:"bytes,2,rep,name=row" json:"row,omitempty"`
+}
+
+func (m *DacInfo) Reset()                    { *m = DacInfo{} }
+func (m *DacInfo) String() string            { return proto.CompactTextString(m) }
+func (*DacInfo) ProtoMessage()               {}
+func (*DacInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *DacInfo) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *DacInfo) GetRow() []*Row {
+	if m != nil {
+		return m.Row
+	}
+	return nil
+}
+
+type PlayTrackCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+	TrackId  uint64 `protobuf:"varint,3,opt,name=track_id,json=trackId" json:"track_id,omitempty"`
+}
+
+func (m *PlayTrackCommand) Reset()                    { *m = PlayTrackCommand{} }
+func (m *PlayTrackCommand) String() string            { return proto.CompactTextString(m) }
+func (*PlayTrackCommand) ProtoMessage()               {}
+func (*PlayTrackCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+
+func (m *PlayTrackCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *PlayTrackCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+func (m *PlayTrackCommand) GetTrackId() uint64 {
+	if m != nil {
+		return m.TrackId
+	}
+	return 0
+}
+
+// No respnse is expected.
+// Can be replaced with OneInteger
+type PauseDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *PauseDeviceCommand) Reset()                    { *m = PauseDeviceCommand{} }
+func (m *PauseDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*PauseDeviceCommand) ProtoMessage()               {}
+func (*PauseDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+
+func (m *PauseDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *PauseDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type ResumeDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *ResumeDeviceCommand) Reset()                    { *m = ResumeDeviceCommand{} }
+func (m *ResumeDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*ResumeDeviceCommand) ProtoMessage()               {}
+func (*ResumeDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+
+func (m *ResumeDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *ResumeDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type ClearDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *ClearDeviceCommand) Reset()                    { *m = ClearDeviceCommand{} }
+func (m *ClearDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*ClearDeviceCommand) ProtoMessage()               {}
+func (*ClearDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+
+func (m *ClearDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *ClearDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type StopDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *StopDeviceCommand) Reset()                    { *m = StopDeviceCommand{} }
+func (m *StopDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*StopDeviceCommand) ProtoMessage()               {}
+func (*StopDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+
+func (m *StopDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *StopDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type WhoDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *WhoDeviceCommand) Reset()                    { *m = WhoDeviceCommand{} }
+func (m *WhoDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhoDeviceCommand) ProtoMessage()               {}
+func (*WhoDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+
+func (m *WhoDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *WhoDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type WhatDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *WhatDeviceCommand) Reset()                    { *m = WhatDeviceCommand{} }
+func (m *WhatDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhatDeviceCommand) ProtoMessage()               {}
+func (*WhatDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+
+func (m *WhatDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *WhatDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
+type TrackCountQuery struct {
+	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+}
+
+func (m *TrackCountQuery) Reset()                    { *m = TrackCountQuery{} }
+func (m *TrackCountQuery) String() string            { return proto.CompactTextString(m) }
+func (*TrackCountQuery) ProtoMessage()               {}
+func (*TrackCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+
+func (m *TrackCountQuery) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+type ArtistCountQuery struct {
+	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+}
+
+func (m *ArtistCountQuery) Reset()                    { *m = ArtistCountQuery{} }
+func (m *ArtistCountQuery) String() string            { return proto.CompactTextString(m) }
+func (*ArtistCountQuery) ProtoMessage()               {}
+func (*ArtistCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+
+func (m *ArtistCountQuery) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+type FolderCountQuery struct {
+	Type Type `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+}
+
+func (m *FolderCountQuery) Reset()                    { *m = FolderCountQuery{} }
+func (m *FolderCountQuery) String() string            { return proto.CompactTextString(m) }
+func (*FolderCountQuery) ProtoMessage()               {}
+func (*FolderCountQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+
+func (m *FolderCountQuery) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+type SelectQuery struct {
+	Type    Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	Column  string `protobuf:"bytes,2,opt,name=column" json:"column,omitempty"`
+	Pattern string `protobuf:"bytes,3,opt,name=pattern" json:"pattern,omitempty"`
+}
+
+func (m *SelectQuery) Reset()                    { *m = SelectQuery{} }
+func (m *SelectQuery) String() string            { return proto.CompactTextString(m) }
+func (*SelectQuery) ProtoMessage()               {}
+func (*SelectQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+
+func (m *SelectQuery) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *SelectQuery) GetColumn() string {
+	if m != nil {
+		return m.Column
+	}
+	return ""
+}
+
+func (m *SelectQuery) GetPattern() string {
+	if m != nil {
+		return m.Pattern
+	}
+	return ""
+}
+
+// A OneString is expected back.
+type WhenDeviceCommand struct {
+	Type     Type   `protobuf:"varint,1,opt,name=type,enum=pas.Type" json:"type,omitempty"`
+	DeviceId uint64 `protobuf:"varint,2,opt,name=device_id,json=deviceId" json:"device_id,omitempty"`
+}
+
+func (m *WhenDeviceCommand) Reset()                    { *m = WhenDeviceCommand{} }
+func (m *WhenDeviceCommand) String() string            { return proto.CompactTextString(m) }
+func (*WhenDeviceCommand) ProtoMessage()               {}
+func (*WhenDeviceCommand) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+
+func (m *WhenDeviceCommand) GetType() Type {
+	if m != nil {
+		return m.Type
+	}
+	return Type_GENERIC
+}
+
+func (m *WhenDeviceCommand) GetDeviceId() uint64 {
+	if m != nil {
+		return m.DeviceId
+	}
+	return 0
+}
+
 func init() {
-	proto.RegisterType((*Row)(nil), "pas.Row")
-	proto.RegisterType((*DacInfo)(nil), "pas.DacInfo")
-	proto.RegisterType((*SelectResult)(nil), "pas.SelectResult")
 	proto.RegisterType((*GenericPB)(nil), "pas.GenericPB")
+	proto.RegisterType((*OneInteger)(nil), "pas.OneInteger")
+	proto.RegisterType((*OneString)(nil), "pas.OneString")
+	proto.RegisterType((*OneFloat)(nil), "pas.OneFloat")
+	proto.RegisterType((*TwoIntegers)(nil), "pas.TwoIntegers")
+	proto.RegisterType((*TwoStrings)(nil), "pas.TwoStrings")
+	proto.RegisterType((*Row)(nil), "pas.Row")
+	proto.RegisterType((*SelectResult)(nil), "pas.SelectResult")
+	proto.RegisterType((*DacInfo)(nil), "pas.DacInfo")
 	proto.RegisterType((*PlayTrackCommand)(nil), "pas.PlayTrackCommand")
 	proto.RegisterType((*PauseDeviceCommand)(nil), "pas.PauseDeviceCommand")
 	proto.RegisterType((*ResumeDeviceCommand)(nil), "pas.ResumeDeviceCommand")
@@ -691,10 +714,6 @@ func init() {
 	proto.RegisterType((*FolderCountQuery)(nil), "pas.FolderCountQuery")
 	proto.RegisterType((*SelectQuery)(nil), "pas.SelectQuery")
 	proto.RegisterType((*WhenDeviceCommand)(nil), "pas.WhenDeviceCommand")
-	proto.RegisterType((*OneInteger)(nil), "pas.OneInteger")
-	proto.RegisterType((*OneString)(nil), "pas.OneString")
-	proto.RegisterType((*OneFloat)(nil), "pas.OneFloat")
-	proto.RegisterType((*TwoIntegers)(nil), "pas.TwoIntegers")
 	proto.RegisterEnum("pas.LogLevel", LogLevel_name, LogLevel_value)
 	proto.RegisterEnum("pas.Type", Type_name, Type_value)
 }
@@ -702,55 +721,58 @@ func init() {
 func init() { proto.RegisterFile("commands.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 794 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x56, 0x4d, 0x6f, 0xdb, 0x46,
-	0x10, 0xad, 0x44, 0xd9, 0x14, 0xc7, 0xb6, 0xbc, 0x5e, 0xc7, 0x89, 0x93, 0xa2, 0x40, 0xc0, 0x53,
-	0xe0, 0x83, 0x9a, 0xa4, 0x97, 0x22, 0x97, 0x96, 0x26, 0x57, 0x0a, 0x51, 0x8a, 0x4b, 0x2f, 0x29,
-	0xa9, 0xbe, 0x94, 0x60, 0xa4, 0xad, 0x23, 0x84, 0x22, 0x05, 0x6a, 0x65, 0x43, 0x3f, 0xa3, 0x3f,
-	0xa9, 0xff, 0xac, 0xbb, 0xfc, 0x70, 0xdb, 0x93, 0x62, 0x44, 0x37, 0xbd, 0x37, 0xb3, 0x6f, 0xde,
-	0x0c, 0x66, 0x57, 0x84, 0xde, 0x2c, 0x5f, 0x2e, 0x93, 0x6c, 0xbe, 0xee, 0xaf, 0x8a, 0x5c, 0xe4,
-	0x58, 0x5b, 0x25, 0x6b, 0xf3, 0xaf, 0x16, 0x68, 0x2c, 0x7f, 0xc0, 0x3f, 0x40, 0x47, 0x6c, 0x57,
-	0xfc, 0xb2, 0xf5, 0xba, 0xf5, 0xa6, 0xf7, 0xde, 0xe8, 0xcb, 0x58, 0x3f, 0x92, 0x04, 0x2b, 0x69,
-	0xfc, 0x23, 0xe8, 0x05, 0x5f, 0x6f, 0x52, 0xb1, 0xbe, 0x6c, 0xbf, 0xd6, 0xde, 0x1c, 0xbd, 0xbf,
-	0x28, 0x33, 0xe4, 0xc9, 0x3e, 0xab, 0x78, 0x92, 0x89, 0x62, 0xcb, 0x9a, 0xac, 0x57, 0x1f, 0xe0,
-	0xf8, 0xbf, 0x01, 0x8c, 0x40, 0xfb, 0xc2, 0xb7, 0xa5, 0xbc, 0xc1, 0xd4, 0x4f, 0xfc, 0x0c, 0x0e,
-	0xee, 0x93, 0x74, 0xc3, 0xa5, 0xa0, 0xe2, 0x2a, 0xf0, 0xa1, 0xfd, 0x73, 0xcb, 0x74, 0x40, 0x77,
-	0x92, 0x99, 0x9b, 0xfd, 0x99, 0xef, 0xb2, 0xf5, 0x0a, 0xb4, 0x22, 0x7f, 0xa8, 0x2d, 0x75, 0x1b,
-	0x4b, 0x4c, 0x91, 0xa6, 0x0b, 0xc7, 0x21, 0x4f, 0xf9, 0x4c, 0x54, 0x3e, 0xbe, 0x45, 0xea, 0x0a,
-	0x8c, 0x21, 0xcf, 0x78, 0xb1, 0x98, 0x05, 0xd7, 0x3b, 0x74, 0xcc, 0x05, 0xa0, 0x20, 0x4d, 0xb6,
-	0x51, 0x91, 0xcc, 0xbe, 0xd8, 0xd5, 0xc0, 0x77, 0x95, 0xfe, 0x1e, 0x8c, 0x39, 0xbf, 0x5f, 0xcc,
-	0x78, 0xbc, 0x98, 0x97, 0xd3, 0xe8, 0xb0, 0x6e, 0x45, 0xb8, 0x73, 0xfc, 0x12, 0xba, 0x42, 0x69,
-	0xa9, 0x98, 0x56, 0xc6, 0xf4, 0x12, 0xbb, 0x73, 0x33, 0x00, 0x1c, 0x24, 0x9b, 0x35, 0x77, 0xca,
-	0xdc, 0x3d, 0x14, 0x33, 0x6f, 0xe0, 0x5c, 0x4d, 0x6b, 0xb9, 0x47, 0x49, 0x69, 0xd2, 0x4e, 0x79,
-	0x52, 0xec, 0x4f, 0x91, 0xc2, 0x59, 0x28, 0xf2, 0xd5, 0xfe, 0x04, 0x7d, 0x40, 0xd3, 0xcf, 0xf9,
-	0x5e, 0x0d, 0x4e, 0x3f, 0x27, 0x62, 0x7f, 0x82, 0x6f, 0xe1, 0xb4, 0xde, 0xa7, 0x4d, 0x26, 0x6e,
-	0x36, 0x5c, 0xde, 0xa7, 0x1d, 0x5b, 0xf8, 0x0e, 0x90, 0x55, 0x88, 0xc5, 0x5a, 0x3c, 0xe9, 0xc8,
-	0x20, 0x4f, 0xe7, 0xbc, 0xf8, 0xfa, 0x23, 0x7f, 0xc0, 0x51, 0x75, 0xc5, 0xbe, 0x26, 0x1b, 0x3f,
-	0x87, 0xc3, 0x59, 0x9e, 0x6e, 0x96, 0x59, 0x7d, 0xe3, 0x6b, 0x84, 0x2f, 0x41, 0x5f, 0x25, 0x42,
-	0xf0, 0x22, 0x2b, 0x17, 0xdc, 0x60, 0x0d, 0xac, 0x06, 0xc9, 0xb3, 0xfd, 0x0d, 0xd2, 0x02, 0xa0,
-	0x19, 0x77, 0x33, 0xc1, 0xef, 0x78, 0xb1, 0x4b, 0xe9, 0x7f, 0x0f, 0x54, 0xa7, 0x7e, 0xa0, 0xcc,
-	0x5f, 0xc1, 0x90, 0x12, 0xa1, 0x28, 0x16, 0xd9, 0xdd, 0x93, 0x14, 0x9a, 0x27, 0xce, 0xfc, 0x05,
-	0xba, 0x52, 0x61, 0x90, 0xe6, 0x89, 0x78, 0x92, 0x40, 0xbb, 0x11, 0x90, 0x63, 0x8f, 0x1e, 0xf2,
-	0xba, 0x8b, 0xf5, 0x2e, 0x8d, 0x17, 0xa0, 0x97, 0xc7, 0xe2, 0xa4, 0x6e, 0xe4, 0xb0, 0x84, 0xd6,
-	0xbf, 0x81, 0x4f, 0xf5, 0xc3, 0x52, 0x05, 0xae, 0xaf, 0x42, 0xe8, 0x7a, 0xf9, 0x9d, 0xc7, 0xef,
-	0x79, 0x8a, 0x0d, 0x38, 0x18, 0x58, 0x91, 0xe5, 0xa1, 0xef, 0xf0, 0x11, 0xe8, 0x23, 0xd7, 0x77,
-	0x47, 0x12, 0xb4, 0x30, 0x86, 0x9e, 0x4d, 0xfd, 0x09, 0x61, 0xa1, 0x15, 0xb9, 0xd4, 0x97, 0x5c,
-	0x5b, 0x25, 0x48, 0xe2, 0x9a, 0x86, 0x04, 0x69, 0xb8, 0x07, 0xc0, 0x88, 0xe3, 0xda, 0x63, 0x8f,
-	0x8e, 0x43, 0xd4, 0xb9, 0xfa, 0x5b, 0x83, 0x8e, 0x72, 0xa5, 0xb2, 0x86, 0xc4, 0x27, 0xcc, 0xb5,
-	0xa5, 0xe6, 0x05, 0x9c, 0x05, 0x9e, 0x75, 0x1b, 0x47, 0xcc, 0xb2, 0x7f, 0x8b, 0x1d, 0x32, 0x71,
-	0x6d, 0x22, 0xd5, 0x11, 0x1c, 0x07, 0xd6, 0x38, 0x24, 0x0d, 0xd3, 0xc6, 0x67, 0x70, 0xc2, 0x48,
-	0x38, 0x1e, 0x3d, 0x52, 0x1a, 0x3e, 0x95, 0xdb, 0x17, 0xd1, 0xa0, 0x21, 0x3a, 0xaa, 0xe4, 0xf4,
-	0x23, 0x6d, 0xf0, 0x81, 0x4a, 0x98, 0x7e, 0xb4, 0xa2, 0x86, 0x38, 0x54, 0x44, 0x55, 0xc8, 0xa6,
-	0x63, 0x3f, 0x42, 0xba, 0xaa, 0x63, 0xb1, 0xc8, 0x0d, 0xa3, 0x9a, 0xe9, 0x2a, 0x66, 0x40, 0x3d,
-	0x87, 0xb0, 0x9a, 0x31, 0x14, 0x13, 0x12, 0x8f, 0xd8, 0x51, 0x7c, 0x33, 0x26, 0xec, 0x16, 0x81,
-	0x92, 0x91, 0x5e, 0x08, 0x9b, 0x10, 0x27, 0x7e, 0xfb, 0x0e, 0x1d, 0x55, 0x85, 0x88, 0xdf, 0x14,
-	0x3a, 0x56, 0x67, 0x6c, 0x8f, 0x58, 0xac, 0x61, 0x4e, 0x94, 0xff, 0x5a, 0x45, 0xb5, 0xe1, 0x45,
-	0xa8, 0x87, 0x75, 0xf9, 0xcf, 0x4b, 0xa7, 0xe8, 0x54, 0x4d, 0x84, 0xfa, 0x24, 0x76, 0x65, 0x39,
-	0xa4, 0x9a, 0x50, 0x20, 0x8c, 0x98, 0xeb, 0x0f, 0xd1, 0x19, 0x3e, 0x91, 0xfb, 0x26, 0xf1, 0xc0,
-	0xa3, 0x56, 0x84, 0xb0, 0xdc, 0x08, 0xe4, 0x58, 0xb6, 0xcc, 0x1d, 0x50, 0xe9, 0x70, 0x34, 0xb2,
-	0x7c, 0x07, 0x9d, 0x2b, 0x03, 0x3e, 0xf9, 0xfd, 0xb1, 0xd3, 0x67, 0x4a, 0xc5, 0xa6, 0xc1, 0xad,
-	0xb2, 0x3c, 0x26, 0xe8, 0x42, 0xe1, 0x11, 0x9d, 0x90, 0x1a, 0x3f, 0x2f, 0x1b, 0x0f, 0x02, 0xe2,
-	0x3b, 0x35, 0xf3, 0x42, 0xd5, 0xf1, 0xe8, 0x30, 0xf6, 0xc8, 0x84, 0x78, 0xe8, 0x12, 0x9f, 0xc3,
-	0xe9, 0x23, 0xac, 0x1b, 0x7f, 0xf9, 0xe9, 0xb0, 0xfc, 0x70, 0xf8, 0xe9, 0x9f, 0x00, 0x00, 0x00,
-	0xff, 0xff, 0xe9, 0x43, 0x49, 0x60, 0x4a, 0x08, 0x00, 0x00,
+	// 843 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x96, 0xcf, 0x6f, 0xdb, 0x36,
+	0x14, 0xc7, 0x67, 0x2b, 0x89, 0xad, 0x97, 0xc4, 0x61, 0x98, 0xa6, 0x75, 0xd3, 0x0d, 0x18, 0x74,
+	0x2a, 0x72, 0xc8, 0xda, 0xee, 0x32, 0xf4, 0xb2, 0x29, 0x12, 0xed, 0x0a, 0x95, 0x45, 0x85, 0x92,
+	0xec, 0xe5, 0xb0, 0x09, 0xaa, 0xcd, 0xa5, 0x46, 0x15, 0xc9, 0x90, 0xe9, 0x04, 0xfe, 0x33, 0xf6,
+	0xe7, 0xee, 0x36, 0x52, 0x3f, 0xd2, 0x1e, 0x06, 0xb8, 0x59, 0x7d, 0xf3, 0xf7, 0xcb, 0xf7, 0x3e,
+	0xef, 0x3d, 0x8a, 0xa2, 0x0c, 0xbd, 0x69, 0x7e, 0x7b, 0x9b, 0x64, 0xb3, 0xe5, 0xc5, 0xa2, 0xc8,
+	0x45, 0x8e, 0xb5, 0x45, 0xb2, 0x34, 0xce, 0x41, 0x1f, 0xf2, 0x8c, 0x17, 0xf3, 0xa9, 0x7f, 0x89,
+	0x7f, 0x80, 0x1d, 0xb1, 0x5e, 0xf0, 0x7e, 0xeb, 0xc7, 0xd6, 0xcb, 0xde, 0x1b, 0xfd, 0x42, 0x06,
+	0x5c, 0x84, 0xd2, 0x60, 0xa5, 0x6d, 0x98, 0x00, 0x34, 0xe3, 0x4e, 0x26, 0xf8, 0x0d, 0x2f, 0x36,
+	0x04, 0xe3, 0x27, 0xb0, 0x7b, 0x97, 0xa4, 0x2b, 0xde, 0x6f, 0xcb, 0xf5, 0x1d, 0x56, 0x09, 0xe3,
+	0x37, 0xd0, 0x25, 0x22, 0x10, 0xc5, 0x3c, 0xbb, 0x79, 0x14, 0x41, 0x6f, 0x08, 0xbf, 0x42, 0x57,
+	0x12, 0x06, 0x69, 0x9e, 0x88, 0x47, 0x01, 0xda, 0x0d, 0xe0, 0x4f, 0xd8, 0x0f, 0xef, 0xf3, 0x7a,
+	0x8a, 0xe5, 0x26, 0xc6, 0x33, 0xe8, 0x94, 0x69, 0x71, 0x52, 0x0f, 0xb2, 0x57, 0x4a, 0xf3, 0xf3,
+	0xc2, 0x87, 0xbe, 0xf6, 0xc5, 0xc2, 0xa5, 0xf1, 0x07, 0x80, 0xe4, 0x57, 0x23, 0x6e, 0xc4, 0x3f,
+	0x85, 0xbd, 0x69, 0x9e, 0xae, 0x6e, 0xb3, 0x7a, 0xc8, 0x5a, 0xe1, 0x3e, 0x74, 0x16, 0x89, 0x10,
+	0xbc, 0xc8, 0x4a, 0xba, 0xce, 0x1a, 0x69, 0xfc, 0xdd, 0x02, 0x8d, 0xe5, 0xf7, 0x9b, 0xc0, 0x3f,
+	0x41, 0xa7, 0xe0, 0xcb, 0x55, 0x2a, 0x96, 0x92, 0xac, 0xbd, 0xdc, 0x7f, 0x73, 0x5a, 0x46, 0xc8,
+	0xcc, 0x0b, 0x56, 0xf9, 0x24, 0x13, 0xc5, 0x9a, 0x35, 0x51, 0x67, 0x6f, 0xe1, 0xe0, 0xcb, 0x05,
+	0x8c, 0x40, 0xfb, 0xc4, 0xd7, 0x25, 0x5e, 0x67, 0xea, 0xe7, 0x7f, 0x3f, 0x8f, 0xb7, 0xed, 0x5f,
+	0x5a, 0x86, 0x03, 0x07, 0x01, 0x4f, 0xf9, 0x54, 0x54, 0x84, 0x4d, 0xbd, 0x9d, 0x81, 0x56, 0xe4,
+	0xf7, 0x75, 0x5f, 0xdd, 0xa6, 0x2f, 0xa6, 0x4c, 0xc3, 0x86, 0x8e, 0x9d, 0x4c, 0x9d, 0xec, 0xaf,
+	0xfc, 0x5b, 0x28, 0x73, 0x40, 0x7e, 0x9a, 0xac, 0xc3, 0x22, 0x99, 0x7e, 0xb2, 0xaa, 0x53, 0xbf,
+	0x09, 0xf7, 0x02, 0xf4, 0x19, 0xbf, 0x9b, 0x4f, 0x79, 0x3c, 0x9f, 0xd5, 0x8f, 0xba, 0x5b, 0x19,
+	0xce, 0x0c, 0x3f, 0x87, 0xae, 0x50, 0x2c, 0xb5, 0x56, 0x3d, 0xed, 0x4e, 0xa9, 0x9d, 0x99, 0xe1,
+	0x03, 0xf6, 0x93, 0xd5, 0x92, 0xdb, 0x65, 0xec, 0x16, 0x8a, 0x19, 0x57, 0x70, 0xa2, 0xf6, 0xf1,
+	0x76, 0x8b, 0x48, 0xd9, 0xa4, 0x95, 0xf2, 0xa4, 0xd8, 0x1e, 0x91, 0xc2, 0x71, 0x20, 0xf2, 0xc5,
+	0xf6, 0x80, 0x1e, 0xa0, 0xc9, 0xc7, 0x7c, 0xab, 0x0d, 0x4e, 0x3e, 0x26, 0x62, 0x7b, 0xc0, 0x57,
+	0x70, 0x54, 0x9f, 0xa7, 0x55, 0x26, 0xae, 0x56, 0x5c, 0xbe, 0x23, 0x1b, 0xee, 0xcb, 0xd7, 0x80,
+	0xcc, 0x42, 0xcc, 0x97, 0xe2, 0x51, 0x29, 0x83, 0x3c, 0x9d, 0xf1, 0xe2, 0xeb, 0x53, 0xe4, 0x7d,
+	0x56, 0xbd, 0x7c, 0x5f, 0x13, 0xfd, 0x3f, 0x2e, 0x9c, 0x72, 0x23, 0x79, 0xb6, 0xb5, 0x8d, 0x3c,
+	0xbf, 0x81, 0xae, 0x9b, 0xdf, 0xb8, 0xfc, 0x8e, 0xa7, 0x58, 0x87, 0xdd, 0x81, 0x19, 0x9a, 0x2e,
+	0xfa, 0x0e, 0xef, 0x43, 0x67, 0xe4, 0x78, 0xce, 0x48, 0x8a, 0x16, 0xc6, 0xd0, 0xb3, 0xa8, 0x37,
+	0x26, 0x2c, 0x30, 0x43, 0x87, 0x7a, 0xd2, 0x6b, 0xab, 0x00, 0x69, 0x5c, 0xd2, 0x80, 0x20, 0x0d,
+	0xf7, 0x00, 0x18, 0xb1, 0x1d, 0x2b, 0x72, 0x69, 0x14, 0xa0, 0x9d, 0x52, 0x3b, 0x9f, 0xf5, 0x59,
+	0x1b, 0xb5, 0xce, 0xff, 0xd1, 0x60, 0x47, 0x35, 0xa5, 0x32, 0x87, 0xc4, 0x23, 0xcc, 0xb1, 0x64,
+	0x9d, 0x53, 0x38, 0xf6, 0x5d, 0xf3, 0x3a, 0x0e, 0x99, 0x69, 0xbd, 0x8f, 0x6d, 0x32, 0x76, 0x2c,
+	0x22, 0x2b, 0x22, 0x38, 0xf0, 0xcd, 0x28, 0x20, 0x8d, 0xd3, 0xc6, 0xc7, 0x70, 0xc8, 0x48, 0x10,
+	0x8d, 0x1e, 0x2c, 0x0d, 0x1f, 0xc9, 0xbd, 0x0e, 0xa9, 0xdf, 0x18, 0x65, 0xd9, 0xc9, 0x3b, 0xda,
+	0xe8, 0x5d, 0x15, 0x30, 0x79, 0x67, 0x86, 0x8d, 0xb1, 0xa7, 0x8c, 0xaa, 0x90, 0x45, 0x23, 0x2f,
+	0x44, 0x1d, 0x55, 0xc7, 0x64, 0xa1, 0x13, 0x84, 0xb5, 0xd3, 0x55, 0xce, 0x80, 0xba, 0x36, 0x61,
+	0xb5, 0xa3, 0x2b, 0x27, 0x20, 0x2e, 0xb1, 0xc2, 0xf8, 0x2a, 0x22, 0xec, 0x1a, 0x81, 0xc2, 0xc8,
+	0x5e, 0x08, 0x1b, 0x13, 0x3b, 0x7e, 0xf5, 0x1a, 0xed, 0x57, 0x85, 0x88, 0xd7, 0x14, 0x3a, 0x50,
+	0x39, 0x96, 0x4b, 0x4c, 0xd6, 0x38, 0x87, 0xaa, 0xff, 0x9a, 0xa2, 0xc6, 0x70, 0x43, 0xd4, 0xc3,
+	0x1d, 0xf9, 0xed, 0xa0, 0x13, 0x74, 0xa4, 0x76, 0x84, 0x7a, 0x24, 0x76, 0x64, 0x39, 0xa4, 0x86,
+	0x50, 0x22, 0x08, 0x99, 0xe3, 0x0d, 0xd1, 0x31, 0x3e, 0x94, 0x1f, 0x69, 0xa9, 0x07, 0x2e, 0x35,
+	0x43, 0x84, 0xe5, 0xbd, 0x8f, 0x6c, 0xd3, 0x92, 0xb1, 0x03, 0x2a, 0x3b, 0x1c, 0x8d, 0x4c, 0xcf,
+	0x46, 0x27, 0xaa, 0x01, 0x8f, 0xfc, 0xfe, 0x30, 0xe9, 0x13, 0x45, 0xb1, 0xa8, 0x7f, 0xad, 0x5a,
+	0x8e, 0x08, 0x3a, 0x55, 0x7a, 0x44, 0xc7, 0xa4, 0xd6, 0x4f, 0xcb, 0xc1, 0x7d, 0x9f, 0x78, 0x76,
+	0xed, 0x3c, 0x53, 0x75, 0x5c, 0x3a, 0x8c, 0x5d, 0x32, 0x26, 0x2e, 0xea, 0xe3, 0x13, 0x38, 0x7a,
+	0x90, 0xf5, 0xe0, 0xcf, 0x55, 0x56, 0x38, 0xa1, 0xaa, 0x51, 0x32, 0x94, 0xa7, 0x01, 0x9d, 0x95,
+	0x3b, 0x2a, 0x9d, 0xaa, 0xdb, 0x00, 0xbd, 0x50, 0x79, 0x91, 0xf7, 0xde, 0xa3, 0x13, 0x2f, 0x1e,
+	0x91, 0x20, 0x30, 0x87, 0x04, 0x7d, 0xff, 0x61, 0xaf, 0xfc, 0x8f, 0xf3, 0xf3, 0xbf, 0x01, 0x00,
+	0x00, 0xff, 0xff, 0x97, 0x1a, 0x0a, 0x48, 0xf5, 0x08, 0x00, 0x00,
 }
