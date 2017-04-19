@@ -1,5 +1,5 @@
 # pas
-Perry's audio server
+Perry's audio server - a robust audio server for large numbers of concurrent streams of digital and analog output.
 
 ## Latest Development Highlights
 
@@ -22,17 +22,15 @@ PLEASE CONTACT ME IF INTERESTED, USING MY <a href="https://www.linkedin.com/in/p
 
 ## What is pas?
 
-pas is an audio server capable of sending multiple **concurrent analog** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC drives a separate audio zone in a multi-zone or multi-room installation. 
+pas is an audio server capable of sending multiple **concurrent analog or digital** stereo feeds to some (as yet undetermined maximum) number of outboard DACs. Each DAC drives a separate audio zone in a multi-zone or multi-room installation. 
 
-A key feature of pas is that it is quite light weight, capable of running multiple concurrent streams even from a $50 ARM-based dev-board. See directly below for information about the sbc pas being being developed on.
-
-**To repeat: pas does not stream digital data. It (via DACs) emits analog audio for injection into a means of analog audio distribution.**
+A key feature of pas is that it is quite light weight, capable of running multiple concurrent streams even from a $50 ARM-based dev-board. See directly below for information about the microscopic computer pas being being developed on.
 
 Some information about pas:
 - pas is Linux based.
 - pas is heavily multithreaded and likes multicore machines.
 - pas is written to be headless. UI's are provided via ssh or other means such as a web server.
-- audio is emitted using <a href="https://www.freedesktop.org/wiki/Software/PulseAudio/">pulseaudio</a> via USB DACs.
+- audio is emitted using <a href="https://www.freedesktop.org/wiki/Software/PulseAudio/">pulseaudio</a> via USB ports.
 - audio is decoded using <a href="https://ffmpeg.org/">ffmpeg</a> so pas supports those formats supported by ffmpeg.
 - data is maintained using <a href="https://www.mysql.com/">MySQL</a>.
 - pas *may* expose a MPD-compatible interface as the pas API is quite robust.
@@ -48,8 +46,13 @@ pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulse
 
 pas is not <a href="https://www.hackerposse.com/~rozzin/journal/whole-home-pulseaudio.html">this</a> which, well, I have no idea what this does.
 
-These and others send digital data to remote digital devices. pas sits next to a rack of amplifiers.
+These and others send digital data to remote digital devices.
 
+**Apparently there is a high end market which pas has the potential to disrupt**
+
+We've come across music servers costing $5000 and more which provide less functionality than pas. Of course they presumably have much better DACs but pas doesn't provide the DAC. You do. This could get interesting.
+
+In any case, we are redefining pas as a general purpose multi-stream digital and analog audio server - with a DAC, it's analog. Without a DAC, it's digital. 
 
 ## Who is Perry?
 
