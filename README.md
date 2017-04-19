@@ -94,7 +94,7 @@ Yes, there is some cool code in pas.
 
 The web server is being written in go and it and the pas server use Google Protocol Buffers (version 3).
 
-The threading models are nice.
+The threading models are nice. Apparently they are **real** nice as there are $5000+ audio servers that do single streams. pas supports an unknown number (limited by your hardware) number of concurrent streams.
 
 ## When will pas be done?
 
