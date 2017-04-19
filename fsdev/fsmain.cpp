@@ -135,7 +135,7 @@ void AnalyzeChecksums(vector<DIRENT> & t, Logger & _log_)
 					checksum_crosswalk[check_sum] = t.at(i).name;
 				}
 				else {
-					cerr << "checksum match: " << check_sum << "'t" << t.at(i).name << "\t" << checksum_crosswalk[check_sum] << endl;
+					cerr << "checksum match: " << check_sum << "\t" << t.at(i).name << "\t" << checksum_crosswalk[check_sum] << endl;
 				}
 			}
 			pclose(p);
