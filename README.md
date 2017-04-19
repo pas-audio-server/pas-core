@@ -5,9 +5,9 @@ Perry's audio server
 
 *pas is ready for client development!*
 
-The [[pas client API]] specification is available now.
+The <a href="https://github.com/pkivolowitz/pas/wiki/pas-client-API">pas client API</a> specification is available now.
 
-A curses-based client driving three DACs simultaneously.
+Here is a totally retro curses-based client driving three DACs simultaneously:
 
 <img width="1920" alt="screen shot 2017-04-14 at 9 48 55 pm" src="https://cloud.githubusercontent.com/assets/4084547/25074619/49ac2e24-22c5-11e7-9845-b6fa99d5a3db.png">
 
@@ -83,9 +83,9 @@ Read <a href="https://www.amazon.com/Get-Off-My-Zombie-Novel-ebook/dp/B00DQ26J8G
 
 ## Is pas shitty code?
 
-I take pride in my work. I strive not to write shitty code. If you believe we have written shitty code, please let us know in a non-shitty way.
+We take pride in our work. We strive to write non-shitty code. If you believe we have written shitty code, please let us know in a non-shitty way.
 
-## Does pas contain much *cool* code?
+## Does pas contain cool code?
 
 Yes, there is some cool code in pas. 
 
