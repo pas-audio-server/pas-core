@@ -16,6 +16,12 @@ enum LogLevel {
 	RIDICULOUS = 4;
 }
 
+enum SpecificErrors {
+	UNKNOWN_MESSAGE = 0;
+	INVALID_DEVICE = 1;
+	INTERNAL_ERROR = 2;
+}
+
 enum Type {
 	//
 	// ENUM value 					CAN BE IMPLEMENTED BY:
@@ -49,7 +55,7 @@ enum Type {
 	LOG_LEVEL_QUERY = 25;			//	GenericPB - future
 	TWO_INTEGERS = 26;				// -na-
 	TWO_STRINGS = 27;				// -na-
-	UNKNOWN_MESSAGE = 28;			//	GenericPB
+	ERROR_MESSAGE = 28;				//	OneInteger
 }
 
 //-----------------------------------------------------------------

@@ -44,3 +44,8 @@ fsmain
 # Text files
 play*.txt
 
+# Generated proto files
+*.pb.h
+*.pb.cc
+*.pb.go
+

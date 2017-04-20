@@ -31,6 +31,20 @@ using namespace pas;
 
 extern Logger _log_;
 
+/*	The following are pre-serialized error messages. The idea is that we don't
+	want to "double fault." The error might be that we failed to serialize the
+	pb - why try to serialize again for the error message?
+
+	These will be initialized in the network_component at a time and place where
+	we're not running multiple threads to avoid races.
+*/
+
+extern string unknown_message;
+extern string invalid_device;
+extern string internal_error;
+
+
+
 /*	APPROACH TO EXCEPTIONS / LOGGING
 
 	LoggedExceptions now remember their logging level. If a FATAL is caught, it must be
@@ -64,6 +78,17 @@ static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int 
 	{	
 		LOG2(_log_, "bad device number", VERBOSE);
 	}
+}
+
+static string ErrorMessage(SpecificErrors e)
+{
+	string s;
+	OneInteger o;
+	o.set_type(ERROR_MESSAGE);
+	o.set_value(e);
+	if (!o.SerializeToString(&s)) {
+		throw LOG2("failed to serialize", FATAL);
+	return s;
 }
 
 static void SendPB(string & s, int server_socket)
@@ -188,11 +213,18 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 						r.set_value(acs[w.device_id()]->What());
 					else
 						throw LOG2(_log_, "impossible else", FATAL);
+
+					if (!r.SerializeToString(&s))
+					{
+						throw LOG2(_log_, "failed to serialize", FATAL);
+					}
 				}
-				if (!r.SerializeToString(&s))
-				{
-					throw LOG2(_log_, "failed to serialize", FATAL);
+				else {
+					// As these messages require a response we must provide
+					// one in the event of error.
+					s = ErrorMessage(INVALID_DEVICE);
 				}
+
 				SendPB(s, socket);
 			}
 			break;
@@ -205,6 +237,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					throw LOG2(_log_, "clear failed to parse", FATAL);
 				if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
 					acs[o.value()]->ClearQueue();
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -223,6 +256,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				{
 					acs[o.value_b()]->AppendQueue(acs[o.value_a()]);
 				}
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -235,6 +269,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					throw LOG2(_log_, "next failed to parse", FATAL);
 				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 					AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -246,6 +281,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					throw LOG2(_log_, "stop failed to parse", FATAL);
 				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -257,6 +293,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					throw LOG2(_log_, "resume failed to parse", FATAL);
 				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -268,6 +305,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					throw LOG2(_log_, "pause failed to parse", FATAL);
 				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
 					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
@@ -282,15 +320,20 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				{
 					acs[c.device_id()]->Play(c.track_id());
 				}
-				else
-				{
-					LOG2(_log_, "PLAY_TRACK_DEVICE: bad device number: " + to_string(c.device_id()), CONVERSATIONAL);
-				}
+				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
 
 			case Type::SELECT_QUERY:
 			{
+				// NOTE
+				// NOTE NEED TO REVISIT THE THROW CASES. MAKE THINGS MORE BULLET PROOF.
+				// NOTE
+				// NOTE IDEA: HAVE A PRESERIALIZED ERROR MESSAGE OF EACH TYPE SO THAT
+				// NOTE YOU CAN'T HAVE A FATAL ERROR IN SERIALIZING DURING HANDLING OF
+				// NOTE AN ERROR.
+				// NOTE
+
 				// Will change due to namespaces.
 				LOG2(_log_, "SELECT_QUERY", CONVERSATIONAL);
 				SelectQuery c;
@@ -313,8 +356,9 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			default:
 			{
-				GenericPB pb;
-				pb.set_type(UNKNOWN_MESSAGE);
+				OneInteger pb;
+				pb.set_type(ERROR_MESSAGE);
+				pb.set_value(UNKNOWN_MESSAGE);
 				if (!pb.SerializeToString(&s)) {
 					throw LOG2(_log_, "failed to serialize", FATAL);					
 				}
@@ -344,7 +388,6 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 */
 void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndacs, int connection_number)
 {
-
 	assert(connection_number >= 0);
 	assert(socket >= 0);
 	assert(sockaddr != nullptr);

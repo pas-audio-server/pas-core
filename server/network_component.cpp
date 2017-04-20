@@ -27,12 +27,35 @@ using namespace pas;
 
 extern Logger _log_;
 
+/*	The following are pre-serialized error messages. The idea is that we don't
+	want to "double fault." The error might be that we failed to serialize the
+	pb - why try to serialize again for the error message?
+
+	These will be initialized in the network_component at a time and place where
+	we're not running multiple threads to avoid races.
+*/
+
+string unknown_message;
+string invalid_device;
+string internal_error;
+
 bool NetworkComponent::keep_going = true;
 
 NetworkComponent::NetworkComponent()
 {
 	listening_socket = -1;
 	port = 5077;
+	OneInteger o;
+	o.set_type(ERROR_MESSAGE);
+	o.set_value(UNKNOWN_MESSAGE);
+	if (!o.SerializeToString(&unknown_message))
+		throw LOG2(_log_, "failed to serialize", FATAL);
+	o.set_value(INVALID_DEVICE);
+	if (!o.SerializeToString(&invalid_device))
+		throw LOG(_log_, "failed to serialize", FATAL);
+	o.set_value(INTERNAL_ERROR);
+	if (!o.SerializeToString(&internal_error))
+		throw LOG(_log_, "failed to serialize", FATAL);
 }
 
 void NetworkComponent::SIGINTHandler(int)
