@@ -42,7 +42,8 @@ extern Logger _log_;
 extern string unknown_message;
 extern string invalid_device;
 extern string internal_error;
-
+extern string fts;
+extern string ftp;
 
 
 /*	APPROACH TO EXCEPTIONS / LOGGING
@@ -65,30 +66,12 @@ static DB * InitDB()
 	return db;
 }
 
-// d and n supplied only for sanity checking
-static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac, int d, int n)
+static void AddCommandWrapper(AUDIO_COMMANDS c, AudioComponent * ac)
 {
 	AudioCommand cmd;
 	cmd.cmd = c;
-	if (d >= 0 && d < n)
-	{
-		ac->AddCommand(cmd);
-	}
-	else
-	{	
-		LOG2(_log_, "bad device number", VERBOSE);
-	}
-}
-
-static string ErrorMessage(SpecificErrors e)
-{
-	string s;
-	OneInteger o;
-	o.set_type(ERROR_MESSAGE);
-	o.set_value(e);
-	if (!o.SerializeToString(&s)) {
-		throw LOG2("failed to serialize", FATAL);
-	return s;
+	assert(ac != nullptr);
+	ac->AddCommand(cmd);
 }
 
 static void SendPB(string & s, int server_socket)
@@ -125,16 +108,14 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 	try
 	{
 		GenericPB g;
-		LOG(_log_, nullptr);
 		g.ParseFromString(s);
-		LOG(_log_, nullptr);
 		switch (g.type())
 		{
 			case Type::DAC_INFO_COMMAND:
 			{
+				LOG2(_log_, "DAC_INFO_COMMAND", CONVERSATIONAL);
 				SelectResult sr;
 				sr.set_type(SELECT_RESULT);
-				LOG2(_log_, "SELECT_RESULT", CONVERSATIONAL);
 				for (int i = 0; i < ndacs; i++)
 				{
 					if (acs[i] == nullptr)
@@ -152,8 +133,10 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					(*result)[string("when")] = acs[i]->TimeCode();
 					LOG2(_log_, nullptr, VERBOSE);
 				}
-				if (!sr.SerializeToString(&s))
-						throw LOG2(_log_, "t_c could not serialize", FATAL);
+				if (!sr.SerializeToString(&s)) {
+					s = internal_error;
+					LOG2(_log_, fts, FATAL);
+				}
 				LOG2(_log_, nullptr, VERBOSE);
 				SendPB(s, socket);
 			}
@@ -161,16 +144,25 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 
 			case Type::TRACK_COUNT:
 			{
+				// If it should come to pass that there is both a DB error
+				// AND a failure to serialize, I'd rather report the internal
+				// error.
 				// Will change due to namespaces.
 				LOG2(_log_, "TRACK_COUNT", CONVERSATIONAL);
 				db = InitDB();
-				if (db == nullptr)
-					throw LOG2(_log_, "could not allocate a DB", FATAL);
-				OneInteger r;
-				r.set_type(ONE_INT);
-				r.set_value(db->GetTrackCount());
-				if (!r.SerializeToString(&s))
-					throw LOG2(_log_, "t_c could not serialize", FATAL);
+				if (db == nullptr) {
+					s = internal_error;
+					LOG2(_log_, "could not allocate a DB", FATAL);
+				}
+				else {
+					OneInteger r;
+					r.set_type(ONE_INT);
+					r.set_value(db->GetTrackCount());
+					if (!r.SerializeToString(&s)) {
+						s = internal_error;
+						LOG2(_log_, fts, FATAL);
+					}
+				}
 				SendPB(s, socket);
 			}
 			break;
@@ -180,13 +172,17 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				// Will change due to namespaces.
 				LOG2(_log_, "ARTIST_COUNT", CONVERSATIONAL);
 				db = InitDB();
-				if (db == nullptr)
-					throw LOG2(_log_, "could not allocate a DB", FATAL);
+				if (db == nullptr) {
+					s = internal_error;
+					LOG2(_log_, "could not allocate a DB", FATAL);
+				}
 				OneInteger r;
 				r.set_type(ONE_INT);
 				r.set_value(db->GetArtistCount());
-				if (!r.SerializeToString(&s))
-					throw LOG2(_log_, "a_c could not serialize", FATAL);
+				if (!r.SerializeToString(&s)) {
+					s = internal_error;
+					LOG2(_log_, fts, FATAL);
+				}
 				SendPB(s, socket);
 			}
 			break;
@@ -197,34 +193,38 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			{
 				LOG2(_log_, "WWW", CONVERSATIONAL);
 				// Who, What and When are all the same.
-				WhenDeviceCommand w;
-				if (!w.ParseFromString(s))
-					throw LOG2(_log_, "failed to parse", FATAL);
-
-				OneString r;
-				r.set_type(ONE_STRING);
-				if ((int) w.device_id() < ndacs && acs[w.device_id()] != nullptr)
-				{
-					if (g.type() == Type::WHEN_DEVICE)	
-						r.set_value(acs[w.device_id()]->TimeCode());
-					else if (g.type() == Type::WHO_DEVICE)	
-						r.set_value(acs[w.device_id()]->Who());
-					else if (g.type() == Type::WHAT_DEVICE)	
-						r.set_value(acs[w.device_id()]->What());
-					else
-						throw LOG2(_log_, "impossible else", FATAL);
-
-					if (!r.SerializeToString(&s))
-					{
-						throw LOG2(_log_, "failed to serialize", FATAL);
-					}
+				OneInteger w;
+				if (!w.ParseFromString(s)) {
+					s = internal_error;
+					LOG2(_log_, ftp, FATAL);
 				}
 				else {
-					// As these messages require a response we must provide
-					// one in the event of error.
-					s = ErrorMessage(INVALID_DEVICE);
-				}
+					OneString r;
+					r.set_type(ONE_STRING);
+					if ((int) w.value() < ndacs && acs[w.value()] != nullptr)
+					{
+						if (g.type() == Type::WHEN_DEVICE)	
+							r.set_value(acs[w.value()]->TimeCode());
+						else if (g.type() == Type::WHO_DEVICE)	
+							r.set_value(acs[w.value()]->Who());
+						else if (g.type() == Type::WHAT_DEVICE)	
+							r.set_value(acs[w.value()]->What());
+						else {
+							s = internal_error;
+							LOG2(_log_, "impossible else", FATAL);
+						}
 
+						if (!r.SerializeToString(&s)) {
+							s = internal_error;
+							LOG2(_log_, fts, FATAL);
+						}
+					}
+					else {
+						// As these messages require a response we must provide
+						// one in the event of error.
+						s = invalid_device;
+					}
+				}
 				SendPB(s, socket);
 			}
 			break;
@@ -233,10 +233,12 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			{
 				LOG2(_log_, "CLEAR DEVICE", CONVERSATIONAL);
 				OneInteger o;
-				if (!o.ParseFromString(s))
-					throw LOG2(_log_, "clear failed to parse", FATAL);
-				if ((int) o.value() < ndacs && acs[o.value()] != nullptr)
+				if (!o.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) o.value() < ndacs && acs[o.value()] != nullptr) {
 					acs[o.value()]->ClearQueue();
+				}
 				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
@@ -248,11 +250,11 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				// Not in use yet.
 				LOG2(_log_, "APPEND QUEUE", CONVERSATIONAL);
 				TwoIntegers o;
-				if (!o.ParseFromString(s))
-					throw LOG2(_log_, "append failed to parse", FATAL);
-
-				if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
-					(int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
+				if (!o.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) o.value_a() < ndacs && acs[o.value_a()] != nullptr &&
+						 (int) o.value_b() < ndacs && acs[o.value_b()] != nullptr)
 				{
 					acs[o.value_b()]->AppendQueue(acs[o.value_a()]);
 				}
@@ -263,12 +265,13 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::NEXT_DEVICE:
 			{
 				LOG2(_log_, "NEXT_DEVICE", CONVERSATIONAL);
-				// Doesn't matter which command - clean this up someday.
-				StopDeviceCommand c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "next failed to parse", FATAL);
-				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-					AddCommandWrapper(NEXT, acs[c.device_id()], c.device_id(), ndacs);
+				OneInteger c;
+				if (!c.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) c.value() < ndacs && acs[c.value()] != nullptr) {
+					AddCommandWrapper(NEXT, acs[c.value()]);
+				}
 				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
@@ -276,11 +279,13 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::STOP_DEVICE:
 			{
 				LOG2(_log_, "STOP_DEVICE", CONVERSATIONAL);
-				StopDeviceCommand c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "stop failed to parse", FATAL);
-				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-					AddCommandWrapper(STOP, acs[c.device_id()], c.device_id(), ndacs);
+				OneInteger c;
+				if (!c.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) c.value() < ndacs && acs[c.value()] != nullptr) {
+					AddCommandWrapper(STOP, acs[c.value()]);
+				}
 				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
@@ -288,11 +293,13 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::RESUME_DEVICE:
 			{
 				LOG2(_log_, "RESUME_DEVICE", CONVERSATIONAL);
-				ResumeDeviceCommand c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "resume failed to parse", FATAL);
-				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-					AddCommandWrapper(RESUME, acs[c.device_id()], c.device_id(), ndacs);
+				OneInteger c;
+				if (!c.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) c.value() < ndacs && acs[c.value()] != nullptr) {
+					AddCommandWrapper(RESUME, acs[c.value()]);
+				}
 				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
@@ -300,11 +307,13 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			case Type::PAUSE_DEVICE:
 			{
 				LOG2(_log_, "PAUSE_DEVICE", CONVERSATIONAL);
-				PauseDeviceCommand c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "pause failed to parse", FATAL);
-				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-					AddCommandWrapper(PAUSE, acs[c.device_id()], c.device_id(), ndacs);
+				OneInteger c;
+				if (!c.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) c.value() < ndacs && acs[c.value()] != nullptr) {
+					AddCommandWrapper(PAUSE, acs[c.value()]);
+				}
 				// This message does not respond. Therefore errors can be eaten.
 			}
 			break;
@@ -314,10 +323,10 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				// Will change due to namespaces.					
 				LOG2(_log_, "PLAY_TRACK_DEVICE", CONVERSATIONAL);
 				PlayTrackCommand c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "play failed to parse", FATAL);
-				if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr)
-				{
+				if (!c.ParseFromString(s)) {
+					LOG2(_log_, ftp, FATAL);
+				}
+				else if ((int) c.device_id() < ndacs && acs[c.device_id()] != nullptr) {
 					acs[c.device_id()]->Play(c.track_id());
 				}
 				// This message does not respond. Therefore errors can be eaten.
@@ -337,32 +346,33 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 				// Will change due to namespaces.
 				LOG2(_log_, "SELECT_QUERY", CONVERSATIONAL);
 				SelectQuery c;
-				if (!c.ParseFromString(s))
-					throw LOG2(_log_, "select failed to parse", FATAL);
-				db = InitDB();
-				if (db == nullptr)
-					throw LOG2(_log_, "db failed to initialize", FATAL);
-				SelectResult r;
-				r.set_type(SELECT_RESULT);
-				db->MultiValuedQuery(c.column(), c.pattern(), r);
-				if (!r.SerializeToString(&s))
-				{
-					throw LOG2(_log_, "failed to serialize", FATAL);
+				if (!c.ParseFromString(s)) {
+					s = internal_error;
+					LOG2(_log_, ftp, FATAL);
 				}
-				LOG(_log_, to_string(s.size()));
+				else {
+					db = InitDB();
+					if (db == nullptr) {
+						s = internal_error;
+						LOG2(_log_, "db failed to initialize", FATAL);
+					}
+					else {
+						SelectResult r;
+						r.set_type(SELECT_RESULT);
+						db->MultiValuedQuery(c.column(), c.pattern(), r);
+						if (!r.SerializeToString(&s)) {
+							s = internal_error;
+							LOG2(_log_, fts, FATAL);
+						}
+					}
+				}
 				SendPB(s, socket);
 			}
 			break;
 
 			default:
 			{
-				OneInteger pb;
-				pb.set_type(ERROR_MESSAGE);
-				pb.set_value(UNKNOWN_MESSAGE);
-				if (!pb.SerializeToString(&s)) {
-					throw LOG2(_log_, "failed to serialize", FATAL);					
-				}
-				SendPB(s, socket);
+				SendPB(unknown_message, socket);
 				LOG2(_log_, "switch received type: " + to_string((int) g.type()), CONVERSATIONAL);
 			}
 			break;

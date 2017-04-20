@@ -45,6 +45,7 @@ NetworkComponent::NetworkComponent()
 {
 	listening_socket = -1;
 	port = 5077;
+
 	OneInteger o;
 	o.set_type(ERROR_MESSAGE);
 	o.set_value(UNKNOWN_MESSAGE);
@@ -52,10 +53,10 @@ NetworkComponent::NetworkComponent()
 		throw LOG2(_log_, "failed to serialize", FATAL);
 	o.set_value(INVALID_DEVICE);
 	if (!o.SerializeToString(&invalid_device))
-		throw LOG(_log_, "failed to serialize", FATAL);
+		throw LOG2(_log_, "failed to serialize", FATAL);
 	o.set_value(INTERNAL_ERROR);
 	if (!o.SerializeToString(&internal_error))
-		throw LOG(_log_, "failed to serialize", FATAL);
+		throw LOG2(_log_, "failed to serialize", FATAL);
 }
 
 void NetworkComponent::SIGINTHandler(int)
