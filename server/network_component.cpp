@@ -2,6 +2,7 @@
 #include "network_component.hpp"
 #include "audio_component.hpp"
 #include "logger.hpp"
+#include <string>
 
 /*	This file is part of pas.
 
@@ -39,6 +40,8 @@ string unknown_message;
 string invalid_device;
 string internal_error;
 
+extern string fts , ftp;
+
 bool NetworkComponent::keep_going = true;
 
 NetworkComponent::NetworkComponent()
@@ -48,15 +51,20 @@ NetworkComponent::NetworkComponent()
 
 	OneInteger o;
 	o.set_type(ERROR_MESSAGE);
+	
+	// These throws are appropriate.
+
 	o.set_value(UNKNOWN_MESSAGE);
 	if (!o.SerializeToString(&unknown_message))
-		throw LOG2(_log_, "failed to serialize", FATAL);
+		throw LOG2(_log_, fts, FATAL);
+
 	o.set_value(INVALID_DEVICE);
 	if (!o.SerializeToString(&invalid_device))
-		throw LOG2(_log_, "failed to serialize", FATAL);
+		throw LOG2(_log_, fts, FATAL);
+
 	o.set_value(INTERNAL_ERROR);
 	if (!o.SerializeToString(&internal_error))
-		throw LOG2(_log_, "failed to serialize", FATAL);
+		throw LOG2(_log_, fts, FATAL);
 }
 
 void NetworkComponent::SIGINTHandler(int)
@@ -87,18 +95,14 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		listening_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (listening_socket < 0)
 		{
-			// TODO - fod perror into log
-			perror("Opening socket failed");
-			throw LOG2(_log_, "opening listening socket failed", LogLevel::FATAL);
+			throw LOG2(_log_, "opening listening socket failed " + string(strerror(errno)), FATAL);
 		}
 
 		int optval = 1;
 		optval = setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 		if (optval < 0)
 		{
-			// TODO - fod perror into log
-			perror("sockopt failed");
-			throw LOG2(_log_, "setting socket opt failed", LogLevel::FATAL);
+			throw LOG2(_log_, "setting socket opt failed " + string(strerror(errno)), FATAL);
 		}
 
 		sockaddr_in listening_sockaddr;
@@ -110,16 +114,12 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 
 		if (bind(listening_socket, (sockaddr *) &listening_sockaddr, sizeof(sockaddr_in)) < 0)
 		{
-			// TODO - fod perror into log
-			perror("Bind failed");
-			throw LOG2(_log_, "bind failed", LogLevel::FATAL);
+			throw LOG2(_log_, "bind failed " + string(strerror(errno)), FATAL);
 		}
 
 		if (listen(listening_socket , max_connections) != 0)
 		{
-			// TODO - fod perror into log
-			perror("Error attempting to listen to socket:");
-			throw LOG2(_log_, "listen failed", LogLevel::FATAL);
+			throw LOG2(_log_, "listen failed " + string(strerror(errno)), FATAL);
 		}
 
 		sockaddr_in client_info;
@@ -151,7 +151,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 			ac->AddCommand(cmd);
 			pthread_yield();
 			pthread_yield();
-			usleep(100000);
+			usleep(50000);
 		}
 		usleep(100000);
 		pthread_yield();
