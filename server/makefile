@@ -1,13 +1,11 @@
 # handy command: git ls-files -d | xargs git checkout --
 
 CC	= g++
-CFLAGS	= -O3 -Wall -std=c++11 -pthread
-#CFLAGS	= -g -Wall -std=c++11 -D _DEBUG_
-
+CFLAGS	= -g -O3 -Wall -std=c++11 -pthread -D _DEBUG_
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
 SRC		= server.cpp logger.cpp connection_manager.cpp network_component.cpp \
-		  db_component.cpp file_system_component.cpp track.cpp audio_component.cpp \
+		  db_component.cpp track.cpp audio_component.cpp \
 		  ../protos/cpp/commands.pb.cc
 
 # Now, add on platform-dependent flags.
@@ -41,7 +39,7 @@ endif
 
 all						: clear_screen server.out
 
-server.out				: server.o network_component.o file_system_component.o db_component.o \
+server.out				: server.o network_component.o db_component.o \
 						  track.o connection_manager.o audio_component.o logger.o commands.pb.o
 						  $(CC) $^ -o $@ $(LDFLAGS)
 
@@ -63,8 +61,6 @@ network_component.o		: network_component.cpp
 
 db_component.o			: db_component.cpp 
 
-file_system_component.o	: file_system_component.cpp 
-
 track.o					: track.cpp 
 
 audio_component.o		: audio_component.cpp
@@ -80,7 +76,7 @@ clean					:
 
 # DO NOT DELETE
 
-server.o: network_component.hpp file_system_component.hpp utility.hpp
+server.o: network_component.hpp utility.hpp
 server.o: db_component.hpp track.hpp audio_component.hpp audio_device.hpp
 server.o: logger.hpp
 logger.o: logger.hpp
@@ -91,8 +87,6 @@ network_component.o: connection_manager.hpp utility.hpp network_component.hpp
 network_component.o: audio_component.hpp audio_device.hpp db_component.hpp
 network_component.o: track.hpp logger.hpp
 db_component.o: db_component.hpp track.hpp utility.hpp logger.hpp
-file_system_component.o: file_system_component.hpp utility.hpp
-file_system_component.o: db_component.hpp track.hpp logger.hpp
 track.o: track.hpp logger.hpp
 audio_component.o: audio_component.hpp audio_device.hpp db_component.hpp
-audio_component.o: track.hpp utility.hpp logger.hpp
+audio_component.o: track.hpp utility.hpp logger.hpp ../protos/cpp/commands.pb.h

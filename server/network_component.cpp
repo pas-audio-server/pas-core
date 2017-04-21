@@ -23,6 +23,7 @@
 */
 
 using namespace std;
+using namespace pas;
 
 extern Logger _log_;
 
@@ -64,7 +65,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		{
 			// TODO - fod perror into log
 			perror("Opening socket failed");
-			throw LOG(_log_, nullptr);
+			throw LOG2(_log_, "opening listening socket failed", LogLevel::FATAL);
 		}
 
 		int optval = 1;
@@ -73,7 +74,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		{
 			// TODO - fod perror into log
 			perror("sockopt failed");
-			throw LOG(_log_, nullptr);
+			throw LOG2(_log_, "setting socket opt failed", LogLevel::FATAL);
 		}
 
 		sockaddr_in listening_sockaddr;
@@ -87,14 +88,14 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		{
 			// TODO - fod perror into log
 			perror("Bind failed");
-			throw LOG(_log_, nullptr);
+			throw LOG2(_log_, "bind failed", LogLevel::FATAL);
 		}
 
 		if (listen(listening_socket , max_connections) != 0)
 		{
 			// TODO - fod perror into log
 			perror("Error attempting to listen to socket:");
-			throw LOG(_log_, nullptr);
+			throw LOG2(_log_, "listen failed", LogLevel::FATAL);
 		}
 
 		sockaddr_in client_info;
@@ -121,6 +122,8 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 		for (int i = 0; i < ndacs; i++)
 		{
 			AudioComponent * ac = (AudioComponent *) *(((AudioComponent **) dacs) + i);
+			if (ac == nullptr)
+				continue;
 			ac->AddCommand(cmd);
 			pthread_yield();
 			pthread_yield();
@@ -143,7 +146,7 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 			LOG(_log_, nullptr);
 		}
 
-		LOG(_log_, "Server shutting down");
+		LOG2(_log_, "Server shutting down", LogLevel::MINIMAL);
 	}
 }
 

@@ -67,16 +67,27 @@ struct AudioCommand
 
 	AudioCommand(const AudioCommand & other)
 	{
-//		argument = other.argument;
 		cmd = other.cmd;
 		filler = other.filler;
 	}
 
-//	std::string argument;
 	unsigned char cmd;
 	unsigned char filler;
 };
 
+/*	A PlayStruct() - eat it Paul Montgomery - is the thing that is
+	passed to the Player thread. 
+
+	It contains the full path of the track to be played. The work
+	of deriving the full path (they are all relative now) is done
+	by the caller - at this time only:
+
+		AudioComponent::Play(unsigned int id)
+
+	The artist and title are here so that the DAC can report
+	precisely what and who it's playing right now. This information
+	is passed back to clients in the DACINFO command.
+*/
 struct PlayStruct
 {
 	std::string path;
@@ -95,11 +106,13 @@ public:
 	void Play(const PlayStruct & ps);
 	void Play(unsigned int id);
 	bool IsIdle() { return idle; }
+	bool QuiteDead() { return quite_dead; }
 	std::string HumanName() { return ad.device_name; }
 	std::string TimeCode();
 	std::string What() { return title; }
 	std::string Who() { return artist; }
-	void Clear();
+	void ClearQueue();
+	void AppendQueue(AudioComponent * other);
 
 private:
 	std::string title;
@@ -114,6 +127,7 @@ private:
 
 	// used when the audio thread is idle.
 	bool idle;
+	bool quite_dead;
 	std::queue<AudioCommand> commands;
 	sem_t sem;
 	std::mutex m;

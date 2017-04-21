@@ -5,6 +5,14 @@ syntax = "proto3";
 
 package pas;
 
+enum LogLevel {
+	FATAL = 0;
+	MINIMAL = 1;
+	CONVERSATIONAL = 2;
+	VERBOSE = 3;
+	REDICULOUS = 4;
+}
+
 enum Type {
 	GENERIC = 0;
 	PLAY_TRACK_DEVICE = 1;
@@ -27,6 +35,11 @@ enum Type {
 	ONE_FLOAT = 18;
 	DAC_INFO_COMMAND = 19;
 	NEXT_DEVICE = 20;
+	COPY_QUEUE = 21;
+	MOVE_QUEUE = 22;
+	APPEND_QUEUE = 23;
+	LOG_LEVEL = 24;
+	LOG_LEVEL_QUERY = 25;
 }
 
 // This is a return type
@@ -152,5 +165,11 @@ message OneString {
 message OneFloat {
 	Type type = 1; 
     float value = 2;
+}
+
+message TwoIntegers {
+	Type type = 1;
+	uint64 value_a = 2;
+	uint64 value_b = 3;
 }
 

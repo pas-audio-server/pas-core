@@ -28,6 +28,7 @@
 *.out
 *.app
 core
+fsmain
 
 # VI
 *.swp
