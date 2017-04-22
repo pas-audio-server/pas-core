@@ -113,7 +113,7 @@ int InitializeNetworkConnection(int argc, char * argv[])
 				network_diagnostics = true;
 				cout << "network diagnostics turned on" << endl;
 				break;
-				
+
 			case 'h':
 				ip = optarg;
 				break;
@@ -207,7 +207,12 @@ bool HasEnding (string const & fullString, string const & ending)
 */
 string GetResponse(int server_socket, Type & type)
 {
-	size_t length = 0;
+	// NOTE:
+	// NOTE: length cannot be a size_t as size_t may be 64 bits or 32 bits.
+	// NOTE: unsigned int is always 32 bits.
+	// NOTE:
+	unsigned int length = 0;
+
 	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
 	if (bytes_read != sizeof(length))
 		throw LOG("bad recv getting length: " + to_string(bytes_read));
@@ -216,6 +221,7 @@ string GetResponse(int server_socket, Type & type)
 	length = ntohl(length);
 	string s;
 	s.resize(length);
+
 	//cout << LOG("string is now: " + to_string(s.size())) << endl;
 	bytes_read = recv(server_socket, (void *) &s[0], length, MSG_WAITALL);
 	if (bytes_read != length)
@@ -752,8 +758,14 @@ void SendPB(string & s, int server_socket)
 {
 	assert(server_socket >= 0);
 
-	size_t length = s.size();
-	size_t ll = length;
+	// NOTE:
+	// NOTE: length must be an unsigned int rather than a size_t. size_t
+	// NOTE: varies on different size machines. unsigned int is always
+	// NOTE: 32 bits.
+	// NOTE:
+
+	unsigned int length = (unsigned int) s.size();
+	unsigned int ll = length;
 
 	length = htonl(length);
 
@@ -768,7 +780,7 @@ void SendPB(string & s, int server_socket)
 			if (ll % 32 != 0)
 				cout << endl;
 		}
-		cout << setfill(' ');
+		cout << dec << setfill(' ');
 	}
 
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
@@ -779,7 +791,7 @@ void SendPB(string & s, int server_socket)
 	if (bytes_sent != ll)
 		throw string("bad bytes_sent for message");
 	if (network_diagnostics)
-		cout << "sent " << ll << " bytes" << endl;
+		cout << "sent " << ll << " bytes" << " " << strerror(errno) << endl;
 }
 
 void MakeHelp(vector<pair<string, string>> & help_text)
