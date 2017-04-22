@@ -66,6 +66,7 @@ using namespace pas;
 const int MAX_DACS = 4;
 
 bool keep_going = true;
+bool network_diagnostics = false;
 
 void SIGHandler(int signal_number)
 {
@@ -104,10 +105,15 @@ int InitializeNetworkConnection(int argc, char * argv[])
 	char * ip = (char *) ("127.0.0.1");
 	int opt;
 
-	while ((opt = getopt(argc, argv, "h:p:")) != -1) 
+	while ((opt = getopt(argc, argv, "dh:p:")) != -1) 
 	{
 		switch (opt) 
 		{
+			case 'd':
+				network_diagnostics = true;
+				cout << "network diagnostics turned on" << endl;
+				break;
+				
 			case 'h':
 				ip = optarg;
 				break;
@@ -751,6 +757,20 @@ void SendPB(string & s, int server_socket)
 
 	length = htonl(length);
 
+	if (network_diagnostics) {
+		cout << "Length: " << ll << " encoded as: " << hex << length << dec << endl;
+		if (ll < 64) {
+			for (size_t i = 0; i < 64 && i < ll; i++) {
+				cout << setfill('0') << hex << "0x" << setw(2) << hex << (int)(((int) s.at(i)) & 0xFF) << " ";
+				if (i % 32 == 0 && i > 0)
+					cout << endl;
+			}
+			if (ll % 32 != 0)
+				cout << endl;
+		}
+		cout << setfill(' ');
+	}
+
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
 		throw string("bad bytes_sent for length");
@@ -758,6 +778,8 @@ void SendPB(string & s, int server_socket)
 	bytes_sent = send(server_socket, (const void *) s.data(), ll, 0);
 	if (bytes_sent != ll)
 		throw string("bad bytes_sent for message");
+	if (network_diagnostics)
+		cout << "sent " << ll << " bytes" << endl;
 }
 
 void MakeHelp(vector<pair<string, string>> & help_text)
@@ -869,6 +891,11 @@ int main(int argc, char * argv[])
 				cout << "Disconnected" << endl;
 				connected = false;
 				server_socket = -1;
+			}
+			else if ("netd")
+			{
+				network_diagnostics = !network_diagnostics;
+				cout << "Network diagnostic mode: " << network_diagnostics << endl;
 			}
 		}
 	}
