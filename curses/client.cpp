@@ -52,11 +52,6 @@ using namespace pas;
 
 #define	LOG(s)		(string(__FILE__) + string(":") + string(__FUNCTION__) + string("() line: ") + to_string(__LINE__) + string(" msg: ") + string(s))
 
-// NOTE:
-// NOTE: Assumtion about the number of DACS (for sanity checking of user input.
-// NOTE:
-const int MAX_DACS = 3;
-
 map<char, int> jump_marks;
 
 int dac_number = 0;
@@ -507,14 +502,14 @@ int main(int argc, char * argv[])
 				{
 					case '+':
 						dac_number++;
-						if (dac_number >= MAX_DACS)
+						if (dac_number >= number_of_dacs)
 							dac_number = 0;
 						break;
 
 					case '-':
 						dac_number--;
 						if (dac_number < 0)
-							dac_number = MAX_DACS - 1;
+							dac_number = number_of_dacs - 1;
 						break;
 
 					case KEY_UP:
