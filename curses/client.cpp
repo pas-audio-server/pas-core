@@ -552,7 +552,7 @@ int main(int argc, char * argv[])
 					case 10:
 					case KEY_ENTER:
 						index = index_of_high_lighted_line + index_of_first_visible_track;
-						assert(index < tracks.size());
+						index %= tracks.size();
 						track = atoi(tracks.at(index).id.c_str());
 						cmd.set_type(PLAY_TRACK_DEVICE);
 						cmd.set_device_id(dac_number);
