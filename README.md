@@ -3,6 +3,10 @@ Perry's audio server - a robust audio server for large numbers of concurrent str
 
 ## Latest Development Highlights
 
+FOUR DACS CONCURRENTLY - using new DAC self-discovery feature.
+
+![Four DACS using DAC self-discovery](/4dacs.png?raw=true "Four DACS")
+
 We have shifted over to a github organizational structure. The organization is:
 
 [pas-audio-server](https://github.com/pas-audio-server)
