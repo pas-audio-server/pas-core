@@ -24,15 +24,17 @@ struct AudioDevice
 	{
 	}
 
-	AudioDevice(std::string s, std::string n, int i)
+	AudioDevice(std::string s, std::string n, std::string a, int i)
 	{
 		device_spec = s;
 		device_name = n;
 		index = i;
+		audio_spec = a;
 	}
 
 	int index;
 	std::string device_spec;
 	std::string device_name;
+	std::string audio_spec;
 };
 
