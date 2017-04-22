@@ -4,8 +4,14 @@ CC	= g++
 CFLAGS	= -g -O3 -Wall -std=c++11 -pthread -D _DEBUG_
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
-SRC		= server.cpp logger.cpp connection_manager.cpp network_component.cpp \
-		  db_component.cpp track.cpp audio_component.cpp discover_dacs.cpp \
+SRC		= audio_component.cpp \
+		  connection_manager.cpp \
+		  db_component.cpp \
+		  discover_dacs.cpp \
+		  logger.cpp \
+		  network_component.cpp \
+		  server.cpp \
+		  track.cpp \
 		  ../protos/cpp/commands.pb.cc
 
 # Now, add on platform-dependent flags.

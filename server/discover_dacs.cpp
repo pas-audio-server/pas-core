@@ -48,7 +48,7 @@ vector<AudioDevice> DiscoverDACS()
 	}
 
 	char buffer[BSIZE] = { 0 };
-	string device_name = "alsa.long_card_name";
+	const string device_name = "alsa.long_card_name";
 
 	AudioDevice ad;
 
