@@ -40,6 +40,10 @@ using namespace pas;
 
 Logger _log_("/tmp/paslog.txt", LogLevel::CONVERSATIONAL);
 
+// These errors are checked for so frequently, lets buffer the strings.
+string fts = "failed to serialize";
+string ftp = "failed to parse";
+
 bool keep_going = true;
 int  port = 5077;
 

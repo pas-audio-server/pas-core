@@ -22,6 +22,7 @@
 #include <iomanip>
 #include <cctype>
 #include <map>
+#include <vector>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -587,6 +588,43 @@ void DevCmdForOneString(Type type, int server_socket)
 	}
 }
 
+void BadDAC(int server_socket)
+{
+	string s;
+	WhatDeviceCommand sc;
+	sc.set_type(WHO_DEVICE);
+	sc.set_device_id(99);
+	bool outcome = sc.SerializeToString(&s);
+	if (!outcome)
+		throw string("bad serialize");
+	SendPB(s, server_socket);
+	Type type;
+	s = GetResponse(server_socket, type);
+	if (type == Type::ONE_STRING)
+	{
+		OneString o;
+		if (o.ParseFromString(s))
+		{
+			cout << o.value() << endl;
+		}
+		else
+		{
+			throw string("parsefromstring failed");
+		}
+	}
+	else
+	{
+		cout << "Got back: " << type << endl;
+		if (type == ERROR_MESSAGE)
+		{
+			OneInteger o;
+			o.ParseFromString(s);
+			cout << "Specific error: " << o.value() << endl;
+		}
+	}
+
+}
+
 /*	SelectCommand() - This function initiates a full blowed
 	SQL select statement inside pas. The mount of data returned
 	could be large (and will be deserialized twice). 
@@ -722,15 +760,43 @@ void SendPB(string & s, int server_socket)
 		throw string("bad bytes_sent for message");
 }
 
-// NOTE:
-// NOTE: This code can be used to form the documentation for the supported
-// NOTE: pas server commands by what is sent an received. NOT the user 
-// NOTE: supplied strings.
-// NOTE:
+void MakeHelp(vector<pair<string, string>> & help_text)
+{
+	help_text.push_back(make_pair("", ""));
+	help_text.push_back(make_pair("help", ""));
+	help_text.push_back(make_pair("stop", ""));
+	help_text.push_back(make_pair("resume", ""));
+	help_text.push_back(make_pair("pause", ""));
+	help_text.push_back(make_pair("play", ""));
+	help_text.push_back(make_pair("playlist", ""));
+	help_text.push_back(make_pair("next", ""));
+	help_text.push_back(make_pair("clear", ""));
+	help_text.push_back(make_pair("select", ""));
+	help_text.push_back(make_pair("who", ""));
+	help_text.push_back(make_pair("what", ""));
+	help_text.push_back(make_pair("when", ""));
+	help_text.push_back(make_pair("tracks", ""));
+	help_text.push_back(make_pair("artists", ""));
+	help_text.push_back(make_pair("quit", ""));
+	help_text.push_back(make_pair("dacs", ""));
+	help_text.push_back(make_pair("time", ""));
+	help_text.push_back(make_pair("rc", ""));
+	help_text.push_back(make_pair("qs", ""));
+}
+
+void PrintHelp(vector<pair<string, string>> & help_text)
+{
+	for (auto it = help_text.begin(); it < help_text.end(); it++) {
+		cout << setw(10) << left << it->first << setw(30) << it->second << endl;
+	}
+}
 
 int main(int argc, char * argv[])
 {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+	vector<pair<string, string>> help_text;
+	MakeHelp(help_text);
 
 	int server_socket = -1;
 	bool connected = false;
@@ -749,6 +815,10 @@ int main(int argc, char * argv[])
 			cout << "Command: ";
 			getline(cin, l);
 
+			if (l == "baddac")
+				BadDAC(server_socket);
+			if (l == "help")
+				PrintHelp(help_text);
 			if (l == "stop")
 				DevCmdNoReply(STOP_DEVICE, server_socket);
 			else if (l == "resume")
@@ -777,7 +847,7 @@ int main(int argc, char * argv[])
 				break;
 			else if (l == "dacs")
 				DacInfoCommand(server_socket);
-			else if (l == "timecode")
+			else if (l == "time")
 				DevCmdForOneString(WHEN_DEVICE, server_socket);
 			else if (l == "rc")
 			{
