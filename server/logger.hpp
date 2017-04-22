@@ -30,8 +30,9 @@
 class  LoggedException
 {
 public:
-	LoggedException(std::string s) { msg = s; level = pas::LogLevel::VERBOSE; }
-	LoggedException(std::string s, pas::LogLevel ll) { msg = s; level = ll; }
+	LoggedException(std::string s) : msg(s), level(pas::LogLevel::VERBOSE) {}
+	LoggedException(std::string s, pas::LogLevel ll) : msg(s), level(ll) {}
+	
 	std::string Msg() { return msg; }
 	pas::LogLevel Level() { return level; }
 	
