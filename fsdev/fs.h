@@ -6,6 +6,7 @@
 #include <map>
 #include <iomanip>
 #include <regex>
+#include <sstream>
 
 #include <unistd.h>
 #include <string.h>
