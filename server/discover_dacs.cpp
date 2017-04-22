@@ -59,7 +59,7 @@ vector<AudioDevice> DiscoverDACS()
 
 		size_t index;
 
-		if ((index = b.find("device.product.name", 0)) != string::npos) {
+		if ((index = b.find(device_name, 0)) != string::npos) {
 			if (b.size() < index + device_name.size() + 4) {
 				continue;
 			}
@@ -86,6 +86,14 @@ vector<AudioDevice> DiscoverDACS()
 
 		index = b.find(">", 0);
 		b = b.erase(index, string::npos);
+		if (ad.device_spec.size() > 0) {
+			// We looped to another device without finding a device.product.name. This is
+			// problematic because THAT's where we push a new audio device. So, we'll have
+			// to do it here.
+			ad.device_name = "Unspecified";
+			devices.push_back(ad);
+			ad = AudioDevice();
+		}
 		ad.device_spec = b;
 		memset(buffer, 0, BSIZE);
 	}
