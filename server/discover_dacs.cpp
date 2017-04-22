@@ -28,16 +28,16 @@ extern Logger _log_;
 
 static const int BSIZE = 1024;
 
-vector<AudioDevice> DiscoverDACS()
-{
-	vector<AudioDevice> devices;
-
-	/*   
+/*   
     devices.push_back(AudioDevice("alsa_output.pci-0000_00_1f.4.analog-stereo", "Macintosh Built-In", "unused", (int) devices.size()));
     devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", "unused", (int) devices.size()));
     devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", "unused", (int) devices.size()));
     devices.push_back(AudioDevice("alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo", "Fiio", "unused", (int) devices.size()));
 */
+
+vector<AudioDevice> DiscoverDACS()
+{
+	vector<AudioDevice> devices;
 
 	FILE* p = nullptr;
 	string cmdline = string("pacmd list-sinks | grep name");
@@ -48,7 +48,7 @@ vector<AudioDevice> DiscoverDACS()
 	}
 
 	char buffer[BSIZE] = { 0 };
-	string device_name = "device.product.name";
+	string device_name = "alsa.long_card_name";
 
 	AudioDevice ad;
 
@@ -64,13 +64,14 @@ vector<AudioDevice> DiscoverDACS()
 				continue;
 			}
 			b = b.erase(0, index + device_name.size() + 4);
-			index = b.find("\"", 0);
+			index = b.find(" at ", 0);
 			if (index == string::npos) {
 				continue;
 			}
 			b = b.erase(index, string::npos);
 			ad.device_name = b;
 			if (ad.device_spec.size() > 0) {
+				ad.index = devices.size();
 				devices.push_back(ad);
 				LOG2(_log_, "found DAC: " + ad.device_name + " " + ad.device_spec, CONVERSATIONAL);
 				ad = AudioDevice();
@@ -91,6 +92,7 @@ vector<AudioDevice> DiscoverDACS()
 			// problematic because THAT's where we push a new audio device. So, we'll have
 			// to do it here.
 			ad.device_name = "Unspecified";
+			ad.index = devices.size();
 			devices.push_back(ad);
 			ad = AudioDevice();
 		}
