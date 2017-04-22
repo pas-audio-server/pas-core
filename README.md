@@ -3,6 +3,12 @@ Perry's audio server - a robust audio server for large numbers of concurrent str
 
 ## Latest Development Highlights
 
+We are shifting over to a github organizational structure. The organization is:
+
+[pas-audio-server](https://github.com/pas-audio-server)
+
+This repository will be phased out over time. We will annotate this README when the shift is complete.
+
 *pas is ready for client development!*
 
 The <a href="https://github.com/pkivolowitz/pas/wiki/pas-client-API">pas client API</a> specification is available now.
