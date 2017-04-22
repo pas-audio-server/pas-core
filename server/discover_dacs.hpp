@@ -1,5 +1,6 @@
 #pragma once
-/*  This file is part of pas.
+
+/*	This file is part of pas.
 
     pas is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,18 +16,10 @@
     along with pas.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*  pas is Copyright 2017 by Perry Kivolowitz
+/*	pas is Copyright 2017 by Perry Kivolowitz
 */
 
-struct AudioDevice
-{
-	AudioDevice() {}
+#include "audio_device.hpp"
+#include <vector>
 
-	AudioDevice(std::string s, std::string n, std::string a, int i) : index(i), device_spec(s), device_name(n), audio_spec(a) {}
-
-	int index;
-	std::string device_spec;
-	std::string device_name;
-	std::string audio_spec;
-};
-
+std::vector<AudioDevice> DiscoverDACS();

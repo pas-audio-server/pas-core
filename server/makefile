@@ -4,8 +4,14 @@ CC	= g++
 CFLAGS	= -g -O3 -Wall -std=c++11 -pthread -D _DEBUG_
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
-SRC		= server.cpp logger.cpp connection_manager.cpp network_component.cpp \
-		  db_component.cpp track.cpp audio_component.cpp \
+SRC		= audio_component.cpp \
+		  connection_manager.cpp \
+		  db_component.cpp \
+		  discover_dacs.cpp \
+		  logger.cpp \
+		  network_component.cpp \
+		  server.cpp \
+		  track.cpp \
 		  ../protos/cpp/commands.pb.cc
 
 # Now, add on platform-dependent flags.
@@ -39,7 +45,7 @@ endif
 
 all						: clear_screen server.out
 
-server.out				: server.o network_component.o db_component.o \
+server.out				: server.o network_component.o db_component.o discover_dacs.o \
 						  track.o connection_manager.o audio_component.o logger.o commands.pb.o
 						  $(CC) $^ -o $@ $(LDFLAGS)
 
@@ -68,6 +74,8 @@ audio_component.o		: audio_component.cpp
 commands.pb.o			: ../protos/cpp/commands.pb.cc
 						  $(CC) -c $(CFLAGS) $< -o $@
 
+discover_dacs.o 		: discover_dacs.cpp
+
 depend					:
 						  makedepend -Y -- $(CFLAGS) -- $(SRC) 2> /dev/null
 
@@ -76,7 +84,7 @@ clean					:
 
 # DO NOT DELETE
 
-server.o: network_component.hpp utility.hpp
+server.o: network_component.hpp utility.hpp discover_dacs.hpp
 server.o: db_component.hpp track.hpp audio_component.hpp audio_device.hpp
 server.o: logger.hpp
 logger.o: logger.hpp
@@ -90,3 +98,4 @@ db_component.o: db_component.hpp track.hpp utility.hpp logger.hpp
 track.o: track.hpp logger.hpp
 audio_component.o: audio_component.hpp audio_device.hpp db_component.hpp
 audio_component.o: track.hpp utility.hpp logger.hpp ../protos/cpp/commands.pb.h
+discover_dacs.o: discover_dacs.hpp audio_device.hpp

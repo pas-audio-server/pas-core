@@ -52,14 +52,9 @@ using namespace pas;
 
 #define	LOG(s)		(string(__FILE__) + string(":") + string(__FUNCTION__) + string("() line: ") + to_string(__LINE__) + string(" msg: ") + string(s))
 
-// NOTE:
-// NOTE: Assumtion about the number of DACS (for sanity checking of user input.
-// NOTE:
-const int MAX_DACS = 3;
-
 map<char, int> jump_marks;
 
-int dac_number = 0;
+int current_dac_index = 0;
 string dac_name;
 
 bool keep_going = true;
@@ -284,7 +279,7 @@ void CurrentDACInfo()
 	werase(top_window);
 	wmove(top_window, 1, 2);
 	waddstr(top_window, "DAC Number: ");
-	string s = to_string(dac_number);
+	string s = to_string(current_dac_index);
 	waddstr(top_window, s.c_str());
 	wmove(top_window, 1, 20);
 	waddstr(top_window, "Name: ");
@@ -340,7 +335,7 @@ void DACInfoCommand()
 			Row r = sr.row(i);
 			google::protobuf::Map<string, string> results = r.results();
 
-			if (i == dac_number)
+			if (i == current_dac_index)
 				dac_name = results[string("name")];
 			wmove(bottom_window, 1 + i, 1);
 			waddstr(bottom_window, results[string("index")].c_str());
@@ -417,7 +412,7 @@ void DevCmdNoReply(Type type, int server_socket)
 	string s;
 	ClearDeviceCommand c;
 	c.set_type(type);
-	c.set_device_id(dac_number);
+	c.set_device_id(current_dac_index);
 	bool outcome = c.SerializeToString(&s);
 	if (!outcome)
 		throw string("bad serialize");
@@ -437,6 +432,56 @@ void UpdateAndRender()
 	wrefresh(mid_left);
 	wrefresh(mid_right);
 }
+
+inline void ChangeCurrentDAC(int offset)
+{
+	current_dac_index += offset;
+	current_dac_index = (current_dac_index + number_of_dacs) % number_of_dacs;
+}
+
+
+void ChangeHighlightedLine(int offset)
+{
+	index_of_high_lighted_line += offset;
+
+	if (offset < 0 && index_of_high_lighted_line < 0)
+	{
+		index_of_high_lighted_line = 0;
+		index_of_first_visible_track--;
+		if (index_of_first_visible_track < 0)
+			index_of_first_visible_track = (int) tracks.size() - 1;
+	}
+	else if (offset > 0 && index_of_high_lighted_line >= scroll_height - 3 )
+	{
+		index_of_high_lighted_line = scroll_height - 3;
+		index_of_first_visible_track++;
+		if (index_of_first_visible_track >= (int) tracks.size())
+			index_of_first_visible_track = 0;
+	}
+	else {
+		// Impossible else.
+	}
+
+}
+
+void Play()
+{
+	string s;
+	PlayTrackCommand cmd;
+
+	int index = index_of_high_lighted_line + index_of_first_visible_track;
+	index %= tracks.size();
+	int track = atoi(tracks.at(index).id.c_str());
+	cmd.set_type(PLAY_TRACK_DEVICE);
+	cmd.set_device_id(current_dac_index);
+	cmd.set_track_id(track);
+
+	if (!cmd.SerializeToString(&s))
+		throw string("InnerPlayCommand() bad serialize");
+	SendPB(s, server_socket);
+
+}		
+
 
 int main(int argc, char * argv[])
 {
@@ -492,9 +537,6 @@ int main(int argc, char * argv[])
 		wattroff(instruction_window, A_STANDOUT);
 		wmove(top_window, 0, 2);
 
-		int index, track;
-		PlayTrackCommand cmd;
-		bool outcome;
 		string s;
 		while (keep_going && curses_is_active)
 		{
@@ -506,37 +548,19 @@ int main(int argc, char * argv[])
 				switch (c)
 				{
 					case '+':
-						dac_number++;
-						if (dac_number >= MAX_DACS)
-							dac_number = 0;
+						ChangeCurrentDAC(1);
 						break;
 
 					case '-':
-						dac_number--;
-						if (dac_number < 0)
-							dac_number = MAX_DACS - 1;
+						ChangeCurrentDAC(-1);
 						break;
 
 					case KEY_UP:
-						index_of_high_lighted_line--;
-						if (index_of_high_lighted_line < 0)
-						{
-							index_of_high_lighted_line = 0;
-							index_of_first_visible_track--;
-							if (index_of_first_visible_track < 0)
-								index_of_first_visible_track = (int) tracks.size() - 1;
-						}
+						ChangeHighlightedLine(-1);
 						break;
 
 					case KEY_DOWN:
-						index_of_high_lighted_line++;
-						if (index_of_high_lighted_line >= scroll_height - 3 )
-						{
-							index_of_high_lighted_line = scroll_height - 3;
-							index_of_first_visible_track++;
-							if (index_of_first_visible_track >= (int) tracks.size())
-								index_of_first_visible_track = 0;
-						}
+						ChangeHighlightedLine(1);
 						break;
 
 					case 14:
@@ -566,37 +590,29 @@ int main(int argc, char * argv[])
 
 					case 10:
 					case KEY_ENTER:
-						index = index_of_high_lighted_line + index_of_first_visible_track;
-						index %= tracks.size();
-						track = atoi(tracks.at(index).id.c_str());
-						cmd.set_type(PLAY_TRACK_DEVICE);
-						cmd.set_device_id(dac_number);
-						cmd.set_track_id(track);
-						outcome = cmd.SerializeToString(&s);
-						if (!outcome)
-							throw string("InnerPlayCommand() bad serialize");
-						SendPB(s, server_socket);
+						Play();
 						break;
 		
 					case 6:
+						// ^F
 						index_of_first_visible_track += (scroll_height - 2);
 						index_of_first_visible_track = index_of_first_visible_track % tracks.size();
 						break;
 
 					case 2:
+						// ^B
 						index_of_first_visible_track -= (scroll_height - 2);
 						if (index_of_first_visible_track < 0)
 							index_of_first_visible_track += tracks.size();
 						break;
 
 					case 27:
+						// ESC
 						keep_going = false;
 						break;
 
 					default:
 						display_needs_update = false;
-						//wmove(top_window, 2, 2);
-						//waddstr(top_window, to_string(c).c_str());
 						break;
 				}
 				if (isalnum(c))

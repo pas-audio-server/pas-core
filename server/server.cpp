@@ -33,6 +33,7 @@
 #include "network_component.hpp"
 #include "audio_component.hpp"
 #include "audio_device.hpp"
+#include "discover_dacs.hpp"
 #include "logger.hpp"
 
 using namespace std;
@@ -67,12 +68,12 @@ int main(int argc, char * argv[])
 	
 	try
 	{
-		vector<string> valid_extensions;
+		vector<string> valid_extensions = { "mp3", "flac", "wav", "m4a" ,"ogg" };
 
-		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", (int) devices.size()));
-		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", (int) devices.size()));
-		devices.push_back(AudioDevice("alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo", "Fiio", (int) devices.size()));
-
+		devices = DiscoverDACS();
+		if (devices.size() == 0) {
+			throw LoggedException(LOG2(_log_, "no DACS found", FATAL));
+		}
 		dacs = (AudioComponent **) malloc(devices.size() * sizeof(AudioComponent **));	
 
 		for (size_t i = 0; i < devices.size(); i++)
@@ -88,12 +89,6 @@ int main(int argc, char * argv[])
 
 		NetworkComponent nw;
 	
-		valid_extensions.push_back("mp3");
-		valid_extensions.push_back("flac");
-		valid_extensions.push_back("wav");
-		valid_extensions.push_back("m4a");
-		valid_extensions.push_back("ogg");
-
 		for (size_t i = 0; i < devices.size(); i++)
 		{	
 			if (!dacs[i]->Initialize(devices[i]))
