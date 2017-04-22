@@ -20,17 +20,9 @@
 
 struct AudioDevice
 {
-	AudioDevice()
-	{
-	}
+	AudioDevice() {}
 
-	AudioDevice(std::string s, std::string n, std::string a, int i)
-	{
-		device_spec = s;
-		device_name = n;
-		index = i;
-		audio_spec = a;
-	}
+	AudioDevice(std::string s, std::string n, std::string a, int i) : index(i), device_spec(s), device_name(n), audio_spec(a) {}
 
 	int index;
 	std::string device_spec;
