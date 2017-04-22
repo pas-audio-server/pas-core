@@ -110,9 +110,6 @@ void SIGHandler(int signal_number)
 
 	The default port and IP, BTW, are: 5077 and 127.0.0.1.
 
-TODO: Calls to perror print directly to the console. These should
-be folded into the LOG().
-
 Parameters:
 int argc		Taken from main - the usual meaning
 char * argv[]	Taken from main - the usual meaning
@@ -151,8 +148,7 @@ int InitializeNetworkConnection(int argc, char * argv[])
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_socket < 0)
 	{
-		perror("Failed to open socket");
-		throw string("");
+		throw LOG(string(strerror(errno)));
 	}
 
 	hostent * server_hostent = gethostbyname(ip);
@@ -170,8 +166,7 @@ int InitializeNetworkConnection(int argc, char * argv[])
 
 	if (connect(server_socket, (struct sockaddr*) &server_sockaddr, sizeof(sockaddr_in)) == -1)
 	{
-		perror("Connection failed");
-		throw string("");
+		throw LOG(string(strerror(errno)));
 	}
 
 	return server_socket;
@@ -434,8 +429,14 @@ int main(int argc, char * argv[])
 	if (signal(SIGINT, SIGHandler) == SIG_ERR)
 		throw LOG("");
 
-	if ((server_socket = InitializeNetworkConnection(argc, argv)) < 0)
-		return 0;
+	try {
+		server_socket = InitializeNetworkConnection(argc, argv);
+	}
+	catch (string s) {
+		if (s.size() > 0)
+			cerr << s << endl;
+		return 1;
+	}
 
 	cout << "Fetching tracks..." << endl;
 	FetchTracks();
