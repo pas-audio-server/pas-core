@@ -69,9 +69,10 @@ int main(int argc, char * argv[])
 	{
 		vector<string> valid_extensions;
 
-		devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", (int) devices.size()));
-		devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", (int) devices.size()));
-		devices.push_back(AudioDevice("alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo", "Fiio", (int) devices.size()));
+		devices.push_back(AudioDevice("alsa_output.pci-0000_00_1f.4.analog-stereo", "Macintosh Built-In", (int) devices.size()));
+		//devices.push_back(AudioDevice("alsa_output.usb-AudioQuest_AudioQuest_DragonFly_Black_v1.5_AQDFBL0100111808-01.analog-stereo", "dragonFly Black", (int) devices.size()));
+		//devices.push_back(AudioDevice("alsa_output.usb-Audioengine_Audioengine_D3_Audioengine-00.analog-stereo", "audioengine D3", (int) devices.size()));
+		//devices.push_back(AudioDevice("alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo", "Fiio", (int) devices.size()));
 
 		dacs = (AudioComponent **) malloc(devices.size() * sizeof(AudioComponent **));	
 
