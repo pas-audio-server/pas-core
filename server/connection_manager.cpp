@@ -78,8 +78,13 @@ static void SendPB(string & s, int server_socket)
 {
 	assert(server_socket >= 0);
 
-	size_t length = s.size();
-	size_t ll = length;
+	// NOTE:
+	// NOTE: length CANNOT be a size_t as size_t can be 64 or 32 bits depending upon
+	// NOTE: the machine. unsigned int is 32 bits. This difference in size can cause
+	// NOTE: the received length to leave behind (or send extra) bytes.
+	// NOTE:
+	unsigned int length = (unsigned int) s.size();
+	unsigned int ll = length;
 	LOG2(_log_, to_string(length), VERBOSE);
 
 	length = htonl(length);
@@ -412,14 +417,22 @@ void ConnectionHandler(sockaddr_in * sockaddr, int socket, void * dacs, int ndac
 		LOG2(_log_, "ConnectionHandler(" + to_string(connection_number) + ") servicing client", MINIMAL);
 		while (true)
 		{
-			size_t length = 0;
+			// NOTE:
+			// NOTE: length CANNOT be a size_t as size_t can be 64 or 32 bits depending upon
+			// NOTE: the machine. unsigned int is 32 bits. This difference in size can cause
+			// NOTE: the received length to leave behind (or send extra) bytes.
+			// NOTE:
+
+			unsigned int length;
 			bytes_read = recv(socket, (void *) &length, sizeof(length), 0);
 			if (bytes_read != sizeof(length))
 				throw LOG2(_log_, "bad recv getting length: " + to_string(bytes_read), FATAL);
 			LOG2(_log_, "recv of length: " + to_string(length), VERBOSE);
+			
 			string s;
 			length = ntohl(length);
 			s.resize(length);
+			
 			bytes_read = recv(socket, (void *) &s[0], length, 0);
 			if (bytes_read != length)
 				throw LOG2(_log_, "bad recv getting pbuffer: " + to_string(bytes_read), LogLevel::FATAL);

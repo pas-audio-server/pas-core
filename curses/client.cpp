@@ -176,8 +176,15 @@ void SendPB(string & s, int server_socket)
 {
 	assert(server_socket >= 0);
 
-	size_t length = s.size();
-	size_t ll = length;
+	// NOTE:
+	// NOTE: length CANNOT be a size_t as size_t can be 64 or 32 bits depending upon
+	// NOTE: the machine. unsigned int is 32 bits. This difference in size can cause
+	// NOTE: the received length to leave behind (or send extra) bytes.
+	// NOTE:
+
+	unsigned int length = s.size();
+	unsigned int ll = length;
+
 	length = htonl(length);
 	size_t bytes_sent = send(server_socket, (const void *) &length, sizeof(length), 0);
 	if (bytes_sent != sizeof(length))
@@ -190,7 +197,13 @@ void SendPB(string & s, int server_socket)
 
 string GetResponse(int server_socket, Type & type)
 {
-	size_t length = 0;
+	// NOTE:
+	// NOTE: length CANNOT be a size_t as size_t can be 64 or 32 bits depending upon
+	// NOTE: the machine. unsigned int is 32 bits. This difference in size can cause
+	// NOTE: the received length to leave behind (or send extra) bytes.
+	// NOTE:
+
+	unsigned int length = 0;
 	size_t bytes_read = recv(server_socket, (void *) &length, sizeof(length), 0);
 	if (bytes_read != sizeof(length))
 		throw LOG("bad recv getting length: " + to_string(bytes_read));
@@ -198,6 +211,7 @@ string GetResponse(int server_socket, Type & type)
 	string s;
 	length = ntohl(length);
 	s.resize(length);
+
 	bytes_read = recv(server_socket, (void *) &s[0], length, MSG_WAITALL);
 	if (bytes_read != length)
 		throw LOG("bad recv getting pbuffer: " + to_string(bytes_read));
