@@ -3,19 +3,15 @@ Perry's audio server - a robust audio server for large numbers of concurrent str
 
 ## Latest Development Highlights
 
-We are shifting over to a github organizational structure. The organization is:
+We have shifted over to a github organizational structure. The organization is:
 
 [pas-audio-server](https://github.com/pas-audio-server)
 
-This repository will be phased out over time. We will annotate this README when the shift is complete.
-
 *pas is ready for client development!*
 
-The <a href="https://github.com/pkivolowitz/pas/wiki/pas-client-API">pas client API</a> specification is available now.
+The <a href="https://github.com/pkivolowitz/pas/wiki/pas-client-API">pas client API</a> specification is now available.
 
-Here is a totally retro curses-based client driving three DACs simultaneously. Why just 3? Because that's all I have - SPONSOR THIS PROJECT! pas might do 10 or 20 on a $50 computer. It might do 100 or more on a beefier machine. We don't know.
-
-<img width="1920" alt="screen shot 2017-04-14 at 9 48 55 pm" src="https://cloud.githubusercontent.com/assets/4084547/25074619/49ac2e24-22c5-11e7-9845-b6fa99d5a3db.png">
+A light-weight pas-core simulator called pas-sim is now available. It is a dummy pas-core that responds to commands in the same way that pas-core would (albiet with very limited information).
 
 ## Sponsors
 
