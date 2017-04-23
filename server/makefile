@@ -1,7 +1,7 @@
 # handy command: git ls-files -d | xargs git checkout --
 
 CC	= g++
-CFLAGS	= -g -O3 -Wall -std=c++11 -pthread -D _DEBUG_
+CFLAGS	= -g -Wall -std=c++11 -pthread -D _DEBUG_
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
 SRC		= audio_component.cpp \
