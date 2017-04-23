@@ -525,8 +525,8 @@ void AudioComponent::AddCommand(const AudioCommand & cmd)
 	LOG2(_log_, nullptr, CONVERSATIONAL);
 	m.lock();
 	commands.push(cmd);
-	sem_post(&sem);
 	m.unlock();
+	sem_post(&sem);
 	LOG2(_log_, nullptr, CONVERSATIONAL);
 }
 
