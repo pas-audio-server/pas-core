@@ -71,7 +71,7 @@ track.o					: track.cpp
 
 audio_component.o		: audio_component.cpp
 
-commands.pb.o			: ../protos/cpp/commands.pb.cc
+commands.pb.o			: commands.pb.cc
 						  $(CC) -c $(CFLAGS) $< -o $@
 
 discover_dacs.o 		: discover_dacs.cpp
@@ -90,12 +90,12 @@ server.o: logger.hpp
 logger.o: logger.hpp
 connection_manager.o: connection_manager.hpp utility.hpp audio_component.hpp
 connection_manager.o: audio_device.hpp db_component.hpp track.hpp logger.hpp
-connection_manager.o: ../protos/cpp/commands.pb.h
+connection_manager.o: commands.pb.h
 network_component.o: connection_manager.hpp utility.hpp network_component.hpp
 network_component.o: audio_component.hpp audio_device.hpp db_component.hpp
 network_component.o: track.hpp logger.hpp
 db_component.o: db_component.hpp track.hpp utility.hpp logger.hpp
 track.o: track.hpp logger.hpp
 audio_component.o: audio_component.hpp audio_device.hpp db_component.hpp
-audio_component.o: track.hpp utility.hpp logger.hpp ../protos/cpp/commands.pb.h
+audio_component.o: track.hpp utility.hpp logger.hpp commands.pb.h
 discover_dacs.o: discover_dacs.hpp audio_device.hpp

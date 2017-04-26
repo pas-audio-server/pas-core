@@ -25,7 +25,6 @@
 #include "audio_component.hpp"
 #include "utility.hpp"
 #include "logger.hpp"
-#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
 using namespace pas;

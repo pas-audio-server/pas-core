@@ -126,6 +126,22 @@ void DB::DeInitialize()
 	}
 }
 
+/*	NOTE: nspace defaults to "default"
+*/
+
+int DB::GetRoot(string nspace)
+{
+	assert(connection != nullptr);
+	LOG2(_log_, nullptr, REDICULOUS);
+
+	if (nspace.size() == 0)
+		nspace = "default";
+
+	string sql = "select me from paths where up = -1 and namespace like " + nspace + ";";
+
+	return IntegerQuery(sql);
+}
+
 int DB::IntegerQuery(string & sql)
 {
 	int rv = 0;
@@ -174,72 +190,114 @@ int DB::GetTrackCount(string nspace)
 
 /*	NOTE: nspace defaults to "default"
 */
-void DB::MultiValuedQuery(string column, string pattern, SelectResult & results, string nspace)
+
+void DB::GetSubfolders(SelectResult & results, int id, string nspace)
+{	
+}
+
+void DB::InnerGetTracks(pas::SelectResult & results, string & sql)
 {
 	assert(connection != nullptr);
-
 	sql::Statement * stmt = nullptr;
 	sql::ResultSet * res = nullptr;
+	
+	LOG2(_log_, sql, CONVERSATIONAL);
 
-	LOG2(_log_, nullptr, REDICULOUS);
-
-	if (IsAColumn(column))
+	try
 	{
-		try
+		if ((stmt = connection->createStatement()) == nullptr)
+			throw LOG2(_log_, "createStatement() failed", FATAL);
+
+		res = stmt->executeQuery(sql.c_str());
+
+		while (res->next())
 		{
-			// NOTE:
-			// NOTE: SQL Injection vulnerability here.
-			// NOTE:
-			if ((stmt = connection->createStatement()) == nullptr)
-				throw LOG2(_log_, "createStatement() failed", FATAL);
+			Row * r = results.add_row();
+			r->set_type(ROW);
+		
+			google::protobuf::Map<string, string> * m = r->mutable_results();
 
-			string sql;
-			sql = "select " + select_columns + string(" from tracks where ");
-			sql += column + " like \"" + pattern + "\" and namespace like \"" + nspace + "\"";
-			sql += " order by " + column + ";";
-			LOG2(_log_, sql, CONVERSATIONAL);
-
-			res = stmt->executeQuery(sql.c_str());
-
-			LOG(_log_, nullptr);
-			while (res->next())
+			for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
 			{
-				//cout << LOG("") << endl;
-				Row * r = results.add_row();
-				r->set_type(ROW);
-			
-				google::protobuf::Map<string, string> * m = r->mutable_results();
-
-				for (size_t i = 0; i < sizeof(track_column_names) / sizeof(string); i++)
-				{
-					string col = track_column_names[i];
-					string s;
-					s = res->getString(col);
-					(*m)[col] = s;
-				}
-				(*m)["id"] = res->getString("id");
+				string col = track_column_names[i];
+				string s;
+				s = res->getString(col);
+				(*m)[col] = s;
 			}
-			LOG(_log_, nullptr);
+
+			(*m)["id"] = res->getString("id");
+			(*m)["type"] = "track";
+	
+			// Some tracks have no title tag. In this
+			// case, substitute in the filename.
+			if ((*m)["title"].size() == 0)
+				(*m)["title"] = (*m)["fname"];
 		}
-		catch (LoggedException s)
-		{
-			if (s.Level() == FATAL)
-				throw s;
-		}
-		catch (sql::SQLException &e)
-		{
-			// This is a throw.
-			ReformatSQLException(e);
-		}
-		//LOG(_log_, to_string(results.ByteSize()));
+	}
+	catch (LoggedException s)
+	{
+		if (s.Level() == FATAL)
+			throw s;
+	}
+	catch (sql::SQLException &e)
+	{
+		// This is a throw.
+		ReformatSQLException(e);
 	}
 
-	// SAME NOTE ABOUT MEMORY LEAK ON FATAL EXCEPTIONS.
+	// Mem leak is a throw took place!
+
 	if (stmt != nullptr)
 		delete stmt;
 
 	if (res != nullptr)
 		delete res;
+
+}
+
+void DB::GetTracks(SelectResult & results, int id, string nspace)
+{	
+	if (nspace.size() == 0)
+		nspace = "default";
+
+	string sql;
+	sql = "select " + select_columns + " from tracks where ";
+	sql += "parent = " + to_string(id) + " ";
+	sql += "and namespace like \"" + nspace + "\" ";
+	sql += "order by track;";
+	InnerGetTracks(results, sql);
+}
+
+void DB::GetFolder(SelectResult & results, int id, string nspace)
+{
+}
+
+
+/*	NOTE: nspace defaults to "default"
+	NOTE: orderby defaults to ""
+*/
+void DB::MultiValuedQuery(
+	string column, 
+	string pattern, 
+	SelectResult & results, 
+	string nspace,
+	string orderby
+)
+{
+	if (nspace.size() == 0)
+		nspace = "default";
+
+	if (IsAColumn(column))
+	{
+		string sql;
+		sql = "select " + select_columns + string(" from tracks where ");
+		sql += column + " like \"" + pattern + "\" and namespace like \"" + nspace + "\"";
+		sql += " order by ";
+		sql += ((orderby.size() == 0) ? column : orderby);
+		sql += ";";
+		InnerGetTracks(results, sql);
+	}
+
 }
 
 bool DB::IsAColumn(std::string c)

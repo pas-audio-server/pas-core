@@ -24,7 +24,6 @@
 #include "audio_component.hpp"
 #include "db_component.hpp"
 #include "logger.hpp"
-#include "../protos/cpp/commands.pb.h"
 
 using namespace std;
 using namespace pas;
@@ -338,17 +337,37 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 			}
 			break;
 
-			case Type::SELECT_QUERY:
+			case SELECT_QUERY_EXPANDED:
 			{
-				// NOTE
-				// NOTE NEED TO REVISIT THE THROW CASES. MAKE THINGS MORE BULLET PROOF.
-				// NOTE
-				// NOTE IDEA: HAVE A PRESERIALIZED ERROR MESSAGE OF EACH TYPE SO THAT
-				// NOTE YOU CAN'T HAVE A FATAL ERROR IN SERIALIZING DURING HANDLING OF
-				// NOTE AN ERROR.
-				// NOTE
+				LOG2(_log_, "SELECT_QUERY_EXPANDED", CONVERSATIONAL);
+				SelectQueryExpanded c;
+				if (!c.ParseFromString(s)) {
+					s = internal_error;
+					LOG2(_log_, ftp, FATAL);
+				}
+				else {
+					db = InitDB();
+					if (db == nullptr) {
+						s = internal_error;
+						LOG2(_log_, "db failed to initialize", FATAL);
+					}
+					else {
+						SelectResult r;
+						r.set_type(SELECT_RESULT);
+						db->MultiValuedQuery(c.column(), c.pattern(), r, c.nspace(), c.orderby());
+						if (!r.SerializeToString(&s)) {
+							s = internal_error;
+							LOG2(_log_, fts, FATAL);
+						}
+					}
+				}
+				SendPB(s, socket);
+			}
+			break;
 
-				// Will change due to namespaces.
+			case SELECT_QUERY:
+			{
+				// If namespace support is needed, use SELECT_QUERY_EXPANDED.
 				LOG2(_log_, "SELECT_QUERY", CONVERSATIONAL);
 				SelectQuery c;
 				if (!c.ParseFromString(s)) {

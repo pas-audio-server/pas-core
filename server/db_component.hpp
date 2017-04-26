@@ -37,7 +37,7 @@
 #include <cppconn/prepared_statement.h>
 #include "track.hpp"
 #include "utility.hpp"
-#include "../protos/cpp/commands.pb.h"
+#include "commands.pb.h"
 
 
 class DB
@@ -48,13 +48,23 @@ public:
 	bool Initialize();
 	void DeInitialize();
 	bool Initialized();
+	int  GetRoot(std::string nspace = std::string("default"));
 	int  GetTrackCount(std::string nspace = std::string("default"));
 	int  GetArtistCount(std::string nspace = std::string("default"));
-	void MultiValuedQuery(std::string column, std::string pattern, pas::SelectResult & results, std::string nspace = "default");
+	void MultiValuedQuery(std::string column, 
+		std::string pattern, 
+		pas::SelectResult & results, 
+		std::string nspace = "default", 
+		std::string orderby = ""
+	);
+	void GetFolder(pas::SelectResult & results, int id, std::string nspace = std::string("default"));
+	void GetSubfolders(pas::SelectResult & results, int id, std::string nspace = std::string("default"));
+	void GetTracks(pas::SelectResult & results, int id, std::string nspace = std::string("default"));
 	void FindIDs(std::string column, std::string pattern, std::vector<std::string> & results);
 	std::string PathFromID(unsigned int id, std::string * title, std::string * artist, std::string nspace = "default");
 
 private:
+	void InnerGetTracks(pas::SelectResult & results, std::string & sql);
 	void InitPreparedStatement();
 	sql::Driver * driver;
 	sql::Connection * connection;

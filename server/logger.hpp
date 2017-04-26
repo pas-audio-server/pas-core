@@ -25,7 +25,7 @@
 #include <string>
 #include <sstream>
 #include <assert.h>
-#include "../protos/cpp/commands.pb.h"
+#include "commands.pb.h"
 
 class  LoggedException
 {
