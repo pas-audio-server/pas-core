@@ -1,7 +1,7 @@
 # handy command: git ls-files -d | xargs git checkout --
 
 CC	= g++
-CFLAGS	= -g -Wall -std=c++11 -pthread -D _DEBUG_
+CFLAGS	= -O3 -Wall -std=c++11 -pthread -D _DEBUG_
 LDFLAGS	= -lavcodec -lavformat -lmysqlcppconn -lpulse-simple -lpulse -lrt -lprotobuf
 
 SRC		= audio_component.cpp \
@@ -12,7 +12,7 @@ SRC		= audio_component.cpp \
 		  network_component.cpp \
 		  server.cpp \
 		  track.cpp \
-		  ../protos/cpp/commands.pb.cc
+		  commands.pb.cc
 
 # Now, add on platform-dependent flags.
 # Taken from http://stackoverflow.com/a/12099167

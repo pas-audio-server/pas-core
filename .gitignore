@@ -45,7 +45,6 @@ fsmain
 play*.txt
 
 # Generated proto files
-protos/cpp/
-protos/go/
-protos/cpp/commands.pb.cc
-protos/cpp/commands.pb.h
+commands.pb.cc
+commands.pb.h
+../protos/
