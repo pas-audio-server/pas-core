@@ -43,6 +43,8 @@ extern string invalid_device;
 extern string internal_error;
 extern string fts;
 extern string ftp;
+extern string dbhost;
+
 
 
 /*	APPROACH TO EXCEPTIONS / LOGGING
@@ -59,7 +61,7 @@ static DB * InitDB()
 	if (db == nullptr)
 		throw LOG2(_log_, "new of DB failed", FATAL);
 
-	if (!db->Initialize())
+	if (!db->Initialize(dbhost))
 		throw LOG2(_log_, "DB failed to initialize: ", FATAL);
 
 	return db;

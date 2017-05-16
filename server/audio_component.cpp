@@ -30,6 +30,7 @@ using namespace std;
 using namespace pas;
 
 extern Logger _log_;
+extern string dbhost;
 
 /*	Note: pas means the puls_eaudio_simple (pasimple) pointer.
 
@@ -608,7 +609,7 @@ void AudioComponent::Play(unsigned int id)
 		if (db == nullptr)
 			throw LOG2(_log_, "allocating db failed", LogLevel::FATAL);
 
-		if (!db->Initialize())
+		if (!db->Initialize(dbhost))
 			throw LOG2(_log_, "db->Initialize() failed", LogLevel::FATAL);
 
 		PlayStruct ps;

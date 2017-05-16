@@ -90,9 +90,11 @@ DB::~DB()
 	audio_component and connection_manager. Check now to see the
 	side effects of being able to throw exceptions now.
 */
-bool DB::Initialize()
+bool DB::Initialize(string dbhost)
 {
 	bool rv = true;
+
+	string dbh = "tcp://" + dbhost + ":3306";
 
 	try {
 		driver = get_driver_instance();
@@ -101,7 +103,7 @@ bool DB::Initialize()
 			rv = false;
 		}
 		else {
-			connection = driver->connect("tcp://192.168.1.117:3306", "pas", "pas");
+			connection = driver->connect(dbh.c_str(), "pas", "pas");
 			if (connection == nullptr) {
 				throw LOG2(_log_, "connect() failed", LogLevel::FATAL);
 			}

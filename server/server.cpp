@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <getopt.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -44,15 +45,35 @@ Logger _log_("/tmp/paslog.txt", LogLevel::CONVERSATIONAL);
 // These errors are checked for so frequently, lets buffer the strings.
 string fts = "failed to serialize";
 string ftp = "failed to parse";
+string dbhost = "127.0.0.1";
 
 bool keep_going = true;
 int  port = 5077;
+
+void ProcessOptions(int argc, char * argv[])
+{
+	int c;
+
+	while ((c = getopt(argc, argv, "h:")) != -1) {
+		switch (c)
+		{
+			case 'h':
+				dbhost = string(optarg);
+				break;
+
+			default:
+				break;
+		}
+	}
+}
 
 int main(int argc, char * argv[])
 {
 	string path("/home/perryk/perryk/music");
 	AudioComponent ** dacs = nullptr;
 	vector<AudioDevice> devices;
+
+	ProcessOptions(argc, argv);
 
 /*
 	// TESTS LOGGING LEVELS

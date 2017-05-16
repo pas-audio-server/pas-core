@@ -45,7 +45,7 @@ class DB
 public:
 	DB();
 	~DB();
-	bool Initialize();
+	bool Initialize(std::string dbhost);
 	void DeInitialize();
 	bool Initialized();
 	int  GetRoot(std::string nspace = std::string("default"));
