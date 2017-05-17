@@ -3,21 +3,12 @@ Perry's audio server - a robust audio server for large numbers of concurrent str
 
 ## Latest Development Highlights
 
+### 5/17/17 pas up and running on $15 computer!
 
+This <a href="http://www.friendlyarm.com/index.php?route=product/product&product_id=180">NanoPi NEO2</a> runs pas very well.
 
-FOUR DACS CONCURRENTLY - using new DAC self-discovery feature. Gone to five DACs more recently.
+![$15 NEO2 runs pas quite handily!](/NEO2_01-900x630.jpg?raw=true "NEO 2")
 
-![Four DACS using DAC self-discovery](/4dacs.png?raw=true "Four DACS")
-
-We have shifted over to a github organizational structure. The organization is:
-
-[pas-audio-server](https://github.com/pas-audio-server)
-
-*pas is ready for client development!*
-
-The <a href="https://github.com/pkivolowitz/pas/wiki/pas-client-API">pas client API</a> specification is now available.
-
-A light-weight pas-core simulator called pas-sim is now available. It is a dummy pas-core that responds to commands in the same way that pas-core would (albiet with very limited information).
 
 ## Sponsors
 
