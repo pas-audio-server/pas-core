@@ -22,11 +22,12 @@ struct AudioDevice
 {
 	AudioDevice() {}
 
-	AudioDevice(std::string s, std::string n, std::string a, int i) : index(i), device_spec(s), device_name(n), audio_spec(a) {}
+	AudioDevice(std::string s, std::string n, int i) : index(i), device_spec(s), device_name(n) {}
 
 	int index;
+    // device_spec is the "official" hardware name - how the DAC is identified to alsa.
 	std::string device_spec;
+    // device_name is some mfr supplied string.
 	std::string device_name;
-	std::string audio_spec;
 };
 
