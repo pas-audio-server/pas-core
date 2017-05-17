@@ -3,7 +3,9 @@ Perry's audio server - a robust audio server for large numbers of concurrent str
 
 ## Latest Development Highlights
 
-FOUR DACS CONCURRENTLY - using new DAC self-discovery feature.
+
+
+FOUR DACS CONCURRENTLY - using new DAC self-discovery feature. Gone to five DACs more recently.
 
 ![Four DACS using DAC self-discovery](/4dacs.png?raw=true "Four DACS")
 
