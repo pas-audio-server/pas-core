@@ -26,6 +26,16 @@ using namespace pas;
 
 extern Logger _log_;
 
+void ReformatSQLException(sql::SQLException &e) {
+	stringstream ss;
+	ss << "# ERR: SQLException in " << __FILE__;
+	ss << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+	ss << "# ERR: " << e.what();
+	ss << " (MySQL error code: " << e.getErrorCode();
+	ss << ", SQLState: " << e.getSQLState() << " )" << endl;
+	throw LOG2(_log_, ss.str(), LogLevel::FATAL);
+}
+
 /*	InitPreparedStatements() Prepared statements in a DB system
 	remove the possibility of SQL injection attacks by encapsulating
 	all user provided data. They are rigidly controlled in terms of
@@ -38,17 +48,6 @@ extern Logger _log_;
 	For example:
 		insert into tracks <query_columns> <parameter columns> ...
 */
-
-
-void ReformatSQLException(sql::SQLException &e) {
-	stringstream ss;
-	ss << "# ERR: SQLException in " << __FILE__;
-	ss << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-	ss << "# ERR: " << e.what();
-	ss << " (MySQL error code: " << e.getErrorCode();
-	ss << ", SQLState: " << e.getSQLState() << " )" << endl;
-	throw LOG2(_log_, ss.str(), LogLevel::FATAL);
-}
 
 void DB::InitPreparedStatement()
 {
@@ -195,6 +194,26 @@ int DB::GetTrackCount(string nspace)
 
 void DB::GetSubfolders(SelectResult & results, int id, string nspace)
 {	
+}
+
+void DB::GetDeviceInfo(std::string alsa_name, std::string & friendly_name)
+{
+	friendly_name = "";
+
+	string s = "select friendly_name from devices where alsa_name=?;";
+	sql::PreparedStatement * stmt = connection->prepareStatement(s.c_str());
+	stmt->setString(1, alsa_name);
+	sql::ResultSet * res = stmt->executeQuery();
+	if (res->next())
+	{
+		friendly_name = res->getString(1);
+	}
+	
+	if (res)
+		delete res;
+
+	if (stmt)
+		delete stmt;
 }
 
 void DB::InnerGetTracks(pas::SelectResult & results, string & sql)

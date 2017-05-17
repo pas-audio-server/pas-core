@@ -62,7 +62,8 @@ public:
 	void GetTracks(pas::SelectResult & results, int id, std::string nspace = std::string("default"));
 	void FindIDs(std::string column, std::string pattern, std::vector<std::string> & results);
 	std::string PathFromID(unsigned int id, std::string * title, std::string * artist, std::string nspace = "default");
-
+	void GetDeviceInfo(std::string alsa_name, std::string & friendly_name);
+	
 private:
 	void InnerGetTracks(pas::SelectResult & results, std::string & sql);
 	void InitPreparedStatement();
