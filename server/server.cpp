@@ -86,6 +86,9 @@ int main(int argc, char * argv[])
 	LOG2(_log_, string("CONVERSATIONAL"), LogLevel::CONVERSATIONAL);
 	LOG2(_log_, string("VERBOSE"), LogLevel::VERBOSE);
 */
+	close(0);
+	close(1);
+	close(2);
 	
 	try
 	{
@@ -124,7 +127,7 @@ int main(int argc, char * argv[])
 			}
 		}	
 
-		cout << "Monitoring network..." << endl;
+		//cout << "Monitoring network..." << endl;
 		nw.AcceptConnections((void *) dacs, (int) devices.size());
 	}
 	catch (LoggedException s)

@@ -88,6 +88,14 @@ void NetworkComponent::AcceptConnections(void * dacs, int ndacs)
 	// purpose of interrupting them, doesn't it? The call to siginterrupt disables this.
 	signal(SIGINT, SIGINTHandler);
 	siginterrupt(SIGINT, 1);
+	
+	signal(SIGCHLD,SIG_IGN); /* ignore child */
+	signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
+	signal(SIGTTOU,SIG_IGN);
+	signal(SIGTTIN,SIG_IGN);
+	signal(SIGHUP,SIG_IGN); /* catch hangup signal */
+	signal(SIGTERM,SIGINTHandler); /* catch kill signal */
+	
 	int incoming_socket = -1;
 
 	try
