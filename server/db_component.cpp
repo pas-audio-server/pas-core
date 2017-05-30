@@ -208,7 +208,8 @@ void DB::GetDeviceInfo(std::string alsa_name, std::string & friendly_name)
 	{
 		friendly_name = res->getString(1);
 	}
-	
+	LOG2(_log_, alsa_name, VERBOSE);	
+	LOG2(_log_, friendly_name, VERBOSE);
 	if (res)
 		delete res;
 

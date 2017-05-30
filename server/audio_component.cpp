@@ -490,7 +490,8 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 		if (!db->Initialize(dbhost))
 			throw LOG2(_log_, "db->Initialize() failed", LogLevel::FATAL);
 
-		 db->GetDeviceInfo(ad.device_spec, ad.friendly_name);
+		 db->GetDeviceInfo(ad.device_spec, this->ad.friendly_name);
+		 LOG2(_log_, ad.friendly_name, VERBOSE);
 	}
 	catch (LoggedException e)
 	{

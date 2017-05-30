@@ -124,6 +124,7 @@ int main(int argc, char * argv[])
 			else
 			{
 				LOG2(_log_, "DAC " + to_string((int) i) + " initialized", MINIMAL);
+				LOG2(_log_, dacs[i]->FriendlyName(), CONVERSATIONAL);
 			}
 		}	
 
