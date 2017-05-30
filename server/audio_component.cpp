@@ -491,7 +491,7 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 			throw LOG2(_log_, "db->Initialize() failed", LogLevel::FATAL);
 
 		 db->GetDeviceInfo(ad.device_spec, this->ad.friendly_name);
-		 LOG2(_log_, ad.friendly_name, VERBOSE);
+		 LOG2(_log_, this->ad.friendly_name, CONVERSATIONAL);
 	}
 	catch (LoggedException e)
 	{
