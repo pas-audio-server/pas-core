@@ -29,5 +29,7 @@ struct AudioDevice
 	std::string device_spec;
     // device_name is some mfr supplied string.
 	std::string device_name;
+    // This name comes from a database table (devices) which maps the ALSA name to a friendly user-defined name.
+    std::string friendly_name;
 };
 

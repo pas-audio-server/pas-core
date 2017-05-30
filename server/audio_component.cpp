@@ -480,6 +480,28 @@ bool AudioComponent::Initialize(AudioDevice & ad)
 		LOG2(_log_, "Initialize() failed", MINIMAL);
 		rv = false;
 	}
+	// Attempt to load the friendly names.
+	DB * db = new DB();
+	try
+	{
+		if (db == nullptr)
+			throw LOG2(_log_, "allocating db failed", LogLevel::FATAL);
+
+		if (!db->Initialize(dbhost))
+			throw LOG2(_log_, "db->Initialize() failed", LogLevel::FATAL);
+
+		 db->GetDeviceInfo(ad.device_spec, ad.friendly_name);
+	}
+	catch (LoggedException e)
+	{
+		if (e.Level() == LogLevel::FATAL) {
+			throw e;
+		}
+	}
+
+	if (db != nullptr)
+		delete db;
+
 	LOG2(_log_, nullptr, REDICULOUS);
 	return rv;
 }

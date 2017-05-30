@@ -108,6 +108,7 @@ public:
 	bool IsIdle() { return idle; }
 	bool QuiteDead() { return quite_dead; }
 	std::string HumanName() { return ad.device_name; }
+	std::string FriendlyName() { return ad.friendly_name; }
 	std::string TimeCode();
 	std::string What() { return title; }
 	std::string Who() { return artist; }

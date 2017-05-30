@@ -133,6 +133,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 					google::protobuf::Map<string, string> * result = r->mutable_results();
 					LOG2(_log_, nullptr, VERBOSE);
 					(*result)[string("index")] = to_string(i);
+					(*result)[string("friendly_name")] = acs[i]->FriendlyName();
 					(*result)[string("name")] = acs[i]->HumanName();
 					(*result)[string("who")] = acs[i]->Who();
 					(*result)[string("what")] = acs[i]->What();
