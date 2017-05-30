@@ -273,7 +273,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 
 			LOG2(_log_, nullptr, REDICULOUS);
 			
-			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 -");
+			string player_command = string("ffmpeg -loglevel quiet -i \"") + ps.path + string("\" -f s24le -ar 44100 -ac 2 - 2> /dev/null < /dev/null");
 			bool is_mp3 = HasEnding(ps.path, "mp3");
 			if ((p = popen(player_command.c_str(), "r")) == nullptr)
 				throw LOG2(_log_, "pipe failed to open", MINIMAL);
@@ -346,7 +346,7 @@ void AudioComponent::PlayerThread(AudioComponent * me)
 					assert(t >= 0);
 					if (t == 0)
 					{
-						LOG2(_log_, nullptr, REDICULOUS);
+						LOG2(_log_, nullptr, CONVERSATIONAL);
 						break;
 					}
 
@@ -440,10 +440,10 @@ retry_command:		if (GoodCommand(ac.cmd))
 		}
 		catch (LoggedException e)
 		{
-			if (e.Level() == FATAL)
+			//if (e.Level() == FATAL)
 				throw e;
 		}
-		LOG2(_log_, nullptr, REDICULOUS);
+		LOG2(_log_, nullptr, CONVERSATIONAL);
 		if (p != nullptr)
 			pclose(p);
 	}

@@ -119,7 +119,7 @@ static bool CommandProcessor(int socket, string & s, void * dacs, int ndacs)
 		{
 			case Type::DAC_INFO_COMMAND:
 			{
-				LOG2(_log_, "DAC_INFO_COMMAND", CONVERSATIONAL);
+				LOG2(_log_, "DAC_INFO_COMMAND", VERBOSE);
 				SelectResult sr;
 				sr.set_type(SELECT_RESULT);
 				for (int i = 0; i < ndacs; i++)
